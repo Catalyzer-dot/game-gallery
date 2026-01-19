@@ -21,7 +21,7 @@ A Node.js CLI tool to manage your Steam game backlog, using Git for version cont
 | :--- | :--- | :--- |
 | 幻兽帕鲁 | Finished | - |
 | 雾锁王国 | Playing | - |
-| 木筏求生 | Backlog | - |
+| 木筏求生 | Finished | - |
 <!-- QUEUE_END -->
 
 ## Usage
