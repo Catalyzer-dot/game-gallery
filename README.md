@@ -18,13 +18,25 @@ A Node.js CLI tool to manage your Steam game backlog, using Git for version cont
 <!-- QUEUE_START -->
 | Game | Status | Notes |
 | :--- | :--- | :--- |
-| Cyberpunk 2077 | to-play | Need to finish Phantom Liberty |
+| Cyberpunk 2077 | finished | - |
 | 雾锁王国 | playing | - |
 <!-- QUEUE_END -->
 
 ## Usage
 
-Add a game (interactive):
+The easiest way to use the tool is through the **Interactive Mode**. Simply run:
+
+```bash
+npm start
+```
+
+This will open a menu where you can add, list, update, or remove games.
+
+### Direct Commands
+
+You can also perform operations directly via command-line arguments:
+
+Add a game (interactive status):
 
 ```bash
 npm start -- add "Elden Ring"

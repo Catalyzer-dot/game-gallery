@@ -2,12 +2,11 @@
   "games": [
     {
       "name": "Cyberpunk 2077",
-      "status": "to-play",
-      "notes": "Need to finish Phantom Liberty",
+      "status": "finished",
       "tags": [],
       "id": "game-1768815450799",
       "addedAt": "2026-01-19T09:37:30.799Z",
-      "lastUpdated": "2026-01-19T09:37:30.800Z"
+      "lastUpdated": "2026-01-19T09:45:09.142Z"
     },
     {
       "name": "雾锁王国",
