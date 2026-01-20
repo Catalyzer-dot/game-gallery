@@ -6,6 +6,8 @@ export interface Game {
   status: GameStatus;
   addedAt: string;
   lastUpdated: string;
+  steamUrl?: string;
+  coverImage?: string;
 }
 
 export interface GameQueueData {

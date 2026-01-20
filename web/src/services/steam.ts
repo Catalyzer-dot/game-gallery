@@ -8,10 +8,6 @@ export interface SteamGame {
   averagePlaytime: number | null;
 }
 
-interface SteamSearchResult {
-  games: SteamGame[];
-}
-
 // 使用公共 CORS 代理来绕过 Steam API 的跨域限制
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 

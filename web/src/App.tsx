@@ -110,7 +110,7 @@ function App() {
     }
   }
 
-  const handleAddGameFromSteam = async (name: string, steamUrl: string, coverImage: string, tags: string[]) => {
+  const handleAddGameFromSteam = async (name: string, steamUrl: string, coverImage: string, _tags: string[]) => {
     const existing = games.find(g => g.name.toLowerCase() === name.toLowerCase())
     if (existing) {
       setToast(`"${name}" 已经在队列中！`)
