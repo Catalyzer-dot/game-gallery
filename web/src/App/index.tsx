@@ -193,6 +193,37 @@ function App() {
 
       setToast(`从 Steam 添加了 "${name}"`)
       setHighlightId(newGame.id)
+
+      // 如果没有好评率数据，立即拉取
+      if ((positivePercentage === undefined || positivePercentage === null) ||
+          (totalReviews === undefined || totalReviews === null)) {
+        const match = steamUrl.match(/\/app\/(\d+)/)
+        if (match) {
+          const appId = parseInt(match[1])
+          console.log(`正在获取 ${name} 的好评率...`)
+
+          try {
+            const reviews = await steamService.getGameReviews(appId)
+
+            if (reviews.positivePercentage !== null || reviews.totalReviews !== null) {
+              const updatedGame: Game = {
+                ...newGame,
+                positivePercentage: reviews.positivePercentage ?? positivePercentage,
+                totalReviews: reviews.totalReviews ?? totalReviews,
+              }
+
+              // 更新本地状态
+              setGames(prevGames =>
+                prevGames.map(g => g.id === newGame.id ? updatedGame : g)
+              )
+
+              console.log(`已获取 ${name} 的好评率: ${reviews.positivePercentage}%`)
+            }
+          } catch (err) {
+            console.error(`获取 ${name} 好评率失败:`, err)
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to add game:', err)
       setToast('添加游戏失败')
