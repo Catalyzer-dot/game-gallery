@@ -31,6 +31,15 @@
       "id": "game-1768843199193",
       "addedAt": "2026-01-19T17:19:59.193Z",
       "lastUpdated": "2026-01-19T17:20:02.811Z"
+    },
+    {
+      "name": "测试游戏",
+      "status": "backlog",
+      "tags": [],
+      "steamUrl": "https://store.steampowered.com/app/1234567",
+      "id": "game-1768891347766",
+      "addedAt": "2026-01-20T06:42:27.766Z",
+      "lastUpdated": "2026-01-20T06:42:27.766Z"
     }
   ],
   "config": {
