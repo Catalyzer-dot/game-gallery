@@ -79,8 +79,9 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, onDelete, is
           src={game.coverImage}
           alt={game.name}
           style={{
-            width: '180px',
-            minWidth: '180px',
+            width: '257px',
+            minWidth: '257px',
+            height: '120px',
             objectFit: 'cover',
             borderRadius: '8px 0 0 8px',
           }}
@@ -91,8 +92,9 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, onDelete, is
       ) : (
         <div
           style={{
-            width: '180px',
-            minWidth: '180px',
+            width: '257px',
+            minWidth: '257px',
+            height: '120px',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             borderRadius: '8px 0 0 8px',
             display: 'flex',
