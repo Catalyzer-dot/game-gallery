@@ -10,7 +10,8 @@
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1285190/7f4b1a9cbe01d19fdcbf10ef5dce492098ef0ba8/capsule_231x87.jpg?t=1765996583",
       "positivePercentage": 60,
       "totalReviews": 74260,
-      "releaseDate": "2025 年 9 月 11 日"
+      "releaseDate": "2025 年 9 月 11 日",
+      "isEarlyAccess": false
     },
     {
       "id": "1768927929101",
@@ -22,7 +23,8 @@
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2080690/capsule_231x87.jpg?t=1748457033",
       "positivePercentage": 81,
       "totalReviews": 22745,
-      "releaseDate": "2023 年 8 月 25 日"
+      "releaseDate": "2023 年 8 月 25 日",
+      "isEarlyAccess": false
     },
     {
       "id": "1768927818475",
