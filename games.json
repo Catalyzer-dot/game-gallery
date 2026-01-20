@@ -29,7 +29,7 @@
     },
     {
       "name": "雾锁王国 (Enshrouded)",
-      "status": "pending",
+      "status": "playing",
       "tags": [
         "Controller Support"
       ],
@@ -37,7 +37,7 @@
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1203620/fedcde67022995e7946efa91f69d0f12e4ba52ec/capsule_231x87.jpg?t=1765290696",
       "id": "game-1768892503233",
       "addedAt": "2026-01-20T07:01:43.233Z",
-      "lastUpdated": "2026-01-20T08:28:19.981Z"
+      "lastUpdated": "2026-01-20T08:28:26.328Z"
     }
   ]
 }
