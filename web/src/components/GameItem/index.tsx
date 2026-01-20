@@ -82,9 +82,7 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, onDelete, is
             <div className={styles.gameTitleArea}>
               <div className={styles.gameTitleRow}>
                 <a
-                  href={game.steamUrl || '#'}
-                  target={game.steamUrl ? "_blank" : "_self"}
-                  rel="noopener noreferrer"
+                  href={game.steamUrl ? `steam://store/${game.steamUrl.match(/\/app\/(\d+)/)?.[1]}` : '#'}
                   onClick={(e) => !game.steamUrl && (e.preventDefault(), setIsEditingSteamUrl(true))}
                   className={styles.gameNameLink}
                 >
