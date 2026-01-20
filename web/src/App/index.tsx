@@ -114,18 +114,22 @@ function App() {
             (needsReleaseDate && releaseInfo.releaseDate !== game.releaseDate)
 
           if (needsUpdate && (reviews.positivePercentage !== null || reviews.totalReviews !== null || releaseInfo.releaseDate !== null)) {
-            const updatedGame: Game = {
-              ...game,
-              positivePercentage: reviews.positivePercentage ?? game.positivePercentage,
-              totalReviews: reviews.totalReviews ?? game.totalReviews,
-              releaseDate: releaseInfo.releaseDate ?? game.releaseDate,
-              comingSoon: releaseInfo.comingSoon ?? game.comingSoon,
-              // 不更新 lastUpdated，保持原有排序
-            }
-
             // 更新本地状态
             setGames(prevGames => {
-              const updatedGames = prevGames.map(g => g.id === game.id ? updatedGame : g)
+              const updatedGames = prevGames.map(g => {
+                if (g.id === game.id) {
+                  // 使用最新的游戏状态，只更新好评率相关字段
+                  return {
+                    ...g,
+                    positivePercentage: reviews.positivePercentage ?? g.positivePercentage,
+                    totalReviews: reviews.totalReviews ?? g.totalReviews,
+                    releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
+                    comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
+                    // 不更新 lastUpdated，保持原有排序
+                  }
+                }
+                return g
+              })
 
               // 如果获取到了新的发布日期，保存到 GitHub
               if (needsReleaseDate && releaseInfo.releaseDate) {
@@ -236,17 +240,21 @@ function App() {
             ])
 
             if (reviews.positivePercentage !== null || reviews.totalReviews !== null || releaseInfo.releaseDate !== null) {
-              const updatedGame: Game = {
-                ...newGame,
-                positivePercentage: reviews.positivePercentage ?? positivePercentage,
-                totalReviews: reviews.totalReviews ?? totalReviews,
-                releaseDate: releaseInfo.releaseDate ?? newGame.releaseDate,
-                comingSoon: releaseInfo.comingSoon ?? newGame.comingSoon,
-              }
-
               // 更新本地状态
               setGames(prevGames =>
-                prevGames.map(g => g.id === newGame.id ? updatedGame : g)
+                prevGames.map(g => {
+                  if (g.id === newGame.id) {
+                    // 使用最新的游戏状态，只更新好评率相关字段
+                    return {
+                      ...g,
+                      positivePercentage: reviews.positivePercentage ?? positivePercentage,
+                      totalReviews: reviews.totalReviews ?? totalReviews,
+                      releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
+                      comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
+                    }
+                  }
+                  return g
+                })
               )
 
               console.log(`已获取 ${name} 的信息: 好评率 ${reviews.positivePercentage}%, 发布日期 ${releaseInfo.releaseDate}`)
