@@ -1,6 +1,15 @@
 {
   "games": [
     {
+      "id": "1768923094570",
+      "name": "永恒天空",
+      "status": "pending",
+      "addedAt": "2026-01-20T15:31:34.570Z",
+      "lastUpdated": "2026-01-20T15:31:34.570Z",
+      "steamUrl": "https://store.steampowered.com/app/1641960",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1641960/03f678c4e5fa43dbf166892179c907e05cfe3fc2/capsule_231x87_schinese.jpg?t=1768834406"
+    },
+    {
       "id": "1768922875013",
       "name": "星球工匠",
       "status": "completion",
