@@ -97,12 +97,13 @@ function App() {
         const appId = parseInt(match[1])
 
         try {
-          // 只在缺少发布日期时才获取，因为发布日期不会变动
-          const needsReleaseDate = !game.releaseDate
+          // 只在缺少发布日期或抢先体验状态时才获取，因为这些数据不会频繁变动
+          const needsReleaseInfo =
+            !game.releaseDate || game.isEarlyAccess === null || game.isEarlyAccess === undefined
 
           const [reviews, releaseInfo] = await Promise.all([
             steamService.getGameReviews(appId),
-            needsReleaseDate
+            needsReleaseInfo
               ? steamService.getGameReleaseDate(appId)
               : Promise.resolve({
                   releaseDate: game.releaseDate,
@@ -121,7 +122,7 @@ function App() {
             game.isEarlyAccess === undefined ||
             reviews.positivePercentage !== game.positivePercentage ||
             reviews.totalReviews !== game.totalReviews ||
-            (needsReleaseDate && releaseInfo.releaseDate !== game.releaseDate)
+            (needsReleaseInfo && releaseInfo.releaseDate !== game.releaseDate)
 
           if (
             needsUpdate &&
@@ -148,15 +149,18 @@ function App() {
                 return g
               })
 
-              // 如果获取到了新的发布日期，保存到 GitHub
-              if (needsReleaseDate && releaseInfo.releaseDate) {
+              // 如果获取到了新的发布信息，保存到 GitHub
+              if (
+                needsReleaseInfo &&
+                (releaseInfo.releaseDate || releaseInfo.isEarlyAccess !== null)
+              ) {
                 githubService
                   .updateGames({ games: updatedGames }, `Update game info: ${game.name}`)
                   .then(() => {
-                    console.log(`已保存 ${game.name} 的发布日期到 GitHub`)
+                    console.log(`已保存 ${game.name} 的游戏信息到 GitHub`)
                   })
                   .catch((err) => {
-                    console.error(`保存 ${game.name} 发布日期失败:`, err)
+                    console.error(`保存 ${game.name} 游戏信息失败:`, err)
                   })
               }
 
