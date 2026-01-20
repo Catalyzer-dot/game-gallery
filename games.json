@@ -93,7 +93,8 @@
       "steamUrl": "https://store.steampowered.com/app/1962700",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1962700/a5668b4e7176e657e2f1c70667df989ba27f64b5/capsule_231x87.jpg?t=1767836238",
       "releaseDate": "2026 年",
-      "comingSoon": true
+      "comingSoon": true,
+      "isEarlyAccess": false
     },
     {
       "id": "1768901475672",
