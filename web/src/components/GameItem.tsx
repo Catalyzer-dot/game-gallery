@@ -152,11 +152,19 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, onDelete, is
                 alignItems: 'center'
               }}>
                 {game.positivePercentage !== undefined && (
-                   <span style={{ 
+                   <div style={{
+                     display: 'flex',
+                     alignItems: 'baseline',
+                     gap: '0.5rem',
                      color: game.positivePercentage >= 80 ? '#66c0f4' : game.positivePercentage >= 60 ? '#ffa500' : '#999'
                    }}>
-                    好评率-{game.positivePercentage}%({game.totalReviews?.toLocaleString()}评论数)
-                  </span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '600' }}>
+                      {game.positivePercentage}% 好评
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                      {game.totalReviews?.toLocaleString()} 条评论
+                    </span>
+                  </div>
                 )}
               </div>
             ) : null}
