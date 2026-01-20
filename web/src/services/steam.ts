@@ -142,28 +142,37 @@ export class SteamService {
     const detailsUrl = `https://store.steampowered.com/api/appdetails?appids=${appId}&l=schinese&cc=CN`
 
     // 尝试多个代理
-    for (const proxy of CORS_PROXIES) {
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const proxy = CORS_PROXIES[i]
       try {
         const proxyUrl = `${proxy}${encodeURIComponent(detailsUrl)}`
         const response = await fetch(proxyUrl)
 
         if (!response.ok) {
+          console.warn(
+            `Proxy ${i + 1}/${CORS_PROXIES.length} failed for appdetails ${appId}: ${response.status}`
+          )
           continue
         }
 
         const data = (await response.json()) as SteamAppDetails
 
         if (!data[appId]?.success) {
+          console.warn(`Proxy ${i + 1}/${CORS_PROXIES.length} returned unsuccessful for ${appId}`)
           continue
         }
 
         return data[appId].data
       } catch (error) {
-        console.error('Failed to fetch game details from proxy:', error)
+        console.error(
+          `Proxy ${i + 1}/${CORS_PROXIES.length} error for appdetails ${appId}:`,
+          error
+        )
         continue
       }
     }
 
+    console.error(`All proxies failed for appdetails ${appId}`)
     return null
   }
 
@@ -204,18 +213,25 @@ export class SteamService {
     const reviewsUrl = `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all&num_per_page=0`
 
     // 尝试多个代理
-    for (const proxy of CORS_PROXIES) {
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const proxy = CORS_PROXIES[i]
       try {
         const proxyUrl = `${proxy}${encodeURIComponent(reviewsUrl)}`
         const response = await fetch(proxyUrl)
 
         if (!response.ok) {
+          console.warn(
+            `Proxy ${i + 1}/${CORS_PROXIES.length} failed for reviews ${appId}: ${response.status}`
+          )
           continue
         }
 
         const data = (await response.json()) as SteamReviewsResponse
 
         if (!data.query_summary) {
+          console.warn(
+            `Proxy ${i + 1}/${CORS_PROXIES.length} returned no query_summary for ${appId}`
+          )
           continue
         }
 
@@ -233,11 +249,12 @@ export class SteamService {
 
         return { positivePercentage, totalReviews }
       } catch (error) {
-        console.error('Failed to fetch reviews from proxy:', error)
+        console.error(`Proxy ${i + 1}/${CORS_PROXIES.length} error for reviews ${appId}:`, error)
         continue
       }
     }
 
+    console.error(`All proxies failed for reviews ${appId}`)
     return { positivePercentage: null, totalReviews: null }
   }
 }

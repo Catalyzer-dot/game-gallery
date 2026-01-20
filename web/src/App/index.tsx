@@ -100,12 +100,8 @@ function App() {
 
         try {
           // 只在缺少发布日期或抢先体验状态时才获取，因为这些数据不会频繁变动
-          // TEMPORARY: 强制刷新一次所有游戏的 isEarlyAccess（修正了检测逻辑）
           const needsReleaseInfo =
-            !game.releaseDate ||
-            game.isEarlyAccess === null ||
-            game.isEarlyAccess === undefined ||
-            true // 临时强制刷新，验证新的 genre-based 检测逻辑
+            !game.releaseDate || game.isEarlyAccess === null || game.isEarlyAccess === undefined
 
           const [reviews, releaseInfo] = await Promise.all([
             steamService.getGameReviews(appId),
