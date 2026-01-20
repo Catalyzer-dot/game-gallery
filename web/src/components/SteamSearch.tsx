@@ -3,7 +3,7 @@ import { Search, Plus, X } from "lucide-react";
 import { steamService, type SteamGame } from "../services/steam";
 
 interface SteamSearchProps {
-  onAddGame: (name: string, steamUrl: string, coverImage: string, tags: string[]) => void;
+  onAddGame: (name: string, steamUrl: string, coverImage: string, tags: string[], positivePercentage?: number, totalReviews?: number) => void;
   onClose: () => void;
 }
 
@@ -48,7 +48,7 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
   };
 
   const handleAddGame = (game: SteamGame) => {
-    onAddGame(game.name, game.steamUrl, game.coverImage, game.tags);
+    onAddGame(game.name, game.steamUrl, game.coverImage, game.tags, game.positivePercentage ?? undefined, game.totalReviews ?? undefined);
     onClose();
   };
 

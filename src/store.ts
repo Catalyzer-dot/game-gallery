@@ -12,6 +12,8 @@ export interface Game {
   lastUpdated: string;
   notes?: string | undefined;
   tags?: string[] | undefined;
+  steamUrl?: string | undefined;
+  coverImage?: string | undefined;
 }
 
 export interface StoreData {

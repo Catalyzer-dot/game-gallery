@@ -5,6 +5,7 @@ export interface SteamGame {
   coverImage: string;
   tags: string[];
   positivePercentage: number | null;
+  totalReviews: number | null;
   averagePlaytime: number | null;
 }
 
@@ -58,19 +59,43 @@ export class SteamService {
         // 转换 Steam API 数据到我们的格式
         const games: SteamGame[] = data.items
           .filter((item: any) => item.type === 'app') // 只要游戏，不要 DLC 等
-          .slice(0, 10) // 限制返回 10 个结果
-          .map((item: any) => ({
-            id: item.id,
-            name: item.name,
-            steamUrl: `https://store.steampowered.com/app/${item.id}`,
-            coverImage: item.tiny_image || `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/capsule_sm_120.jpg`,
-            tags: [], // Steam search API 不返回标签
-            positivePercentage: null, // 需要额外的 API 调用来获取评价
-            averagePlaytime: null, // 需要额外的 API 调用来获取游戏时长
-          }));
+          .slice(0, 10); // 限制返回 10 个结果
 
-        console.log(`Successfully found ${games.length} games`);
-        return games;
+        // 并行获取每个游戏的详细信息
+        const gamesWithDetails = await Promise.all(
+          games.map(async (item: any) => {
+            const details = await this.getGameDetails(item.id);
+
+            let positivePercentage: number | null = null;
+            let totalReviews: number | null = null;
+
+            if (details?.recommendations?.total) {
+              totalReviews = details.recommendations.total;
+            }
+
+            // 计算好评率
+            if (details?.positive_reviews !== undefined && details?.negative_reviews !== undefined) {
+              const total = details.positive_reviews + details.negative_reviews;
+              if (total > 0) {
+                positivePercentage = Math.round((details.positive_reviews / total) * 100);
+              }
+            }
+
+            return {
+              id: item.id,
+              name: item.name,
+              steamUrl: `https://store.steampowered.com/app/${item.id}`,
+              coverImage: item.tiny_image || `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/capsule_sm_120.jpg`,
+              tags: [], // Steam search API 不返回标签
+              positivePercentage,
+              totalReviews,
+              averagePlaytime: null, // 游戏时长信息不在详情 API 中
+            };
+          })
+        );
+
+        console.log(`Successfully found ${gamesWithDetails.length} games with details`);
+        return gamesWithDetails;
       } catch (error) {
         console.error(`Proxy ${i + 1} error:`, error);
         if (i === CORS_PROXIES.length - 1) {

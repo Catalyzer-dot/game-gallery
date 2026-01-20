@@ -76,7 +76,7 @@ function App() {
     return { playing, pending, completion }
   }, [games, searchTerm])
 
-  const handleAddGameFromSteam = async (name: string, steamUrl: string, coverImage: string, _tags: string[]) => {
+  const handleAddGameFromSteam = async (name: string, steamUrl: string, coverImage: string, _tags: string[], positivePercentage?: number, totalReviews?: number) => {
     const existing = games.find(g => g.name.toLowerCase() === name.toLowerCase())
     if (existing) {
       setToast(`"${name}" 已经在队列中！`)
@@ -91,7 +91,9 @@ function App() {
       addedAt: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
       steamUrl,
-      coverImage
+      coverImage,
+      positivePercentage,
+      totalReviews
     }
 
     try {
