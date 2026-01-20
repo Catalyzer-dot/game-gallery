@@ -3,11 +3,14 @@
     {
       "id": "1768927818475",
       "name": "非生物因素",
-      "status": "pending",
+      "status": "completion",
       "addedAt": "2026-01-20T16:50:18.475Z",
-      "lastUpdated": "2026-01-20T16:50:18.475Z",
+      "lastUpdated": "2026-01-20T16:51:11.852Z",
       "steamUrl": "https://store.steampowered.com/app/427410",
-      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/427410/c3b5200fc24c4044d6e2302dc389b5165d96cb1c/capsule_231x87_alt_assets_5_schinese.jpg?t=1765822569"
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/427410/c3b5200fc24c4044d6e2302dc389b5165d96cb1c/capsule_231x87_alt_assets_5_schinese.jpg?t=1765822569",
+      "positivePercentage": 96,
+      "totalReviews": 50665,
+      "releaseDate": "2025 年 7 月 22 日"
     },
     {
       "id": "1768923219470",
