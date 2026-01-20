@@ -24,7 +24,7 @@
       "positivePercentage": 81,
       "totalReviews": 22746,
       "releaseDate": "2023 年 8 月 25 日",
-      "isEarlyAccess": false
+      "isEarlyAccess": true
     },
     {
       "id": "1768927818475",
@@ -37,7 +37,7 @@
       "positivePercentage": 96,
       "totalReviews": 50667,
       "releaseDate": "2025 年 7 月 22 日",
-      "isEarlyAccess": true
+      "isEarlyAccess": false
     },
     {
       "id": "1768923219470",
@@ -114,7 +114,7 @@
       "positivePercentage": 74,
       "totalReviews": 121230,
       "releaseDate": "2025 年 6 月 17 日",
-      "isEarlyAccess": true
+      "isEarlyAccess": false
     },
     {
       "id": "1768900923580",
@@ -179,7 +179,7 @@
       "positivePercentage": 90,
       "totalReviews": 91631,
       "releaseDate": "2022 年 9 月 27 日",
-      "isEarlyAccess": true
+      "isEarlyAccess": false
     },
     {
       "id": "1768900344953",
@@ -192,7 +192,7 @@
       "positivePercentage": 85,
       "totalReviews": 1863,
       "releaseDate": "2025 年 9 月 16 日",
-      "isEarlyAccess": false
+      "isEarlyAccess": true
     },
     {
       "id": "1768900234397",
@@ -205,7 +205,7 @@
       "positivePercentage": 80,
       "totalReviews": 17604,
       "releaseDate": "2025 年 7 月 29 日",
-      "isEarlyAccess": false
+      "isEarlyAccess": true
     },
     {
       "id": "1768900182394",
