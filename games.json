@@ -35,8 +35,9 @@
       "steamUrl": "https://store.steampowered.com/app/427410",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/427410/c3b5200fc24c4044d6e2302dc389b5165d96cb1c/capsule_231x87_alt_assets_5_schinese.jpg?t=1765822569",
       "positivePercentage": 96,
-      "totalReviews": 50665,
-      "releaseDate": "2025 年 7 月 22 日"
+      "totalReviews": 50667,
+      "releaseDate": "2025 年 7 月 22 日",
+      "isEarlyAccess": true
     },
     {
       "id": "1768923219470",
