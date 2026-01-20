@@ -101,8 +101,9 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, isHighlighte
         padding: '1rem 1.25rem',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        minWidth: 0
+        justifyContent: 'center',
+        minWidth: 0,
+        gap: '0.75rem'
       }}>
         <div style={{
           display: 'flex',
@@ -178,7 +179,11 @@ export const GameItem: React.FC<GameItemProps> = ({ game, onUpdate, isHighlighte
               className="game-status-select"
               value={game.status}
               onChange={handleStatusChange}
-              style={{ color: `var(--status-${game.status})` }}
+              style={{
+                color: `var(--status-${game.status})`,
+                padding: '0.5rem 2rem 0.5rem 1rem',
+                minWidth: '140px'
+              }}
             >
               <option value="playing">Playing</option>
               <option value="pending">Pending</option>
