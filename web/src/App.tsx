@@ -311,7 +311,7 @@ function App() {
             </div>
 
             {/* Game List */}
-            <div className="game-list">
+            <div className="game-list" style={{ minHeight: '400px' }}>
               <AnimatePresence mode="wait">
                 {groupedGames[activeTab].length > 0 ? (
                   groupedGames[activeTab].map(game => (
