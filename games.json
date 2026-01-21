@@ -1,6 +1,15 @@
 {
   "games": [
     {
+      "id": "1768969318420",
+      "name": "Aloft",
+      "status": "queueing",
+      "addedAt": "2026-01-21T04:21:58.420Z",
+      "lastUpdated": "2026-01-21T04:21:58.420Z",
+      "steamUrl": "https://store.steampowered.com/app/1660080",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1660080/14dc56107c0dda7d673a41c3079148ff52d6946b/capsule_231x87_schinese.jpg?t=1768517349"
+    },
+    {
       "id": "1768969149224",
       "name": "Salt 2: Shores of Gold",
       "status": "queueing",
