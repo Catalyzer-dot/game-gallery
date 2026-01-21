@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Plus, X } from 'lucide-react'
+import { Plus, X, Loader2 } from 'lucide-react'
 import classNames from 'classnames'
 import { steamService, type SteamGame } from '../../services/steam'
 import styles from './index.module.scss'
@@ -129,7 +129,7 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
             />
             {isSearching && (
               <div className={styles.loadingIcon}>
-                <Search size={18} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               </div>
             )}
           </div>
