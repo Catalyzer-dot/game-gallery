@@ -1,6 +1,19 @@
 {
   "games": [
     {
+      "id": "1768975563986",
+      "name": "Salt 2: Shores of Gold",
+      "status": "queueing",
+      "addedAt": "2026-01-21T06:06:03.986Z",
+      "lastUpdated": "2026-01-21T06:06:03.986Z",
+      "steamUrl": "https://store.steampowered.com/app/1574900",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1574900/1e40029fbc28aaa80d8ab65073a5c8b9c088a905/capsule_231x87.jpg?t=1763380272",
+      "positivePercentage": 85,
+      "totalReviews": 2067,
+      "releaseDate": "2025 年 11 月 12 日",
+      "isEarlyAccess": false
+    },
+    {
       "id": "1768975225795",
       "name": "No Man's Sky 无人深空",
       "status": "queueing",
