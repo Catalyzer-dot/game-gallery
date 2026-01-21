@@ -1,13 +1,26 @@
 {
   "games": [
     {
+      "id": "1768977966802",
+      "name": "Light No Fire 无火之光",
+      "status": "queueing",
+      "addedAt": "2026-01-21T06:46:06.802Z",
+      "lastUpdated": "2026-01-21T06:46:06.802Z",
+      "steamUrl": "https://store.steampowered.com/app/2719590",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2719590/capsule_231x87.jpg?t=1761303632"
+    },
+    {
       "id": "1768977887351",
       "name": "Fishing Planet",
       "status": "queueing",
       "addedAt": "2026-01-21T06:44:47.351Z",
       "lastUpdated": "2026-01-21T06:44:47.351Z",
       "steamUrl": "https://store.steampowered.com/app/380600",
-      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/380600/58dd792f1f11caeed351f3d4359e4de459a5c8d4/capsule_231x87.jpg?t=1767100678"
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/380600/58dd792f1f11caeed351f3d4359e4de459a5c8d4/capsule_231x87.jpg?t=1767100678",
+      "positivePercentage": 87,
+      "totalReviews": 72042,
+      "releaseDate": "2017 年 8 月 28 日",
+      "isEarlyAccess": false
     },
     {
       "id": "1768977866985",
@@ -81,7 +94,7 @@
       "steamUrl": "https://store.steampowered.com/app/275850",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/fe698ad2fe52d89e7435da01ab03eda597bbd25d/capsule_231x87_schinese.jpg?t=1765800348",
       "positivePercentage": 85,
-      "totalReviews": 396075,
+      "totalReviews": 396073,
       "releaseDate": "2016 年 8 月 12 日",
       "isEarlyAccess": false
     },
@@ -107,7 +120,7 @@
       "steamUrl": "https://store.steampowered.com/app/1285190",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1285190/7f4b1a9cbe01d19fdcbf10ef5dce492098ef0ba8/capsule_231x87.jpg?t=1765996583",
       "positivePercentage": 60,
-      "totalReviews": 74275,
+      "totalReviews": 74278,
       "releaseDate": "2025 年 9 月 11 日",
       "isEarlyAccess": false
     },
@@ -210,7 +223,7 @@
       "steamUrl": "https://store.steampowered.com/app/513710",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/513710/9e67261681e1e556055e7ab09a65c6f602b33f81/capsule_231x87_schinese.jpg?t=1768219109",
       "positivePercentage": 74,
-      "totalReviews": 121235,
+      "totalReviews": 121238,
       "releaseDate": "2025 年 6 月 17 日",
       "isEarlyAccess": false
     },
@@ -236,7 +249,7 @@
       "steamUrl": "https://store.steampowered.com/app/3527290",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3527290/1844964d7a353e50eb3cc979ea922729d8c1b0ad/capsule_231x87.jpg?t=1764003551",
       "positivePercentage": 95,
-      "totalReviews": 280352,
+      "totalReviews": 280366,
       "releaseDate": "2025 年 6 月 16 日",
       "isEarlyAccess": false
     },
@@ -301,7 +314,7 @@
       "steamUrl": "https://store.steampowered.com/app/2661300",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2661300/e7f3c89538d758760b7d14ed8d3704e596db2c64/capsule_231x87.jpg?t=1768264574",
       "positivePercentage": 80,
-      "totalReviews": 17614,
+      "totalReviews": 17615,
       "releaseDate": "2025 年 7 月 29 日",
       "isEarlyAccess": true
     },
@@ -327,7 +340,7 @@
       "steamUrl": "https://store.steampowered.com/app/730",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/capsule_231x87_schinese.jpg?t=1749053861",
       "positivePercentage": 86,
-      "totalReviews": 9315370,
+      "totalReviews": 9315429,
       "releaseDate": "2017 年 9 月 15 日",
       "isEarlyAccess": false
     },
