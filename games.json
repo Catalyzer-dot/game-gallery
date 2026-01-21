@@ -1,6 +1,32 @@
 {
   "games": [
     {
+      "id": "1768975584802",
+      "name": "翼星求生 ICARUS",
+      "status": "queueing",
+      "addedAt": "2026-01-21T06:06:24.802Z",
+      "lastUpdated": "2026-01-21T06:06:24.802Z",
+      "steamUrl": "https://store.steampowered.com/app/1149460",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1149460/capsule_231x87_schinese.jpg?t=1764892501",
+      "positivePercentage": 74,
+      "totalReviews": 57503,
+      "releaseDate": "2021 年 12 月 3 日",
+      "isEarlyAccess": false
+    },
+    {
+      "id": "1768975563986",
+      "name": "Salt 2: Shores of Gold",
+      "status": "queueing",
+      "addedAt": "2026-01-21T06:06:03.986Z",
+      "lastUpdated": "2026-01-21T06:06:03.986Z",
+      "steamUrl": "https://store.steampowered.com/app/1574900",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1574900/1e40029fbc28aaa80d8ab65073a5c8b9c088a905/capsule_231x87.jpg?t=1763380272",
+      "positivePercentage": 85,
+      "totalReviews": 2067,
+      "releaseDate": "2025 年 11 月 12 日",
+      "isEarlyAccess": false
+    },
+    {
       "id": "1768975225795",
       "name": "No Man's Sky 无人深空",
       "status": "queueing",
@@ -35,7 +61,7 @@
       "steamUrl": "https://store.steampowered.com/app/1285190",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1285190/7f4b1a9cbe01d19fdcbf10ef5dce492098ef0ba8/capsule_231x87.jpg?t=1765996583",
       "positivePercentage": 60,
-      "totalReviews": 74275,
+      "totalReviews": 74278,
       "releaseDate": "2025 年 9 月 11 日",
       "isEarlyAccess": false
     },
@@ -177,7 +203,7 @@
       "steamUrl": "https://store.steampowered.com/app/1623730",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1623730/c5806289105932d9729d1ccba4bd5fc6158078af/capsule_231x87_schinese.jpg?t=1768450096",
       "positivePercentage": 94,
-      "totalReviews": 411227,
+      "totalReviews": 411238,
       "releaseDate": "2024 年 1 月 18 日",
       "isEarlyAccess": true
     },
