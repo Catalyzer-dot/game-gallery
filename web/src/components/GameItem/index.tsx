@@ -180,7 +180,7 @@ export const GameItem: React.FC<GameItemProps> = ({
                 }}
               >
                 <option value="playing">Playing</option>
-                <option value="pending">Pending</option>
+                <option value="queueing">Queueing</option>
                 <option value="completion">Completion</option>
               </select>
             </div>

@@ -9,7 +9,7 @@
   --accent-glow: rgba(59, 130, 246, 0.5);
 
   --status-playing: #10b981;
-  --status-pending: #f59e0b;
+  --status-queueing: #f59e0b;
   --status-completion: #0ea5e9;
   --status-dropped: #ef4444;
 

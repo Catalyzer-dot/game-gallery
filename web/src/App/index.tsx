@@ -19,7 +19,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [showSteamSearch, setShowSteamSearch] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [activeTab, setActiveTab] = useState<'playing' | 'pending' | 'completion'>('playing')
+  const [activeTab, setActiveTab] = useState<'playing' | 'queueing' | 'completion'>('playing')
   const [isRefreshingEarlyAccess, setIsRefreshingEarlyAccess] = useState(false)
 
   // Fetch games on mount
@@ -209,14 +209,14 @@ function App() {
     const playing = filtered
       .filter((g) => g.status === 'playing')
       .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
-    const pending = filtered
-      .filter((g) => g.status === 'pending')
+    const queueing = filtered
+      .filter((g) => g.status === 'queueing')
       .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
     const completion = filtered
       .filter((g) => g.status === 'completion')
       .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
 
-    return { playing, pending, completion }
+    return { playing, queueing, completion }
   }, [games, searchTerm])
 
   const handleAddGameFromSteam = async (
@@ -240,7 +240,7 @@ function App() {
     const newGame: Game = {
       id: Date.now().toString(),
       name,
-      status: 'pending',
+      status: 'queueing',
       addedAt: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
       steamUrl,
@@ -502,14 +502,14 @@ function App() {
                 Playing ({groupedGames.playing.length})
               </button>
               <button
-                onClick={() => setActiveTab('pending')}
+                onClick={() => setActiveTab('queueing')}
                 className={classNames(styles.tabBtn, {
-                  [styles.active]: activeTab === 'pending',
-                  [styles.activePending]: activeTab === 'pending',
+                  [styles.active]: activeTab === 'queueing',
+                  [styles.activeQueueing]: activeTab === 'queueing',
                 })}
               >
                 <Bookmark size={16} />
-                Pending ({groupedGames.pending.length})
+                Queueing ({groupedGames.queueing.length})
               </button>
               <button
                 onClick={() => setActiveTab('completion')}
