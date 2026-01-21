@@ -220,6 +220,16 @@ export const GameItem: React.FC<GameItemProps> = ({
           )}
         </div>
       </div>
+
+      {game.genres && game.genres.length > 0 && (
+        <div className={styles.genresInfo}>
+          {game.genres.map((genre) => (
+            <span key={genre.id} className={styles.genreTag}>
+              {genre.description}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

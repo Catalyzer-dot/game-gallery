@@ -10,6 +10,7 @@ export interface SteamGame {
   releaseDate: string | null
   comingSoon: boolean | null
   isEarlyAccess: boolean | null
+  genres: { id: string; description: string }[] | null
 }
 
 interface SteamSearchItem {
@@ -120,6 +121,7 @@ export class SteamService {
             releaseDate: null, // 后续异步加载
             comingSoon: null, // 后续异步加载
             isEarlyAccess: null, // 后续异步加载
+            genres: null, // 后续异步加载
           }))
 
         console.log(`Successfully found ${games.length} games`)
@@ -164,10 +166,7 @@ export class SteamService {
 
         return data[appId].data
       } catch (error) {
-        console.error(
-          `Proxy ${i + 1}/${CORS_PROXIES.length} error for appdetails ${appId}:`,
-          error
-        )
+        console.error(`Proxy ${i + 1}/${CORS_PROXIES.length} error for appdetails ${appId}:`, error)
         continue
       }
     }
@@ -177,17 +176,16 @@ export class SteamService {
   }
 
   // 获取游戏发布日期和抢先体验状态
-  async getGameReleaseDate(
-    appId: number
-  ): Promise<{
+  async getGameReleaseDate(appId: number): Promise<{
     releaseDate: string | null
     comingSoon: boolean | null
     isEarlyAccess: boolean | null
+    genres: { id: string; description: string }[] | null
   }> {
     const details = await this.getGameDetails(appId)
 
     if (!details) {
-      return { releaseDate: null, comingSoon: null, isEarlyAccess: null }
+      return { releaseDate: null, comingSoon: null, isEarlyAccess: null, genres: null }
     }
 
     // 检查是否为抢先体验（genre id = 70）
@@ -203,6 +201,7 @@ export class SteamService {
       releaseDate: details.release_date?.date || null,
       comingSoon: details.release_date?.coming_soon || null,
       isEarlyAccess,
+      genres: details.genres || null,
     }
   }
 

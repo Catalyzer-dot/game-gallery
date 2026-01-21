@@ -1,5 +1,10 @@
 export type GameStatus = 'playing' | 'queueing' | 'completion'
 
+export interface Genre {
+  id: string
+  description: string
+}
+
 export interface Game {
   id: string
   name: string
@@ -13,6 +18,7 @@ export interface Game {
   releaseDate?: string
   comingSoon?: boolean
   isEarlyAccess?: boolean
+  genres?: Genre[]
 }
 
 export interface GameQueueData {
