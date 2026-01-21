@@ -1,6 +1,18 @@
 {
   "games": [
     {
+      "id": "1768977160839",
+      "name": "Outbound / 拾光旅人",
+      "status": "queueing",
+      "addedAt": "2026-01-21T06:32:40.839Z",
+      "lastUpdated": "2026-01-21T06:32:40.839Z",
+      "steamUrl": "https://store.steampowered.com/app/2681030",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2681030/cccf9acc10970d7cb508c0fda9457b65b55d5a91/capsule_231x87_schinese.jpg?t=1768503645",
+      "releaseDate": "2026 年第二季度",
+      "comingSoon": true,
+      "isEarlyAccess": false
+    },
+    {
       "id": "1768975584802",
       "name": "翼星求生 ICARUS",
       "status": "queueing",
