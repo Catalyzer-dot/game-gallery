@@ -67,7 +67,6 @@
     border-radius: 1rem 0 0 1rem;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.3s ease;
 
     &::after {
       content: '';
@@ -79,13 +78,17 @@
       background: rgba(0, 0, 0, 0);
       transition: background 0.3s ease;
       pointer-events: none;
+      z-index: 1;
     }
 
     &:hover {
-      transform: scale(1.05);
-
       &::after {
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(0, 0, 0, 0.3);
+      }
+
+      .gameCover,
+      .gameCoverPlaceholder {
+        transform: scale(1.08);
       }
     }
 
@@ -95,6 +98,7 @@
       object-fit: cover;
       border-radius: 1rem 0 0 1rem;
       font-size: 0;
+      transition: transform 0.3s ease;
     }
 
     .gameCoverPlaceholder {
@@ -108,6 +112,7 @@
       font-size: 2.5rem;
       color: rgba(255, 255, 255, 0.3);
       font-weight: bold;
+      transition: transform 0.3s ease;
     }
   }
 
