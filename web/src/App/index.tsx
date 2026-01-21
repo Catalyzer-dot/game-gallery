@@ -35,12 +35,12 @@ function App() {
         const data = await githubService.fetchGames()
 
         // 数据迁移：将 pending 状态迁移为 queueing
-        const hasPendingGames = data.games.some((g: Game) => g.status === 'pending' as any)
+        const hasPendingGames = data.games.some((g: Game) => (g.status as string) === 'pending')
 
         if (hasPendingGames) {
           console.log('Migrating pending games to queueing...')
           const migratedGames = data.games.map((g: Game) =>
-            g.status === ('pending' as any) ? { ...g, status: 'queueing' as GameStatus } : g
+            (g.status as string) === 'pending' ? { ...g, status: 'queueing' as GameStatus } : g
           )
 
           // 保存迁移后的数据
@@ -198,10 +198,7 @@ function App() {
       if (hasAnyUpdate) {
         try {
           const finalGames = gamesRef.current
-          await githubService.updateGames(
-            { games: finalGames },
-            'Update games info after refresh'
-          )
+          await githubService.updateGames({ games: finalGames }, 'Update games info after refresh')
           console.log('已保存所有游戏信息到 GitHub')
         } catch (err) {
           console.error('保存游戏信息到 GitHub 失败:', err)
@@ -417,7 +414,10 @@ function App() {
         const releaseInfo = await steamService.getGameReleaseDate(appId)
 
         // 如果抢先体验状态有变化，更新
-        if (releaseInfo.isEarlyAccess !== null && releaseInfo.isEarlyAccess !== game.isEarlyAccess) {
+        if (
+          releaseInfo.isEarlyAccess !== null &&
+          releaseInfo.isEarlyAccess !== game.isEarlyAccess
+        ) {
           updatedGames[i] = {
             ...updatedGames[i],
             isEarlyAccess: releaseInfo.isEarlyAccess,
@@ -495,9 +495,8 @@ function App() {
           >
             <RefreshCw size={18} className={isRefreshingEarlyAccess ? 'animate-spin' : ''} />
           </button>
-          <button onClick={() => setShowSettings(true)} className={styles.btnSettings}>
+          <button onClick={() => setShowSettings(true)} className={styles.btnSettings} title="设置">
             <SettingsIcon size={18} />
-            设置
           </button>
         </div>
       </header>
