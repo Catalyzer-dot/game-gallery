@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://zhaoyang.github.io/game-queue",
+  "homepage": "https://zhaoyang.github.io/game-gallery",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
