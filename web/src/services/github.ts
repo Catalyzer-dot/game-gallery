@@ -29,10 +29,10 @@ export class GitHubService {
         // 强制修正为正确的owner和repo
         if (
           this.config &&
-          (this.config.owner !== 'yangzirui-lab' || this.config.repo !== 'game-queue')
+          (this.config.owner !== 'yangzirui-lab' || this.config.repo !== 'game-gallery')
         ) {
           this.config.owner = 'yangzirui-lab'
-          this.config.repo = 'game-queue'
+          this.config.repo = 'game-gallery'
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config))
         }
       }

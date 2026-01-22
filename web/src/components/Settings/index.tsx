@@ -15,7 +15,7 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [errorMessage, setErrorMessage] = useState('')
 
   const FIXED_OWNER = 'yangzirui-lab'
-  const FIXED_REPO = 'game-queue'
+  const FIXED_REPO = 'game-gallery'
 
   useEffect(() => {
     const config = githubService.getConfig()
@@ -182,11 +182,11 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                 创建一个 GitHub Personal Access Token（需要 <code>repo</code> 权限）
               </li>
               <li>
-                游戏数据将保存到 <code>yangzirui-lab/game-queue</code> 仓库
+                游戏数据将保存到 <code>yangzirui-lab/game-gallery</code> 仓库
               </li>
               <li>点击"测试连接"验证配置是否正确</li>
               <li>
-                如果仓库不存在，需要先在 GitHub 创建 <code>game-queue</code> 仓库
+                如果仓库不存在，需要先在 GitHub 创建 <code>game-gallery</code> 仓库
               </li>
             </ul>
           </div>
