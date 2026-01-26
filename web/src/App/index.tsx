@@ -300,7 +300,10 @@ function App() {
     })
 
     // Search in mini games
-    const miniGames = [{ id: 'snake', name: '贪吃蛇', description: '经典贪吃蛇游戏，控制蛇吃食物并避免撞墙' }]
+    const miniGames = [
+      { id: 'snake', name: '贪吃蛇', description: '经典贪吃蛇游戏，控制蛇吃食物并避免撞墙' },
+      { id: '2048', name: '2048', description: '滑动方块合并相同数字，挑战达到 2048' },
+    ]
     miniGames.forEach((game) => {
       if (
         game.name.toLowerCase().includes(lowerSearch) ||

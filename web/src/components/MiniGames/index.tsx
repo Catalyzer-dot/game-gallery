@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { SnakeGame } from './SnakeGame'
+import { Game2048 } from './Game2048'
 import styles from './index.module.scss'
 
 interface MiniGame {
@@ -17,6 +18,13 @@ const miniGames: MiniGame[] = [
     description: '经典贪吃蛇游戏，控制蛇吃食物并避免撞墙',
     icon: '🐍',
     color: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+  },
+  {
+    id: '2048',
+    name: '2048',
+    description: '滑动方块合并相同数字，挑战达到 2048',
+    icon: '🎯',
+    color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
   },
 ]
 
@@ -63,6 +71,7 @@ export const MiniGames: React.FC<MiniGamesProps> = ({ onClose: _onClose }) => {
       </div>
 
       {activeGame === 'snake' && <SnakeGame onClose={handleCloseGame} />}
+      {activeGame === '2048' && <Game2048 onClose={handleCloseGame} />}
     </>
   )
 }
