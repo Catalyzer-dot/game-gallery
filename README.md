@@ -4,7 +4,7 @@ A modern web application to manage your Steam game backlog, beautifully showcasi
 
 ## 🚀 在线访问
 
-**生产环境**: [https://game-gallery.vercel.app](https://game-gallery.vercel.app)
+**生产环境**: [https://yangzirui-lab.github.io/game-gallery](https://yangzirui-lab.github.io/game-gallery)
 
 直接访问部署好的应用，无需本地安装。
 
