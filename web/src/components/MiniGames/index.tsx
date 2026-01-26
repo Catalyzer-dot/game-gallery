@@ -24,7 +24,7 @@ interface MiniGamesProps {
   onClose: () => void
 }
 
-export const MiniGames: React.FC<MiniGamesProps> = ({ onClose }) => {
+export const MiniGames: React.FC<MiniGamesProps> = ({ onClose: _onClose }) => {
   const [activeGame, setActiveGame] = useState<string | null>(null)
 
   const handlePlayGame = (gameId: string) => {
