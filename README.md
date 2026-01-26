@@ -36,7 +36,7 @@ This will open the dashboard in your browser.
 
 This project uses a **split deployment** approach:
 
-- **Frontend**: GitHub Pages (https://yangzirui-lab.github.io)
+- **Frontend**: GitHub Pages (https://yangzirui-lab.github.io/game-gallery)
 - **API**: Vercel Serverless Functions
 
 ### Quick Deployment Guide
