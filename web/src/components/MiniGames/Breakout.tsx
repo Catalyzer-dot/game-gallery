@@ -5,15 +5,15 @@ import styles from './Breakout.module.scss'
 const CANVAS_WIDTH = 600
 const CANVAS_HEIGHT = 500
 const PADDLE_WIDTH = 100
-const PADDLE_HEIGHT = 15
-const BALL_RADIUS = 8
+const PADDLE_HEIGHT = 12
+const BALL_RADIUS = 7
 const BRICK_ROWS = 6
 const BRICK_COLS = 10
-const BRICK_WIDTH = 54
-const BRICK_HEIGHT = 20
-const BRICK_PADDING = 6
-const BRICK_OFFSET_TOP = 60
-const BRICK_OFFSET_LEFT = 30
+const BRICK_PADDING = 4
+const BRICK_WIDTH = (CANVAS_WIDTH - BRICK_PADDING * (BRICK_COLS + 1)) / BRICK_COLS
+const BRICK_HEIGHT = 18
+const BRICK_OFFSET_TOP = 50
+const BRICK_OFFSET_LEFT = BRICK_PADDING
 
 interface Brick {
   x: number
@@ -76,7 +76,7 @@ const LEVELS: Level[] = [
 ]
 
 const BRICK_COLORS = {
-  1: { color: '#10b981', score: 10 },
+  1: { color: '#22c55e', score: 10 },
   2: { color: '#f59e0b', score: 20 },
   3: { color: '#ef4444', score: 30 },
 }
@@ -86,7 +86,9 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [currentLevel, setCurrentLevel] = useState(0)
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(3)
-  const [gameStatus, setGameStatus] = useState<'ready' | 'playing' | 'paused' | 'won' | 'lost'>('ready')
+  const [gameStatus, setGameStatus] = useState<'ready' | 'playing' | 'paused' | 'won' | 'lost'>(
+    'ready'
+  )
   const [bricks, setBricks] = useState<Brick[]>([])
 
   const paddleXRef = useRef((CANVAS_WIDTH - PADDLE_WIDTH) / 2)
@@ -112,8 +114,8 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         const type = pattern[row][col]
         if (type > 0) {
           const brick: Brick = {
-            x: col * (BRICK_WIDTH + BRICK_PADDING) + BRICK_OFFSET_LEFT,
-            y: row * (BRICK_HEIGHT + BRICK_PADDING) + BRICK_OFFSET_TOP,
+            x: BRICK_OFFSET_LEFT + col * (BRICK_WIDTH + BRICK_PADDING),
+            y: BRICK_OFFSET_TOP + row * (BRICK_HEIGHT + BRICK_PADDING),
             status: 1,
             color: BRICK_COLORS[type as keyof typeof BRICK_COLORS].color,
             score: BRICK_COLORS[type as keyof typeof BRICK_COLORS].score,
@@ -153,40 +155,71 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   // 碰撞检测
   const collisionDetection = useCallback(() => {
-    setBricks((prevBricks) => {
-      const ball = ballRef.current
-      let hasCollision = false
+    const ball = ballRef.current
+    let hitBrickIndex = -1
+    let hitFromSide = false
 
-      const newBricks = prevBricks.map((brick) => {
-        if (brick.status === 0) return brick
+    // 先找到碰撞的砖块
+    for (let i = 0; i < bricks.length; i++) {
+      const brick = bricks[i]
+      if (brick.status === 0) continue
 
-        // 检测球是否与砖块碰撞
-        if (
-          ball.x > brick.x &&
-          ball.x < brick.x + BRICK_WIDTH &&
-          ball.y > brick.y &&
-          ball.y < brick.y + BRICK_HEIGHT
-        ) {
-          if (!hasCollision) {
-            ball.dy = -ball.dy
-            hasCollision = true
-          }
-          setScore((prev) => prev + brick.score)
-          return { ...brick, status: 0 }
-        }
+      // 检测球是否与砖块碰撞（考虑球的半径）
+      if (
+        ball.x + BALL_RADIUS > brick.x &&
+        ball.x - BALL_RADIUS < brick.x + BRICK_WIDTH &&
+        ball.y + BALL_RADIUS > brick.y &&
+        ball.y - BALL_RADIUS < brick.y + BRICK_HEIGHT
+      ) {
+        // 判断碰撞方向
+        const ballCenterX = ball.x
+        const ballCenterY = ball.y
+        const brickCenterX = brick.x + BRICK_WIDTH / 2
+        const brickCenterY = brick.y + BRICK_HEIGHT / 2
 
-        return brick
-      })
+        const diffX = Math.abs(ballCenterX - brickCenterX)
+        const diffY = Math.abs(ballCenterY - brickCenterY)
 
-      // 检查是否所有砖块都被摧毁
-      const allDestroyed = newBricks.every((brick) => brick.status === 0)
-      if (allDestroyed) {
-        setTimeout(() => setGameStatus('won'), 100)
+        // 根据碰撞角度决定反弹方向
+        hitFromSide = diffX / BRICK_WIDTH > diffY / BRICK_HEIGHT
+        hitBrickIndex = i
+        break
+      }
+    }
+
+    // 如果检测到碰撞，处理反弹和销毁
+    if (hitBrickIndex >= 0) {
+      const brick = bricks[hitBrickIndex]
+
+      // 反转球的速度
+      if (hitFromSide) {
+        ball.dx = -ball.dx
+      } else {
+        ball.dy = -ball.dy
       }
 
-      return newBricks
-    })
-  }, [])
+      // 更新砖块状态
+      setBricks((prevBricks) => {
+        const newBricks = prevBricks.map((b, index) => {
+          if (index === hitBrickIndex) {
+            return { ...b, status: 0 }
+          }
+          return b
+        })
+
+        // 检查是否所有砖块都被摧毁
+        const allDestroyed = newBricks.every((brick) => brick.status === 0)
+        if (allDestroyed) {
+          setTimeout(() => setGameStatus('won'), 100)
+        }
+
+        return newBricks
+      })
+
+      // 增加分数
+      setScore((prev) => prev + brick.score)
+    }
+  }, [bricks])
 
   // 绘制函数
   const draw = useCallback(() => {
@@ -199,31 +232,23 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     // 清空画布
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-    // 绘制砖块
+    // 绘制砖块 - 极简风格
     bricks.forEach((brick) => {
       if (brick.status === 1) {
         ctx.fillStyle = brick.color
         ctx.fillRect(brick.x, brick.y, BRICK_WIDTH, BRICK_HEIGHT)
-        ctx.strokeStyle = '#1e293b'
-        ctx.strokeRect(brick.x, brick.y, BRICK_WIDTH, BRICK_HEIGHT)
       }
     })
 
-    // 绘制挡板
-    ctx.fillStyle = '#3b82f6'
+    // 绘制挡板 - 极简风格
+    ctx.fillStyle = '#ffffff'
     ctx.fillRect(paddleXRef.current, CANVAS_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT)
-    ctx.strokeStyle = '#1e40af'
-    ctx.lineWidth = 2
-    ctx.strokeRect(paddleXRef.current, CANVAS_HEIGHT - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT)
 
-    // 绘制球
+    // 绘制球 - 极简风格
     ctx.beginPath()
     ctx.arc(ballRef.current.x, ballRef.current.y, BALL_RADIUS, 0, Math.PI * 2)
-    ctx.fillStyle = '#fbbf24'
+    ctx.fillStyle = '#ffffff'
     ctx.fill()
-    ctx.strokeStyle = '#f59e0b'
-    ctx.lineWidth = 2
-    ctx.stroke()
     ctx.closePath()
   }, [bricks])
 
@@ -383,10 +408,8 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className={styles.statsBar}>
-          <div className={styles.stat}>⚡ 得分: {score}</div>
-          <div className={styles.stat}>
-            ❤️ 生命: {Array(lives).fill('❤️').join('')}
-          </div>
+          <div className={styles.stat}>得分: {score}</div>
+          <div className={styles.stat}>生命: {lives}</div>
           <div className={styles.stat}>
             关卡: {currentLevel + 1}/{LEVELS.length}
           </div>
@@ -406,8 +429,8 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <div className={styles.message}>
                 <h3>准备开始</h3>
                 <p>按空格键开始</p>
-                <p className={styles.hint}>← → 或 A D 移动挡板</p>
-                <p className={styles.hint}>P 键暂停</p>
+                <p className={styles.hint}>方向键或 A/D 移动挡板</p>
+                <p className={styles.hint}>P 暂停游戏</p>
               </div>
             </div>
           )}
@@ -432,7 +455,7 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </button>
                 ) : (
                   <>
-                    <p className={styles.congrats}>🎉 恭喜通关所有关卡！</p>
+                    <p className={styles.congrats}>恭喜通关所有关卡</p>
                     <button onClick={restartGame} className={styles.btn}>
                       重新挑战
                     </button>
@@ -456,9 +479,9 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className={styles.instructions}>
-          <p>🎮 使用方向键或鼠标移动挡板</p>
-          <p>🎯 打碎所有砖块通关</p>
-          <p>⏸️ P 键暂停游戏</p>
+          <p>使用方向键或鼠标移动挡板</p>
+          <p>打碎所有砖块通关</p>
+          <p>P 键暂停游戏</p>
         </div>
       </div>
     </div>

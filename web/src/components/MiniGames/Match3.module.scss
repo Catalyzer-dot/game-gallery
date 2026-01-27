@@ -70,18 +70,99 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.hintBtn {
+  background: rgba(34, 197, 94, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #22c55e;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.5);
+  }
+}
+
 .gameBoard {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.canvas {
+  padding: 1rem;
   background: #0a0a0a;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  cursor: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  grid-template-rows: repeat(8, 50px);
+  gap: 2px;
+  position: relative;
+}
+
+.tile {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(.matched) {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+  }
+
+  &.selected {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+  }
+
+  &.matched {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+  }
+}
+
+.tileIcon {
+  font-size: 2rem;
+  user-select: none;
+}
+
+.pathSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+
+  polyline {
+    animation: pathDraw 0.3s ease-out;
+  }
+}
+
+@keyframes pathDraw {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+  }
 }
 
 .messageOverlay {
@@ -118,12 +199,6 @@
   .hint {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.5);
-  }
-
-  .congrats {
-    font-size: 1.1rem;
-    color: #22c55e;
-    margin: 1rem 0;
   }
 }
 

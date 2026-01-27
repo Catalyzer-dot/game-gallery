@@ -211,9 +211,7 @@ function App() {
         await new Promise((resolve) => setTimeout(resolve, 1000))
       }
 
-      console.log(
-        prioritizeMissing ? '游戏信息刷新完成（已刷新抢先体验状态）' : '好评率刷新完成'
-      )
+      console.log(prioritizeMissing ? '游戏信息刷新完成（已刷新抢先体验状态）' : '好评率刷新完成')
 
       // 所有游戏刷新完成后，统一保存一次到 GitHub
       if (hasAnyUpdate) {
@@ -306,6 +304,9 @@ function App() {
       { id: 'memory', name: '记忆翻牌', description: '翻开卡片找出所有配对，挑战你的记忆力' },
       { id: 'tower', name: '塔防', description: '建造防御塔抵御敌人，通过三个关卡' },
       { id: 'breakout', name: '打砖块', description: '经典街机游戏，用挡板接球打碎砖块' },
+      { id: 'flappy', name: 'Flappy Bird', description: '点击屏幕控制小鸟飞行，躲避管道障碍' },
+      { id: 'match3', name: '连连看', description: '找到相同图案配对消除，挑战你的眼力' },
+      { id: 'jump', name: '跳一跳', description: '长按蓄力跳跃，落在中心获得连击加分' },
     ]
     miniGames.forEach((game) => {
       if (
@@ -534,7 +535,6 @@ function App() {
       setToast('操作失败')
     }
   }
-
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)

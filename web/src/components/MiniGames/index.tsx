@@ -4,6 +4,9 @@ import { Game2048 } from './Game2048'
 import { MemoryGame } from './MemoryGame'
 import { TowerDefense } from './TowerDefense'
 import { Breakout } from './Breakout'
+import { FlappyBird } from './FlappyBird'
+import { Match3 } from './Match3'
+import { JumpJump } from './JumpJump'
 import styles from './index.module.scss'
 
 interface MiniGame {
@@ -50,6 +53,27 @@ const miniGames: MiniGame[] = [
     icon: '🧱',
     color: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
   },
+  {
+    id: 'flappy',
+    name: 'Flappy Bird',
+    description: '点击屏幕控制小鸟飞行，躲避管道障碍',
+    icon: '🐦',
+    color: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+  },
+  {
+    id: 'match3',
+    name: '连连看',
+    description: '找到相同图案配对消除，挑战你的眼力',
+    icon: '🔗',
+    color: 'linear-gradient(135deg, #ec4899 0%, #d946ef 100%)',
+  },
+  {
+    id: 'jump',
+    name: '跳一跳',
+    description: '长按蓄力跳跃，落在中心获得连击加分',
+    icon: '🦘',
+    color: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+  },
 ]
 
 interface MiniGamesProps {
@@ -84,7 +108,13 @@ export const MiniGames: React.FC<MiniGamesProps> = ({ onClose: _onClose }) => {
                     <h3 className={styles.gameName}>{game.name}</h3>
                     <p className={styles.gameDescription}>{game.description}</p>
                   </div>
-                  <button className={styles.playBtn} onClick={(e) => { e.stopPropagation(); handlePlayGame(game.id) }}>
+                  <button
+                    className={styles.playBtn}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePlayGame(game.id)
+                    }}
+                  >
                     开始游戏 <span className={styles.playIcon}>▶</span>
                   </button>
                 </div>
@@ -99,6 +129,9 @@ export const MiniGames: React.FC<MiniGamesProps> = ({ onClose: _onClose }) => {
       {activeGame === 'memory' && <MemoryGame onClose={handleCloseGame} />}
       {activeGame === 'tower' && <TowerDefense onClose={handleCloseGame} />}
       {activeGame === 'breakout' && <Breakout onClose={handleCloseGame} />}
+      {activeGame === 'flappy' && <FlappyBird onClose={handleCloseGame} />}
+      {activeGame === 'match3' && <Match3 onClose={handleCloseGame} />}
+      {activeGame === 'jump' && <JumpJump onClose={handleCloseGame} />}
     </>
   )
 }
