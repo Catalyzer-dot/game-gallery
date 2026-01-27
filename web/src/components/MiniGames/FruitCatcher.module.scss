@@ -121,6 +121,38 @@
   }
 }
 
+.heartEmpty {
+  width: 14px;
+  height: 14px;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  transform: rotate(-45deg);
+  border-radius: 2px;
+  flex-shrink: 0;
+
+  &::before,
+  &::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    position: absolute;
+  }
+
+  &::before {
+    top: -7px;
+    left: 0;
+  }
+
+  &::after {
+    left: 7px;
+    top: 0;
+  }
+}
+
 .buffsBar {
   display: flex;
   gap: 0.5rem;

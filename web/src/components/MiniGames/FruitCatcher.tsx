@@ -534,15 +534,11 @@ export const FruitCatcher: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         <div className={styles.statsBar}>
           <div className={styles.stat}>得分: {score}</div>
           <div className={styles.stat}>
-            {lives > 0 ? (
-              <div className={styles.lives}>
-                {Array.from({ length: lives }).map((_, i) => (
-                  <div key={i} className={styles.heart}></div>
-                ))}
-              </div>
-            ) : (
-              <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>×</span>
-            )}
+            <div className={styles.lives}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={i < lives ? styles.heart : styles.heartEmpty}></div>
+              ))}
+            </div>
           </div>
           <div className={styles.stat}>最高: {bestScore}</div>
           {combo > 0 && <div className={styles.stat}>连击: {combo}x</div>}
