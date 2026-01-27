@@ -15,8 +15,8 @@ COPY . .
 # 构建应用
 RUN CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o app.exe main.go
 
-# 最终阶段：Windows容器
-FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
+# 最终阶段：Windows容器（适配 Windows Server 2019）
+FROM mcr.microsoft.com/windows/nanoserver:1809
 
 WORKDIR /app
 
