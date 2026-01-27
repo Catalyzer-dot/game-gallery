@@ -13,18 +13,18 @@ RUN go mod download
 COPY . .
 
 # 构建应用
-RUN CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o app.exe main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app main.go
 
-# 最终阶段：Windows容器（适配 Windows Server 2019）
-FROM mcr.microsoft.com/windows/nanoserver:1809
+# 最终阶段：使用轻量级 Alpine Linux
+FROM alpine:latest
 
 WORKDIR /app
 
 # 复制编译好的应用
-COPY --from=builder /build/app.exe .
+COPY --from=builder /build/app .
 
 # 暴露端口
 EXPOSE 8080
 
 # 启动应用
-CMD ["app.exe"]
+CMD ["./app"]
