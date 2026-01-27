@@ -19,31 +19,44 @@
 
 ## 🚀 快速开始
 
-### 前置条件
+### 部署方式
 
-- Docker 和 Docker Compose
-- GitHub Token（用于游戏数据同步）
+本项目支持两种部署方式：
 
-### 部署步骤
+#### 1. Windows Server 自动部署（推荐用于生产环境）
+
+使用 GitHub Actions + Self-hosted Runner 实现自动化部署：
+
+- **后端**: 部署到 Windows Docker 容器
+- **前端**: 部署到 IIS
+- **触发**: 推送到 main 分支自动部署
+
+详细配置请参考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+#### 2. 本地开发环境
 
 ```bash
 # 1. 克隆仓库
-git clone <repository-url>
+git clone https://github.com/yangzirui-lab/game-gallery.git
 cd game-gallery
 
 # 2. 配置后端环境变量
 cd backend
 cp .env.example .env
-# 编辑 .env 文件，填入必要的配置：
-# - STEAM_API_KEY: Steam API Key（可选，目前因网络限制暂时不需要）
-# - JWT_SECRET: JWT 密钥
+# 编辑 .env 文件，填入 STEAM_API_KEY（可选）
+
+# 3. 启动后端（Docker 方式）
 cd ..
+docker build -f backend/Dockerfile -t game-gallery-backend .
+docker run -d -p 8080:8080 --env-file backend/.env game-gallery-backend
 
-# 3. 启动所有服务
-docker-compose up -d
+# 4. 启动前端（开发模式）
+cd web
+npm install
+npm run dev
 
-# 4. 访问应用
-# 前端: http://localhost/
+# 5. 访问应用
+# 前端: http://localhost:5173
 # 后端 API: http://localhost:8080
 ```
 
@@ -140,8 +153,11 @@ GameGallery
 
 ### 部署环境
 
-- **Frontend**: GitHub Pages (https://yangzirui-lab.github.io/game-gallery) 或 Docker + Nginx
-- **API**: Docker + Go Backend 或 Vercel Serverless Functions
+- **开发/演示环境**: GitHub Pages (https://yangzirui-lab.github.io/game-gallery)
+- **生产环境**: Windows Server 2019
+  - 前端: IIS
+  - 后端: Docker (Windows 容器)
+  - CI/CD: GitHub Actions (Self-hosted Runner)
 
 ## 🌐 前端功能说明
 
@@ -186,22 +202,23 @@ GameGallery
 
 ```
 game-gallery/
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml            # GitHub Pages 部署（前端）
+│       └── deploy-windows.yml    # Windows Server 自动部署
 ├── backend/              # Go 后端应用
 │   ├── main.go
 │   ├── go.mod
 │   ├── go.sum
 │   ├── .env.example
 │   ├── internal/
-│   ├── Dockerfile.linux
-│   └── ...
+│   └── Dockerfile        # Windows 容器构建文件
 ├── web/                  # React 前端应用
 │   ├── src/
 │   ├── package.json
-│   ├── Dockerfile
-│   ├── nginx.conf
 │   └── ...
-├── docker-compose.yml    # Docker 编排配置
-├── nginx.conf            # Nginx 反向代理配置
+├── docker-compose.windows.yml    # Windows 容器编排
+├── DEPLOYMENT.md         # Windows Server 部署指南
 └── README.md            # 本文件
 ```
 
@@ -243,11 +260,21 @@ game-gallery/
 - 检查仓库是否存在且可访问
 - 点击"测试连接"诊断问题
 
+## 🚢 CI/CD 自动部署
+
+项目使用 GitHub Actions 实现自动化部署：
+
+- **GitHub Pages**: 推送到 main 分支自动部署前端演示版本
+- **Windows Server**: 使用 Self-hosted Runner 自动部署生产环境
+  - 后端自动构建并部署到 Docker 容器
+  - 前端自动构建并部署到 IIS
+  - 支持手动触发部署
+
+查看 [DEPLOYMENT.md](./DEPLOYMENT.md) 了解如何配置 Windows Server 自动部署。
+
 ## 📚 相关文档
 
-- [STEAM_LOGIN_GUIDE.md](./STEAM_LOGIN_GUIDE.md) - Steam 登录详细配置
-- [BACKEND_SETUP.md](./BACKEND_SETUP.md) - 后端详细部署指南
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - 生产环境部署说明
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Windows Server 自动部署配置指南
 
 ## 🤝 贡献指南
 
