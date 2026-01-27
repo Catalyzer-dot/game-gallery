@@ -157,7 +157,7 @@ GameGallery
 - **生产环境**: Windows Server 2019
   - 前端: IIS
   - 后端: Docker (Windows 容器)
-  - CI/CD: GitHub Actions (Self-hosted Runner)
+  - CI/CD: GitHub Actions + GHCR (镜像仓库中转)
 
 ## 🌐 前端功能说明
 
@@ -262,15 +262,15 @@ game-gallery/
 
 ## 🚢 CI/CD 自动部署
 
-项目使用 GitHub Actions 实现自动化部署：
+项目使用 GitHub Actions 实现自动化构建：
 
 - **GitHub Pages**: 推送到 main 分支自动部署前端演示版本
-- **Windows Server**: 使用 Self-hosted Runner 自动部署生产环境
-  - 后端自动构建并部署到 Docker 容器
-  - 前端自动构建并部署到 IIS
-  - 支持手动触发部署
+- **Windows Server**: 使用镜像仓库中转方式部署生产环境（安全，适合公开仓库）
+  - GitHub Actions 自动构建后端镜像并推送到 GHCR (GitHub Container Registry)
+  - GitHub Actions 自动构建前端并推送到 `dist` 分支
+  - 在服务器上运行部署脚本拉取最新版本
 
-查看 [DEPLOYMENT.md](./DEPLOYMENT.md) 了解如何配置 Windows Server 自动部署。
+查看 [DEPLOYMENT.md](./DEPLOYMENT.md) 了解如何配置 Windows Server 部署。
 
 ## 📚 相关文档
 

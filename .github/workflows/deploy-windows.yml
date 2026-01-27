@@ -1,4 +1,4 @@
-name: Deploy to Windows Server
+name: Build and Push Images
 
 on:
   push:
@@ -6,66 +6,65 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
+
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build-backend:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Docker service
-        shell: powershell
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push backend image
+        working-directory: ./backend
         run: |
-          Write-Host "Checking Docker service..." -ForegroundColor Cyan
-          $dockerService = Get-Service docker -ErrorAction SilentlyContinue
-          if ($dockerService.Status -ne 'Running') {
-            Write-Host "Starting Docker service..." -ForegroundColor Yellow
-            Start-Service docker
-            Start-Sleep -Seconds 5
-          }
-          Write-Host "Docker service is running" -ForegroundColor Green
-
-      - name: Deploy Backend to Docker
-        shell: powershell
-        run: |
-          Write-Host "=== Deploying Backend ===" -ForegroundColor Green
-
-          # Stop and remove old container
-          Write-Host "Cleaning old containers..." -ForegroundColor Cyan
-          $oldContainer = docker ps -a -q -f name=game-gallery-backend
-          if ($oldContainer) {
-            docker stop game-gallery-backend 2>$null
-            docker rm game-gallery-backend 2>$null
+          $tags = "${{ steps.meta.outputs.tags }}" -split "`n"
+          $tagArgs = @()
+          foreach ($tag in $tags) {
+            if ($tag.Trim()) {
+              $tagArgs += "-t"
+              $tagArgs += $tag.Trim()
+            }
           }
 
-          # Build new image
-          Write-Host "Building backend image..." -ForegroundColor Cyan
-          docker build -f .\backend\Dockerfile -t game-gallery-backend:latest .\backend
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Backend build failed!" -ForegroundColor Red
-            exit 1
+          docker build $tagArgs -f Dockerfile .
+
+          foreach ($tag in $tags) {
+            if ($tag.Trim()) {
+              docker push $tag.Trim()
+            }
           }
 
-          # Start new container
-          Write-Host "Starting backend container..." -ForegroundColor Cyan
-          docker run -d `
-            -p 8080:8080 `
-            --env-file .\backend\.env `
-            --name game-gallery-backend `
-            --restart unless-stopped `
-            game-gallery-backend:latest
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Backend startup failed!" -ForegroundColor Red
-            exit 1
-          }
-
-          Write-Host "Backend deployed successfully" -ForegroundColor Green
-
-          # Wait for backend to be ready
-          Start-Sleep -Seconds 3
-          docker ps -f name=game-gallery-backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -74,109 +73,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ./web/package-lock.json
 
-      - name: Build Frontend
-        shell: powershell
+      - name: Install dependencies
         working-directory: ./web
-        run: |
-          Write-Host "=== Building Frontend ===" -ForegroundColor Green
+        run: npm ci
 
-          # Install dependencies
-          Write-Host "Installing dependencies..." -ForegroundColor Cyan
-          npm ci
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Dependency installation failed!" -ForegroundColor Red
-            exit 1
-          }
+      - name: Build frontend
+        working-directory: ./web
+        run: npm run build
 
-          # Build
-          Write-Host "Building frontend..." -ForegroundColor Cyan
-          npm run build
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Frontend build failed!" -ForegroundColor Red
-            exit 1
-          }
-
-          Write-Host "Frontend build completed" -ForegroundColor Green
-
-      - name: Deploy Frontend to IIS
-        shell: powershell
-        run: |
-          Write-Host "=== Deploying Frontend to IIS ===" -ForegroundColor Green
-
-          # Import IIS module
-          Import-Module WebAdministration -ErrorAction Stop
-
-          $siteName = "GameGallery"
-          $sitePath = "C:\inetpub\wwwroot\game-gallery"
-
-          # Stop site if exists
-          if (Test-Path "IIS:\Sites\$siteName") {
-            Write-Host "Stopping existing site..." -ForegroundColor Cyan
-            Stop-WebSite -Name $siteName -ErrorAction SilentlyContinue
-          }
-
-          # Create/update site directory
-          if (!(Test-Path $sitePath)) {
-            New-Item -ItemType Directory -Path $sitePath -Force | Out-Null
-          }
-
-          # Copy built files
-          Write-Host "Copying files to IIS directory..." -ForegroundColor Cyan
-          Copy-Item -Path ".\web\dist\*" -Destination $sitePath -Recurse -Force
-
-          # Create web.config for Vue Router
-          $webConfigContent = @'
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <system.webServer>
-        <rewrite>
-            <rules>
-                <rule name="Handle History Mode and custom 404/500" stopProcessing="true">
-                    <match url="(.*)" />
-                    <conditions logicalGrouping="MatchAll">
-                        <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                        <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="/" />
-                </rule>
-            </rules>
-        </rewrite>
-        <staticContent>
-            <mimeMap fileExtension=".json" mimeType="application/json" />
-        </staticContent>
-    </system.webServer>
-</configuration>
-'@
-          $webConfigContent | Out-File -FilePath "$sitePath\web.config" -Encoding UTF8
-
-          # Create or update site
-          if (!(Test-Path "IIS:\Sites\$siteName")) {
-            Write-Host "Creating IIS site..." -ForegroundColor Cyan
-            New-WebSite -Name $siteName -Port 80 -PhysicalPath $sitePath -Force | Out-Null
-          }
-
-          # Start site
-          Write-Host "Starting IIS site..." -ForegroundColor Cyan
-          Start-WebSite -Name $siteName
-
-          Write-Host "Frontend deployed to IIS successfully" -ForegroundColor Green
-
-      - name: Verify Deployment
-        shell: powershell
-        run: |
-          Write-Host "`n=== Deployment Summary ===" -ForegroundColor Green
-
-          # Check backend
-          Write-Host "`nBackend Status:" -ForegroundColor Cyan
-          docker ps -f name=game-gallery-backend --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-          # Check frontend
-          Write-Host "`nFrontend Status:" -ForegroundColor Cyan
-          Import-Module WebAdministration
-          $site = Get-Website -Name "GameGallery"
-          Write-Host "Site: $($site.Name) - State: $($site.State) - Path: $($site.PhysicalPath)" -ForegroundColor White
-
-          Write-Host "`nAccess URLs:" -ForegroundColor Yellow
-          Write-Host "  Frontend: http://localhost (or http://YOUR_SERVER_IP)" -ForegroundColor White
-          Write-Host "  Backend: http://localhost:8080" -ForegroundColor White
-          Write-Host "  Health: http://localhost:8080/health" -ForegroundColor White
+      - name: Deploy to dist branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/dist
+          publish_branch: dist
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy frontend build ${{ github.sha }}'
