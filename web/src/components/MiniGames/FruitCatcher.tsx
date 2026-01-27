@@ -158,6 +158,13 @@ export const FruitCatcher: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     // 清空画布
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
+    // 绘制背景
+    const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT)
+    gradient.addColorStop(0, '#87ceeb')
+    gradient.addColorStop(1, '#e0f6ff')
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+
     // 绘制篮子
     const basketX = basketXRef.current
     const basketY = CANVAS_HEIGHT - BASKET_HEIGHT
