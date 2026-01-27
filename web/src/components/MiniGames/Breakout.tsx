@@ -153,22 +153,24 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   // 碰撞检测
   const collisionDetection = useCallback(() => {
-    let allBricksDestroyed = true
-
     setBricks((prevBricks) => {
+      const ball = ballRef.current
+      let hasCollision = false
+
       const newBricks = prevBricks.map((brick) => {
         if (brick.status === 0) return brick
 
-        allBricksDestroyed = false
-
-        const ball = ballRef.current
+        // 检测球是否与砖块碰撞
         if (
           ball.x > brick.x &&
           ball.x < brick.x + BRICK_WIDTH &&
           ball.y > brick.y &&
           ball.y < brick.y + BRICK_HEIGHT
         ) {
-          ball.dy = -ball.dy
+          if (!hasCollision) {
+            ball.dy = -ball.dy
+            hasCollision = true
+          }
           setScore((prev) => prev + brick.score)
           return { ...brick, status: 0 }
         }
@@ -176,12 +178,14 @@ export const Breakout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         return brick
       })
 
+      // 检查是否所有砖块都被摧毁
+      const allDestroyed = newBricks.every((brick) => brick.status === 0)
+      if (allDestroyed) {
+        setTimeout(() => setGameStatus('won'), 100)
+      }
+
       return newBricks
     })
-
-    if (allBricksDestroyed) {
-      setGameStatus('won')
-    }
   }, [])
 
   // 绘制函数
