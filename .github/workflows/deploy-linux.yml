@@ -81,6 +81,34 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy frontend build ${{ github.sha }}'
 
+      # 通过SSH推送前端文件到服务器
+      - name: Push Frontend to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "./web/dist/*"
+          target: "/tmp/game-gallery-frontend/"
+          strip_components: 2
+          rm: true
+          timeout: 15m
+          command_timeout: 15m
+
+      # 通过SSH推送配置文件到服务器
+      - name: Push Config Files to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "docker-compose.yml,nginx.conf"
+          target: "/tmp/game-gallery-config/"
+          timeout: 5m
+          command_timeout: 5m
+
       # 通过SSH部署到服务器
       - name: Deploy to Linux Server
         uses: appleboy/ssh-action@master
@@ -90,22 +118,20 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          timeout: 10m
+          command_timeout: 10m
           script: |
             # 创建部署目录
             mkdir -p /opt/game-gallery/backend
             cd /opt/game-gallery
 
-            # 从 dist 分支拉取前端文件
-            echo "Pulling frontend files from dist branch..."
-            TEMP_DIR="/tmp/game-gallery-deploy-$$"
-            mkdir -p "$TEMP_DIR"
-
-            if git clone --branch dist --depth 1 --single-branch https://github.com/yangzirui-lab/game-gallery.git "$TEMP_DIR"; then
+            # 部署前端文件
+            if [ -d /tmp/game-gallery-frontend ]; then
               echo "Deploying frontend files..."
               mkdir -p /opt/game-gallery/web/dist
               rm -rf /opt/game-gallery/web/dist/*
-              cp -r "$TEMP_DIR"/* /opt/game-gallery/web/dist/
-              rm -rf "$TEMP_DIR"
+              cp -r /tmp/game-gallery-frontend/* /opt/game-gallery/web/dist/
+              rm -rf /tmp/game-gallery-frontend
 
               # 修正文件权限
               echo "Fixing file permissions..."
@@ -113,16 +139,28 @@ jobs:
 
               echo "✅ Frontend files deployed"
             else
-              echo "⚠️  Failed to pull frontend files from dist branch"
+              echo "⚠️  Frontend files not found, skipping..."
             fi
 
-            # 下载/更新配置文件
-            echo "Updating docker-compose.yml..."
-            curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/docker-compose.yml
-            sed -i '/^version:/d' docker-compose.yml
+            # 部署配置文件
+            if [ -d /tmp/game-gallery-config ]; then
+              echo "Deploying configuration files..."
 
-            echo "Updating nginx.conf..."
-            curl -fsSL -o nginx.conf https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/nginx.conf
+              if [ -f /tmp/game-gallery-config/docker-compose.yml ]; then
+                cp /tmp/game-gallery-config/docker-compose.yml /opt/game-gallery/
+                sed -i '/^version:/d' /opt/game-gallery/docker-compose.yml
+                echo "✅ docker-compose.yml updated"
+              fi
+
+              if [ -f /tmp/game-gallery-config/nginx.conf ]; then
+                cp /tmp/game-gallery-config/nginx.conf /opt/game-gallery/
+                echo "✅ nginx.conf updated"
+              fi
+
+              rm -rf /tmp/game-gallery-config
+            else
+              echo "⚠️  Configuration files not found, skipping..."
+            fi
 
             # 检查后端环境变量文件
             if [ ! -f backend/.env ]; then
