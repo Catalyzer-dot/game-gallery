@@ -115,7 +115,7 @@ jobs:
             sed -i '/^version:/d' docker-compose.yml
 
             echo "Updating nginx.conf..."
-            curl -fsSL -o nginx.conf https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/nginx-prod.conf
+            curl -fsSL -o nginx.conf https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/nginx.conf
 
             # 检查后端环境变量文件
             if [ ! -f backend/.env ]; then
