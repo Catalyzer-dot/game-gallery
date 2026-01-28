@@ -3,6 +3,7 @@ extends Area2D
 @export var speed := 400.0
 @export var damage := 25.0
 @export var homing_strength := 5.0  # 追踪强度
+@export var bullet_color := Color(1, 1, 0, 1)
 
 var target: CharacterBody2D = null
 var velocity := Vector2.ZERO
@@ -12,6 +13,9 @@ var velocity := Vector2.ZERO
 
 func _ready():
 	body_entered.connect(_on_body_entered)
+
+	# 应用子弹颜色
+	sprite.color = bullet_color
 
 	if target and is_instance_valid(target):
 		# 初始方向

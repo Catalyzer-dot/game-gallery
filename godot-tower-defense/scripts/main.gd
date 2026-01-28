@@ -14,6 +14,7 @@ var spawn_timer := 0.0
 var wave_in_progress := false
 
 @onready var spawn_point = $SpawnPoint
+@onready var end_point = $EndPoint
 @onready var path = $Path2D
 @onready var ui = $UI
 @onready var tower_container = $Towers
@@ -33,8 +34,6 @@ func _ready():
 		slot.input_event.connect(_on_slot_clicked.bind(slot))
 		slot.mouse_entered.connect(_on_slot_mouse_entered.bind(slot))
 		slot.mouse_exited.connect(_on_slot_mouse_exited.bind(slot))
-
-	start_wave()
 
 func _process(delta):
 	if wave_in_progress:
@@ -64,24 +63,48 @@ func _on_enemy_died(reward):
 func _on_enemy_reached_end():
 	lives -= 1
 	ui.update_lives(lives)
+
+	# 播放终点缩小动画
+	play_endpoint_hit_animation()
+
 	if lives <= 0:
 		game_over()
 	check_wave_complete()
 
+func play_endpoint_hit_animation():
+	# 创建补间动画
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_ELASTIC)
+
+	# 缩小到0.7倍
+	tween.tween_property(end_point, "scale", Vector2(0.7, 0.7), 0.2)
+	# 恢复到原大小
+	tween.tween_property(end_point, "scale", Vector2(1.0, 1.0), 0.3)
+
 func check_wave_complete():
-	if not wave_in_progress and get_tree().get_nodes_in_group("enemies").size() == 0:
-		await get_tree().create_timer(2.0).timeout
-		start_next_wave()
+	# 波次完成后不自动开始下一波，等待玩家点击按钮
+	pass
 
 func start_wave():
+	if wave_in_progress:
+		return  # 如果波次正在进行，忽略
+
 	wave_in_progress = true
 	enemies_spawned = 0
 	spawn_timer = 0.0
+	print("开始波次 ", wave, "/10")
 
 func start_next_wave():
+	# 检查当前波次是否完成
+	if wave_in_progress or get_tree().get_nodes_in_group("enemies").size() > 0:
+		print("请等待当前波次完成")
+		return
+
 	wave += 1
 	wave_size += 3
 	ui.update_wave(wave)
+	print("准备波次 ", wave, "/10")
 	start_wave()
 
 func game_over():
@@ -136,7 +159,9 @@ func place_tower_at_slot(slot):
 		"attack_range": 200.0,
 		"attack_speed": 1.0,
 		"damage": 25.0,
-		"bullet_speed": 400.0
+		"bullet_speed": 400.0,
+		"tower_color": Color(0.4, 0.6, 0.8, 1),  # 蓝色 - 基础塔
+		"bullet_color": Color(0.3, 0.7, 1, 1)    # 亮蓝色子弹
 	}
 
 	if selected_tower_type == "rapid":
@@ -145,7 +170,9 @@ func place_tower_at_slot(slot):
 			"attack_range": 180.0,
 			"attack_speed": 2.0,
 			"damage": 15.0,
-			"bullet_speed": 500.0
+			"bullet_speed": 500.0,
+			"tower_color": Color(1, 0.5, 0.3, 1),   # 橙色 - 快速塔
+			"bullet_color": Color(1, 0.7, 0.2, 1)   # 金黄色子弹
 		}
 
 	if money < tower_cost:
@@ -158,6 +185,8 @@ func place_tower_at_slot(slot):
 	tower.attack_speed = tower_stats.attack_speed
 	tower.damage = tower_stats.damage
 	tower.bullet_speed = tower_stats.bullet_speed
+	tower.tower_color = tower_stats.tower_color
+	tower.bullet_color = tower_stats.bullet_color
 	tower_container.add_child(tower)
 
 	# 标记槽位已占用

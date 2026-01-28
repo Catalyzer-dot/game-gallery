@@ -6,6 +6,8 @@ const BULLET = preload("res://scenes/bullet.tscn")
 @export var attack_speed := 1.0  # 每秒攻击次数
 @export var damage := 25.0
 @export var bullet_speed := 400.0
+@export var tower_color := Color(0.5, 0.5, 0.6, 1)
+@export var bullet_color := Color(1, 1, 0, 1)
 
 var current_target: CharacterBody2D = null
 var attack_timer := 0.0
@@ -13,6 +15,8 @@ var can_attack := true
 
 @onready var range_indicator = $RangeIndicator
 @onready var turret = $Turret
+@onready var turret_sprite = $Turret/TurretSprite
+@onready var base = $Base
 @onready var muzzle = $Turret/Muzzle
 @onready var detection_area = $DetectionArea
 
@@ -24,6 +28,10 @@ func _ready():
 	# 设置范围指示器
 	range_indicator.scale = Vector2.ONE * attack_range / 50.0
 	range_indicator.visible = false
+
+	# 应用塔的颜色
+	turret_sprite.color = tower_color
+	base.color = tower_color.darkened(0.3)
 
 	detection_area.body_entered.connect(_on_enemy_entered_range)
 	detection_area.body_exited.connect(_on_enemy_exited_range)
@@ -73,6 +81,7 @@ func shoot():
 	bullet.target = current_target
 	bullet.damage = damage
 	bullet.speed = bullet_speed
+	bullet.bullet_color = bullet_color
 	# 添加到场景根节点，确保正确的碰撞检测
 	get_tree().root.get_node("Main").add_child(bullet)
 
