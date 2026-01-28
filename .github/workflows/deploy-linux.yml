@@ -109,17 +109,13 @@ jobs:
             mkdir -p /opt/game-gallery/backend
             cd /opt/game-gallery
 
-            # 下载配置文件（如果不存在）
-            if [ ! -f docker-compose.yml ]; then
-              echo "Downloading docker-compose.yml..."
-              curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/docker-compose.yml
-              sed -i '/^version:/d' docker-compose.yml
-            fi
+            # 下载/更新配置文件
+            echo "Updating docker-compose.yml..."
+            curl -fsSL -o docker-compose.yml https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/docker-compose.yml
+            sed -i '/^version:/d' docker-compose.yml
 
-            if [ ! -f nginx.conf ]; then
-              echo "Downloading nginx.conf..."
-              curl -fsSL -o nginx.conf https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/nginx-prod.conf
-            fi
+            echo "Updating nginx.conf..."
+            curl -fsSL -o nginx.conf https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/nginx-prod.conf
 
             # 检查后端环境变量文件
             if [ ! -f backend/.env ]; then
