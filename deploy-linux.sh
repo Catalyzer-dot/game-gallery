@@ -115,6 +115,13 @@ echo ""
 log_info "[3/5] Deploying frontend files..."
 mkdir -p "$DEPLOY_DIR/web/dist"
 cp -r "$TEMP_DIR"/* "$DEPLOY_DIR/web/dist/"
+
+# 修正文件权限
+if id deploy &>/dev/null; then
+    log_info "Setting file ownership to deploy user..."
+    chown -R deploy:deploy "$DEPLOY_DIR/web"
+fi
+
 log_info "Frontend files deployed to $DEPLOY_DIR/web/dist"
 
 # 清理临时目录

@@ -118,6 +118,11 @@ jobs:
               mkdir -p /opt/game-gallery/web/dist
               tar -xzf /tmp/frontend.tar.gz -C /opt/game-gallery/web/dist/
               rm -f /tmp/frontend.tar.gz
+
+              # 修正文件权限
+              echo "Fixing file permissions..."
+              chown -R deploy:deploy /opt/game-gallery/web
+
               echo "✅ Frontend files extracted"
             else
               echo "⚠️  Frontend archive not found, skipping..."
