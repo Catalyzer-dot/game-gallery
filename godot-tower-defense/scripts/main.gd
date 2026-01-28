@@ -17,14 +17,23 @@ var wave_in_progress := false
 @onready var path = $Path2D
 @onready var ui = $UI
 @onready var tower_container = $Towers
+@onready var tower_slots = $TowerSlots
 
 var selected_tower_type = null
 var placeable := false
+var selected_slot = null
 
 func _ready():
 	ui.update_money(money)
 	ui.update_lives(lives)
 	ui.update_wave(wave)
+
+	# 连接所有塔位的信号
+	for slot in tower_slots.get_children():
+		slot.input_event.connect(_on_slot_clicked.bind(slot))
+		slot.mouse_entered.connect(_on_slot_mouse_entered.bind(slot))
+		slot.mouse_exited.connect(_on_slot_mouse_exited.bind(slot))
+
 	start_wave()
 
 func _process(delta):
@@ -82,8 +91,46 @@ func game_over():
 func _on_tower_button_pressed(tower_type):
 	selected_tower_type = tower_type
 	placeable = true
+	# 高亮所有可用塔位
+	for slot in tower_slots.get_children():
+		if not is_slot_occupied(slot):
+			slot.get_node("Indicator").modulate = Color(1, 1, 0.5, 0.6)
 
-func place_tower(pos: Vector2):
+func _on_slot_clicked(_viewport, event, _shape_idx, slot):
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+
+	if not placeable or selected_tower_type == null:
+		return
+
+	if is_slot_occupied(slot):
+		print("该位置已被占用！")
+		return
+
+	place_tower_at_slot(slot)
+
+func _on_slot_mouse_entered(slot):
+	if is_slot_occupied(slot):
+		return
+
+	if placeable and selected_tower_type != null:
+		slot.get_node("Indicator").modulate = Color(1, 1, 1, 0.8)
+	else:
+		slot.get_node("Indicator").modulate = Color(1, 1, 1, 0.4)
+
+func _on_slot_mouse_exited(slot):
+	if is_slot_occupied(slot):
+		return
+
+	if placeable and selected_tower_type != null:
+		slot.get_node("Indicator").modulate = Color(1, 1, 0.5, 0.6)
+	else:
+		slot.get_node("Indicator").modulate = Color(1, 1, 1, 0.3)
+
+func is_slot_occupied(slot):
+	return slot.has_meta("tower")
+
+func place_tower_at_slot(slot):
 	var tower_cost = 50
 	var tower_stats = {
 		"attack_range": 200.0,
@@ -102,16 +149,21 @@ func place_tower(pos: Vector2):
 		}
 
 	if money < tower_cost:
-		print("金钱不足！")
+		print("金钱不足！需要 $", tower_cost, "，当前: $", money)
 		return
 
 	var tower = TOWER.instantiate()
-	tower.position = pos
+	tower.position = slot.position
 	tower.attack_range = tower_stats.attack_range
 	tower.attack_speed = tower_stats.attack_speed
 	tower.damage = tower_stats.damage
 	tower.bullet_speed = tower_stats.bullet_speed
 	tower_container.add_child(tower)
+
+	# 标记槽位已占用
+	slot.set_meta("tower", tower)
+	slot.get_node("Sprite2D").modulate = Color(0.3, 0.3, 0.3, 0.4)
+	slot.get_node("Indicator").visible = false
 
 	money -= tower_cost
 	ui.update_money(money)
@@ -119,7 +171,7 @@ func place_tower(pos: Vector2):
 	placeable = false
 	selected_tower_type = null
 
-func _unhandled_input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if placeable and selected_tower_type != null:
-			place_tower(event.position)
+	# 恢复所有槽位的高亮
+	for s in tower_slots.get_children():
+		if not is_slot_occupied(s):
+			s.get_node("Indicator").modulate = Color(1, 1, 1, 0.3)

@@ -1,9 +1,23 @@
-[gd_scene load_steps=7 format=3 uid="uid://enemy_scene"]
+[gd_scene load_steps=10 format=3 uid="uid://enemy_scene"]
 
 [ext_resource type="Script" path="res://scripts/enemy.gd" id="1"]
 
 [sub_resource type="CircleShape2D" id="circle_1"]
 radius = 15.0
+
+[sub_resource type="StyleBoxFlat" id="healthbar_bg"]
+bg_color = Color(0.2, 0.2, 0.2, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="healthbar_fill"]
+bg_color = Color(0.2, 0.8, 0.2, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [sub_resource type="Gradient" id="gradient_1"]
 offsets = PackedFloat32Array(0, 0.5, 1)
@@ -49,13 +63,17 @@ polygon = PackedVector2Array(-10, -10, 10, -10, 10, 10, -10, 10)
 shape = SubResource("circle_1")
 
 [node name="HealthBar" type="ProgressBar" parent="."]
-offset_left = -15.0
-offset_top = -25.0
-offset_right = 15.0
-offset_bottom = -20.0
+modulate = Color(1, 1, 1, 1)
+offset_left = -20.0
+offset_top = -30.0
+offset_right = 20.0
+offset_bottom = -24.0
+theme_override_styles/background = SubResource("healthbar_bg")
+theme_override_styles/fill = SubResource("healthbar_fill")
 max_value = 100.0
 value = 100.0
 show_percentage = false
+fill_mode = 0
 
 [node name="HitParticles" type="GPUParticles2D" parent="."]
 emitting = false
