@@ -54,15 +54,15 @@ theme_override_constants/separation = 4
 
 [node name="MoneyLabel" type="Label" parent="TopLeftPanel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
-theme_override_font_sizes/font_size = 18
-text = "♦ $200"
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "💰 $200"
 
 [node name="LivesLabel" type="Label" parent="TopLeftPanel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
-theme_override_font_sizes/font_size = 18
-text = "♥ 20"
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 20
+text = "❤️ 20"
 
 [node name="WavePanel" type="PanelContainer" parent="."]
 anchors_preset = 5
@@ -165,4 +165,5 @@ text = "Restart"
 
 [connection signal="pressed" from="TowerButtons/Tower1Button" to="." method="_on_tower1_button_pressed"]
 [connection signal="pressed" from="TowerButtons/Tower2Button" to="." method="_on_tower2_button_pressed"]
+[connection signal="pressed" from="TowerButtons/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="GameOverPanel/VBox/RestartButton" to="." method="_on_restart_button_pressed"]
