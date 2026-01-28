@@ -139,19 +139,112 @@ try {
 } catch {
     Write-Host "ERROR: Still cannot access website: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host ""
-    Write-Host "Checking IIS event logs..." -ForegroundColor Yellow
-    $events = Get-WinEvent -LogName "Microsoft-IIS-Configuration/Operational" -MaxEvents 5 -ErrorAction SilentlyContinue
-    if ($events) {
-        Write-Host "Recent IIS events:" -ForegroundColor White
-        $events | ForEach-Object {
-            Write-Host "  [$($_.TimeCreated)] $($_.Message)" -ForegroundColor White
+
+    # Deep diagnostic
+    Write-Host "Running deep diagnostic..." -ForegroundColor Yellow
+    Write-Host ""
+
+    # Check Application Pool
+    Write-Host "Checking Application Pool..." -ForegroundColor Cyan
+    $website = Get-Website -Name "game-gallery" -ErrorAction SilentlyContinue
+    if ($website) {
+        $appPoolName = $website.applicationPool
+        Write-Host "  App Pool: $appPoolName" -ForegroundColor White
+        $appPool = Get-WebAppPoolState -Name $appPoolName -ErrorAction SilentlyContinue
+        if ($appPool) {
+            Write-Host "  State: $($appPool.Value)" -ForegroundColor White
+            if ($appPool.Value -ne 'Started') {
+                Write-Host "  ! Restarting Application Pool..." -ForegroundColor Yellow
+                Restart-WebAppPool -Name $appPoolName
+                Start-Sleep -Seconds 3
+            }
         }
     }
+
+    # Show web.config content
     Write-Host ""
-    Write-Host "Please check:" -ForegroundColor Yellow
-    Write-Host "1. File permissions on $iisPath" -ForegroundColor White
-    Write-Host "2. IIS Application Pool status" -ForegroundColor White
-    Write-Host "3. Windows Event Viewer > Windows Logs > Application" -ForegroundColor White
+    Write-Host "Current web.config content:" -ForegroundColor Cyan
+    $webConfigPath = Join-Path $iisPath "web.config"
+    if (Test-Path $webConfigPath) {
+        Get-Content $webConfigPath | Write-Host -ForegroundColor Gray
+    }
+
+    # Check recent IIS logs
+    Write-Host ""
+    Write-Host "Recent IIS log entries:" -ForegroundColor Cyan
+    $iisLogPath = "C:\inetpub\logs\LogFiles"
+    if (Test-Path $iisLogPath) {
+        $latestLog = Get-ChildItem -Path $iisLogPath -Recurse -Filter "*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($latestLog) {
+            Write-Host "Log file: $($latestLog.FullName)" -ForegroundColor Gray
+            Get-Content $latestLog.FullName -Tail 3 | Write-Host -ForegroundColor Gray
+        }
+    }
+
+    # Check Windows Event Log
+    Write-Host ""
+    Write-Host "Recent Application errors:" -ForegroundColor Cyan
+    $events = Get-WinEvent -FilterHashtable @{
+        LogName = 'Application'
+        Level = 2
+    } -MaxEvents 3 -ErrorAction SilentlyContinue
+
+    if ($events) {
+        foreach ($event in $events) {
+            if ($event.Message -match "IIS|W3SVC") {
+                Write-Host "  [$($event.TimeCreated)] $($event.ProviderName)" -ForegroundColor Yellow
+                Write-Host "  $($event.Message)" -ForegroundColor Gray
+                Write-Host ""
+            }
+        }
+    }
+
+    # Try simpler web.config
+    Write-Host ""
+    Write-Host "Trying minimal web.config (without URL rewrite)..." -ForegroundColor Yellow
+    $minimalConfig = @'
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <staticContent>
+            <remove fileExtension=".json" />
+            <mimeMap fileExtension=".json" mimeType="application/json" />
+        </staticContent>
+        <httpErrors errorMode="Detailed" />
+    </system.webServer>
+</configuration>
+'@
+    $minimalConfig | Out-File -FilePath $webConfigPath -Encoding UTF8 -Force
+    Write-Host "Minimal web.config applied" -ForegroundColor Cyan
+
+    # Restart and test
+    Write-Host "Restarting website..." -ForegroundColor Cyan
+    Restart-WebItem "IIS:\Sites\game-gallery" -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2
+
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost" -TimeoutSec 5 -UseBasicParsing
+        Write-Host "SUCCESS! Minimal config works (Status: $($response.StatusCode))" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "The issue was with the URL Rewrite configuration." -ForegroundColor Yellow
+        Write-Host "Client-side routing will not work, but the site is accessible." -ForegroundColor Yellow
+    } catch {
+        Write-Host "ERROR: Even minimal config fails: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Manual steps to try:" -ForegroundColor Yellow
+        Write-Host "1. Restart IIS completely:" -ForegroundColor White
+        Write-Host "   iisreset" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "2. Check if files exist:" -ForegroundColor White
+        Write-Host "   Get-ChildItem $iisPath" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "3. Temporarily remove web.config:" -ForegroundColor White
+        Write-Host "   Rename-Item '$webConfigPath' '$webConfigPath.disabled'" -ForegroundColor Cyan
+        Write-Host "   Then test: http://localhost" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "4. Check Application Pool .NET version:" -ForegroundColor White
+        Write-Host "   Should be 'No Managed Code' for static sites" -ForegroundColor Cyan
+    }
 }
 
 Write-Host ""
