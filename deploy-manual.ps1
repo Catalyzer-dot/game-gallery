@@ -65,7 +65,8 @@ try {
     npm install
     Write-Host "OK Dependencies installed" -ForegroundColor Green
 
-    Write-Host "Building project..." -ForegroundColor Cyan
+    Write-Host "Building project for IIS (base path: /)..." -ForegroundColor Cyan
+    $env:VITE_BASE_PATH = "/"
     npm run build
     Write-Host "OK Build completed" -ForegroundColor Green
 } catch {
@@ -104,6 +105,38 @@ try {
     Write-Host "Copying files to IIS directory..." -ForegroundColor Cyan
     Copy-Item -Path "$distPath\*" -Destination $IISPath -Recurse -Force
     Write-Host "OK Files deployed to: $IISPath" -ForegroundColor Green
+
+    # Create web.config for SPA routing
+    Write-Host "Creating web.config for SPA routing..." -ForegroundColor Cyan
+    $webConfigContent = @'
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <rewrite>
+            <rules>
+                <rule name="React Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                        <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                        <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/" />
+                </rule>
+            </rules>
+        </rewrite>
+        <staticContent>
+            <mimeMap fileExtension=".json" mimeType="application/json" />
+            <mimeMap fileExtension=".js" mimeType="application/javascript" />
+        </staticContent>
+        <httpErrors errorMode="Custom" existingResponse="Replace">
+            <remove statusCode="404" />
+            <error statusCode="404" path="/" responseMode="ExecuteURL" />
+        </httpErrors>
+    </system.webServer>
+</configuration>
+'@
+    $webConfigContent | Out-File -FilePath "$IISPath\web.config" -Encoding UTF8 -Force
+    Write-Host "OK web.config created" -ForegroundColor Green
 
 } catch {
     Write-Host "ERROR: Deployment failed: $($_.Exception.Message)" -ForegroundColor Red
