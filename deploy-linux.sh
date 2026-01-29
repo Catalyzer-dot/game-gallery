@@ -149,6 +149,22 @@ else
     log_warn "Failed to update nginx.conf"
 fi
 
+log_info "Updating deploy-linux.sh..."
+if curl -fsSL -o deploy-linux.sh.new https://raw.githubusercontent.com/yangzirui-lab/game-gallery/main/deploy-linux.sh; then
+    # 比较文件是否有变化
+    if ! cmp -s deploy-linux.sh deploy-linux.sh.new; then
+        mv deploy-linux.sh.new deploy-linux.sh
+        chmod +x deploy-linux.sh
+        log_info "deploy-linux.sh updated (script will continue with old version)"
+    else
+        rm deploy-linux.sh.new
+        log_info "deploy-linux.sh is already up to date"
+    fi
+else
+    log_warn "Failed to update deploy-linux.sh"
+    rm -f deploy-linux.sh.new
+fi
+
 # 检查.env文件
 if [ ! -f "$DEPLOY_DIR/backend/.env" ]; then
     log_warn "Backend .env file not found, please create it before starting services"

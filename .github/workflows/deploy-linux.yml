@@ -106,7 +106,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          source: "docker-compose.yml,nginx.conf"
+          source: "docker-compose.yml,nginx.conf,deploy-linux.sh"
           target: "/tmp/game-gallery-config/"
           timeout: 5m
           command_timeout: 5m
@@ -157,6 +157,12 @@ jobs:
               if [ -f /tmp/game-gallery-config/nginx.conf ]; then
                 cp /tmp/game-gallery-config/nginx.conf /opt/game-gallery/
                 echo "✅ nginx.conf updated"
+              fi
+
+              if [ -f /tmp/game-gallery-config/deploy-linux.sh ]; then
+                cp /tmp/game-gallery-config/deploy-linux.sh /opt/game-gallery/
+                chmod +x /opt/game-gallery/deploy-linux.sh
+                echo "✅ deploy-linux.sh updated"
               fi
 
               rm -rf /tmp/game-gallery-config
