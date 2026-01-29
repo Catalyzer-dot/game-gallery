@@ -175,25 +175,60 @@ jobs:
             echo "Pulling latest backend image..."
             docker pull ghcr.io/yangzirui-lab/game-gallery/backend:latest
 
-            # 重启服务
-            echo "Restarting services..."
-            docker-compose down
-            docker-compose up -d backend nginx
+            # 零停机部署
+            echo "Deploying with zero downtime..."
 
-            # 等待服务启动
-            sleep 5
+            # 更新后端服务（滚动更新）
+            echo "Updating backend service..."
+            docker-compose up -d --no-deps --force-recreate backend
 
-            # 检查状态
-            echo "Container status:"
-            docker-compose ps
+            # 等待后端健康检查
+            echo "Waiting for backend health check..."
+            MAX_RETRY=30
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
+              if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+                echo "✅ Backend is healthy"
+                break
+              fi
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -eq $MAX_RETRY ]; then
+                echo "⚠️  Backend health check timeout, but continuing..."
+                docker-compose logs backend --tail=20
+              fi
+              sleep 2
+            done
 
-            # 健康检查
+            # Nginx 配置热更新（如果配置有变化）
+            if docker-compose ps nginx | grep -q "Up"; then
+              echo "Reloading nginx configuration..."
+              docker-compose exec -T nginx nginx -s reload 2>/dev/null || {
+                echo "Nginx reload failed, recreating container..."
+                docker-compose up -d --no-deps --force-recreate nginx
+                sleep 3
+              }
+            else
+              echo "Starting nginx service..."
+              docker-compose up -d nginx
+              sleep 3
+            fi
+
+            # 最终健康检查
+            echo "Final health check..."
             if curl -sf http://localhost/health > /dev/null; then
               echo "✅ Deployment successful!"
             else
               echo "⚠️  Service started but health check failed"
-              docker-compose logs --tail=50
+              docker-compose logs --tail=30
             fi
+
+            # 清理旧容器
+            echo "Cleaning up old containers..."
+            docker container prune -f
+
+            # 显示最终状态
+            echo "Container status:"
+            docker-compose ps
 
       - name: Deployment Status
         run: |

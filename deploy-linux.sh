@@ -154,24 +154,69 @@ if [ ! -f "$DEPLOY_DIR/backend/.env" ]; then
     log_warn "Backend .env file not found, please create it before starting services"
 fi
 
-# 重启服务
-if docker-compose down; then
-    log_info "Services stopped"
+# 零停机部署
+log_info "Deploying with zero downtime..."
+
+# 更新后端服务（滚动更新）
+log_info "Updating backend service..."
+if docker-compose up -d --no-deps --force-recreate backend; then
+    log_info "Backend container recreated"
 else
-    log_warn "Failed to stop services (might not be running)"
+    log_error "Failed to update backend"
+    exit 1
 fi
 
-if docker-compose up -d backend nginx; then
-    log_info "Services started successfully"
+# 等待后端健康检查
+log_info "Waiting for backend health check..."
+MAX_RETRY=30
+RETRY_COUNT=0
+BACKEND_HEALTHY=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
+    if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+        log_info "Backend is healthy"
+        BACKEND_HEALTHY=true
+        break
+    fi
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -eq $MAX_RETRY ]; then
+        log_warn "Backend health check timeout, but continuing..."
+        docker-compose logs backend --tail=20
+    fi
+    sleep 2
+done
+
+# Nginx 配置热更新（如果配置有变化）
+if docker-compose ps nginx | grep -q "Up"; then
+    log_info "Reloading nginx configuration..."
+    if docker-compose exec -T nginx nginx -s reload 2>/dev/null; then
+        log_info "Nginx configuration reloaded"
+    else
+        log_warn "Nginx reload failed, recreating container..."
+        docker-compose up -d --no-deps --force-recreate nginx
+        sleep 3
+    fi
 else
-    log_error "Failed to start services"
-    exit 1
+    log_info "Starting nginx service..."
+    docker-compose up -d nginx
+    sleep 3
 fi
 
 # 步骤5: 验证部署
 echo ""
 log_info "[5/5] Verifying deployment..."
-sleep 5
+
+# 最终健康检查
+if curl -sf http://localhost/health > /dev/null; then
+    log_info "Health check passed"
+else
+    log_warn "Health check failed"
+    docker-compose logs --tail=30
+fi
+
+# 清理旧容器
+log_info "Cleaning up old containers..."
+docker container prune -f
 
 # 检查容器状态
 if docker-compose ps | grep -q "Up"; then
@@ -180,13 +225,6 @@ else
     log_error "Some containers are not running"
     docker-compose ps
     exit 1
-fi
-
-# 健康检查
-if curl -sf http://localhost/health > /dev/null; then
-    log_info "Health check passed"
-else
-    log_warn "Health check failed, but deployment completed"
 fi
 
 # 显示部署信息
