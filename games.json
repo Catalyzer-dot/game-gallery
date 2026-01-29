@@ -1,6 +1,19 @@
 {
   "games": [
     {
+      "id": "1769651690844",
+      "name": "黑神话：悟空",
+      "status": "queueing",
+      "addedAt": "2026-01-29T01:54:50.844Z",
+      "lastUpdated": "2026-01-29T01:54:50.844Z",
+      "steamUrl": "https://store.steampowered.com/app/2358720",
+      "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/801e841a7975fc29967e30cf799084f4b2987b77/capsule_231x87_schinese.jpg?t=1760601605",
+      "positivePercentage": 97,
+      "totalReviews": 1189526,
+      "releaseDate": "2024 年 8 月 19 日",
+      "isEarlyAccess": false
+    },
+    {
       "id": "1769603561123",
       "name": "莱恩岛生存指南",
       "status": "queueing",
