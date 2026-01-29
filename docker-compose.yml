@@ -1,24 +1,8 @@
-version: '3.8'
+# Docker Compose 配置文件
+# 注意：生产环境不再使用此文件，前端静态文件由 degenerates-backend 的 nginx 服务
 
 services:
-  # Go后端服务
-  backend:
-    image: ghcr.io/yangzirui-lab/game-gallery/backend:latest
-    container_name: game-gallery-backend
-    ports:
-      - '8080:8080'
-    env_file:
-      - ./backend/.env
-    restart: unless-stopped
-    networks:
-      - game-gallery-network
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # 前端服务（开发模式）
+  # 前端服务（本地开发模式）
   frontend-dev:
     build:
       context: ./web
@@ -27,50 +11,19 @@ services:
     ports:
       - '5173:5173'
     environment:
-      - VITE_API_URL=http://localhost:8080
+      - VITE_API_URL=http://localhost:8080/api
     volumes:
       - ./web:/app
       - /app/node_modules
     restart: unless-stopped
-    networks:
-      - game-gallery-network
-    depends_on:
-      - backend
-    profiles:
-      - dev
 
-  # 前端服务（生产模式 - 静态文件）
-  frontend:
-    image: ghcr.io/yangzirui-lab/game-gallery/frontend:latest
-    container_name: game-gallery-frontend
-    restart: unless-stopped
-    networks:
-      - game-gallery-network
-    profiles:
-      - prod
+# 本地开发说明:
+# 1. 运行前端开发服务器: docker-compose up frontend-dev
+# 2. 确保 degenerates-backend 在本地运行并监听 8080 端口
+# 3. 前端访问: http://localhost:5173
+# 4. API 访问: http://localhost:8080/api
 
-  # Nginx反向代理
-  nginx:
-    image: nginx:alpine
-    container_name: game-gallery-nginx
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-      - ./web/dist:/usr/share/nginx/html:ro
-    restart: unless-stopped
-    networks:
-      - game-gallery-network
-    depends_on:
-      - backend
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-networks:
-  game-gallery-network:
-    driver: bridge
+# 生产环境说明:
+# 前端静态文件部署到 /opt/game-gallery/web/dist
+# 由 degenerates-backend 的 nginx 统一服务
+# URL: https://degenerates.site
