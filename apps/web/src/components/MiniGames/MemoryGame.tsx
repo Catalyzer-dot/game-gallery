@@ -57,9 +57,7 @@ export const MemoryGame: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setTimeout(() => {
           setCards((prevCards) =>
             prevCards.map((card) =>
-              card.id === first || card.id === second
-                ? { ...card, isMatched: true }
-                : card
+              card.id === first || card.id === second ? { ...card, isMatched: true } : card
             )
           )
           setMatchedPairs((prev) => prev + 1)
@@ -71,9 +69,7 @@ export const MemoryGame: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setTimeout(() => {
           setCards((prevCards) =>
             prevCards.map((card) =>
-              card.id === first || card.id === second
-                ? { ...card, isFlipped: false }
-                : card
+              card.id === first || card.id === second ? { ...card, isFlipped: false } : card
             )
           )
           setFlippedCards([])
@@ -89,9 +85,7 @@ export const MemoryGame: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const card = cards[id]
     if (card.isFlipped || card.isMatched) return
 
-    setCards((prevCards) =>
-      prevCards.map((c) => (c.id === id ? { ...c, isFlipped: true } : c))
-    )
+    setCards((prevCards) => prevCards.map((c) => (c.id === id ? { ...c, isFlipped: true } : c)))
 
     setFlippedCards((prev) => {
       const newFlipped = [...prev, id]
@@ -114,7 +108,9 @@ export const MemoryGame: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         <div className={styles.scoreBoard}>
           <div className={styles.score}>步数: {moves}</div>
-          <div className={styles.score}>配对: {matchedPairs}/{EMOJIS.length}</div>
+          <div className={styles.score}>
+            配对: {matchedPairs}/{EMOJIS.length}
+          </div>
           <button onClick={initializeGame} className={styles.restartBtn}>
             重新开始
           </button>

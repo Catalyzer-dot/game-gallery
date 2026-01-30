@@ -140,7 +140,10 @@ const LEVELS: Level[] = [
     waves: [
       [{ type: 'basic', count: 10, interval: 700 }],
       [{ type: 'fast', count: 8, interval: 600 }],
-      [{ type: 'basic', count: 5, interval: 500 }, { type: 'fast', count: 5, interval: 500 }],
+      [
+        { type: 'basic', count: 5, interval: 500 },
+        { type: 'fast', count: 5, interval: 500 },
+      ],
       [{ type: 'tank', count: 3, interval: 1500 }],
     ],
   },
@@ -193,7 +196,8 @@ export const TowerDefense: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       if (!level?.path) return 'empty'
 
       const isStart = level.path[0].x === x && level.path[0].y === y
-      const isEnd = level.path[level.path.length - 1].x === x && level.path[level.path.length - 1].y === y
+      const isEnd =
+        level.path[level.path.length - 1].x === x && level.path[level.path.length - 1].y === y
       const isPath = level.path.some((p) => p.x === x && p.y === y)
       const hasTower = towers.some((t) => t.position.x === x && t.position.y === y)
 
@@ -423,7 +427,8 @@ export const TowerDefense: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       for (let x = 0; x < GRID_WIDTH; x++) {
         const cellType = getCellType(x, y)
         const isHovered = hoveredCell?.x === x && hoveredCell?.y === y
-        const canBuild = selectedTowerType && cellType === 'empty' && gold >= TOWER_TYPES[selectedTowerType].cost
+        const canBuild =
+          selectedTowerType && cellType === 'empty' && gold >= TOWER_TYPES[selectedTowerType].cost
 
         cells.push(
           <div

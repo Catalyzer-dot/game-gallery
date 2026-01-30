@@ -5,7 +5,7 @@ services:
   # 前端服务（本地开发模式）
   frontend-dev:
     build:
-      context: ./web
+      context: ./apps/web
       dockerfile: Dockerfile.dev
     container_name: game-gallery-frontend-dev
     ports:
@@ -13,7 +13,7 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8080/api
     volumes:
-      - ./web:/app
+      - ./apps/web:/app
       - /app/node_modules
     restart: unless-stopped
 

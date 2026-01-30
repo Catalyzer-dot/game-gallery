@@ -17,7 +17,12 @@ interface SearchBarProps {
   onResultClick?: (result: SearchResult) => void
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, value, results = [], onResultClick }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({
+  onSearch,
+  value,
+  results = [],
+  onResultClick,
+}) => {
   const [showResults, setShowResults] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -69,7 +74,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, value, results =
                     <span className={styles.badge}>Steam</span>
                     {result.status && (
                       <span className={`${styles.statusBadge} ${styles[result.status]}`}>
-                        {result.status === 'playing' ? 'Playing' : result.status === 'queueing' ? 'Queueing' : 'Completion'}
+                        {result.status === 'playing'
+                          ? 'Playing'
+                          : result.status === 'queueing'
+                            ? 'Queueing'
+                            : 'Completion'}
                       </span>
                     )}
                   </>

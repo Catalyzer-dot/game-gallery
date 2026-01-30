@@ -161,9 +161,7 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                   </div>
                   <div className={styles.steamLoginContent}>
                     <h4 className={styles.steamLoginTitle}>连接 Steam 账号</h4>
-                    <p className={styles.steamLoginDesc}>
-                      登录后可同步 Steam 游戏库和个人资料信息
-                    </p>
+                    <p className={styles.steamLoginDesc}>登录后可同步 Steam 游戏库和个人资料信息</p>
                   </div>
                   <button onClick={handleSteamLogin} className={styles.btnSteamLogin}>
                     <svg
