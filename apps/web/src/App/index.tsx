@@ -1,10 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import classNames from 'classnames'
 import { GameItem } from '../components/GameItem'
 import { SearchBar, type SearchResult } from '../components/SearchBar'
-import { SteamSearch } from '../components/SteamSearch'
-import { Settings } from '../components/Settings'
-import { MiniGames } from '../components/MiniGames'
 import type { Game, GameStatus } from '../types'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SettingsIcon, Loader2, Play, Bookmark, CheckCircle, Library, Sparkles } from 'lucide-react'
@@ -19,6 +16,17 @@ import { useHighlight } from '../hooks/useHighlight'
 import { useGamesGrouping } from '../hooks/useGamesGrouping'
 import { useGameSearch } from '../hooks/useGameSearch'
 import { useGameRefresh } from '../hooks/useGameRefresh'
+
+// 懒加载重组件（命名导出转换为默认导出）
+const MiniGames = lazy(() =>
+  import('../components/MiniGames').then((module) => ({ default: module.MiniGames }))
+)
+const SteamSearch = lazy(() =>
+  import('../components/SteamSearch').then((module) => ({ default: module.SteamSearch }))
+)
+const Settings = lazy(() =>
+  import('../components/Settings').then((module) => ({ default: module.Settings }))
+)
 
 function App() {
   // 状态管理
@@ -378,7 +386,16 @@ function App() {
 
       <main>
         {mainTab === 'playground' ? (
-          <MiniGames onClose={() => {}} />
+          <Suspense
+            fallback={
+              <div className={styles.loadingContainer}>
+                <Loader2 className={`${styles.loaderIcon} animate-spin`} size={32} />
+                <div className={styles.mt1}>加载中...</div>
+              </div>
+            }
+          >
+            <MiniGames onClose={() => {}} />
+          </Suspense>
         ) : isLoading ? (
           <div className={styles.loadingContainer}>
             <Loader2 className={`${styles.loaderIcon} animate-spin`} size={32} />
@@ -469,10 +486,19 @@ function App() {
       </main>
 
       {showSteamSearch && (
-        <SteamSearch onAddGame={handleAddGameFromSteam} onClose={() => setShowSteamSearch(false)} />
+        <Suspense fallback={<div />}>
+          <SteamSearch
+            onAddGame={handleAddGameFromSteam}
+            onClose={() => setShowSteamSearch(false)}
+          />
+        </Suspense>
       )}
 
-      {showSettings && <Settings onClose={handleSettingsClose} />}
+      {showSettings && (
+        <Suspense fallback={<div />}>
+          <Settings onClose={handleSettingsClose} />
+        </Suspense>
+      )}
 
       <AnimatePresence>
         {toast && (
