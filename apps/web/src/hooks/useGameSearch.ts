@@ -9,10 +9,6 @@ import type { SearchResult } from '../components/SearchBar'
  * - 搜索 Steam 游戏（按名称）
  * - 搜索小游戏（按名称和描述）
  * - 返回统一的搜索结果格式
- *
- * @param {Game[]} games - Steam 游戏列表
- * @param {string} searchTerm - 搜索关键词
- * @returns {SearchResult[]} 搜索结果数组
  */
 export function useGameSearch(games: Game[], searchTerm: string): SearchResult[] {
   return useMemo(() => {

@@ -6,10 +6,11 @@ import { useState, useEffect } from 'react'
  * 功能：
  * - 设置高亮的游戏 ID
  * - 3 秒后自动清除高亮状态
- *
- * @returns {Object} { highlightId, setHighlightId }
  */
-export function useHighlight() {
+export function useHighlight(): {
+  highlightId: string | null
+  setHighlightId: (id: string | null) => void
+} {
   const [highlightId, setHighlightId] = useState<string | null>(null)
 
   useEffect(() => {

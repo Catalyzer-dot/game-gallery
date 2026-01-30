@@ -9,11 +9,12 @@ import type { Game, GameStatus } from '../types'
  * - 每组内按置顶状态和最后更新时间排序
  *   - 置顶的游戏排在前面
  *   - 相同置顶状态的游戏按最后更新时间倒序排列
- *
- * @param {Game[]} games - 游戏列表
- * @returns {Object} 分组后的游戏对象 { playing: Game[], queueing: Game[], completion: Game[] }
  */
-export function useGamesGrouping(games: Game[]) {
+export function useGamesGrouping(games: Game[]): {
+  playing: Game[]
+  queueing: Game[]
+  completion: Game[]
+} {
   return useMemo(() => {
     const sortByPinnedAndDate = (a: Game, b: Game) => {
       // 置顶的游戏排在前面

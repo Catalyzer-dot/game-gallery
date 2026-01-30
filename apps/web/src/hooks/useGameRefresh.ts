@@ -12,11 +12,8 @@ import { githubService } from '../services/github'
  * - 从 Steam API 获取游戏的好评率、发布日期、抢先体验状态
  * - 更新后统一保存到 GitHub（使用并发安全的 concurrentUpdateGames）
  * - 防止 API 限流（每个游戏之间延迟 1 秒）
- *
- * @param {Game[]} games - 游戏列表
- * @param {Function} onGamesUpdate - 更新游戏列表的回调函数
  */
-export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void) {
+export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): void {
   // 使用 ref 保存最新的 games 状态，避免闭包陷阱
   const gamesRef = useRef(games)
 

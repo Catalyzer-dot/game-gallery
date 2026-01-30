@@ -6,10 +6,11 @@ import { useState, useEffect } from 'react'
  * 功能：
  * - 显示提示消息
  * - 3 秒后自动清除
- *
- * @returns {Object} { toast, showToast }
  */
-export function useToast() {
+export function useToast(): {
+  toast: string | null
+  showToast: (message: string) => void
+} {
   const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
