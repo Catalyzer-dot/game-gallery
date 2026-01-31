@@ -22,6 +22,20 @@
   gap: 1.5rem;
   max-width: 90vw;
   max-height: 90vh;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    gap: 1.25rem;
+    max-width: 95vw;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    gap: 1rem;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+  }
 }
 
 .header {
@@ -34,6 +48,14 @@
     color: #776e65;
     font-size: 1.5rem;
     font-weight: 700;
+
+    @media (max-width: 768px) {
+      font-size: 1.35rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.2rem;
+    }
   }
 }
 
@@ -58,6 +80,16 @@
   align-items: center;
   max-width: 424px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
 }
 
 .score {
@@ -72,6 +104,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
+
+  @media (max-width: 768px) {
+    padding: 0.65rem 0.45rem;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.85rem;
+  }
 }
 
 .restartBtn {
@@ -87,6 +129,17 @@
   &:hover {
     background: #9f8a76;
   }
+
+  @media (max-width: 768px) {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-column: 1 / -1;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
 }
 
 .board {
@@ -100,6 +153,20 @@
   border-radius: 8px;
   width: 424px;
   height: 424px;
+
+  @media (max-width: 768px) {
+    width: 340px;
+    height: 340px;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  @media (max-width: 480px) {
+    width: min(calc(100vw - 2rem), 340px);
+    height: min(calc(100vw - 2rem), 340px);
+    gap: 8px;
+    padding: 8px;
+  }
 }
 
 .tile {
@@ -124,6 +191,18 @@
 
   &.merged {
     animation: tileMerge 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    width: 75px;
+    height: 75px;
+    font-size: 1.7rem;
+  }
+
+  @media (max-width: 480px) {
+    width: calc((min(100vw - 2rem, 340px) - 40px) / 4);
+    height: calc((min(100vw - 2rem, 340px) - 40px) / 4);
+    font-size: 1.5rem;
   }
 }
 
@@ -213,5 +292,13 @@
     margin: 0;
     color: #776e65;
     font-size: 0.9rem;
+
+    @media (max-width: 768px) {
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.8rem;
+    }
   }
 }
