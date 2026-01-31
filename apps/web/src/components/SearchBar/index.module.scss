@@ -31,6 +31,29 @@
     &::placeholder {
       color: var(--text-secondary);
     }
+
+    @media (max-width: 768px) {
+      width: 200px;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.875rem 0.45rem 2.25rem;
+
+      &:focus {
+        width: 240px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+      max-width: 100%;
+
+      &:focus {
+        width: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex: 1;
   }
 
   .searchResults {
@@ -47,6 +70,17 @@
     overflow-y: auto;
     z-index: 1000;
     backdrop-filter: blur(10px);
+
+    @media (max-width: 768px) {
+      max-height: 300px;
+    }
+
+    @media (max-width: 480px) {
+      position: fixed;
+      left: 0.75rem;
+      right: 0.75rem;
+      max-height: 50vh;
+    }
   }
 
   .searchResultItem {
@@ -62,6 +96,10 @@
     &:hover {
       background: rgba(255, 255, 255, 0.05);
     }
+
+    @media (max-width: 480px) {
+      padding: 0.625rem 0.875rem;
+    }
   }
 
   .resultName {
@@ -69,6 +107,10 @@
     font-size: 0.9rem;
     font-weight: 500;
     margin-bottom: 0.25rem;
+
+    @media (max-width: 480px) {
+      font-size: 0.85rem;
+    }
   }
 
   .resultMeta {
@@ -84,6 +126,11 @@
     border-radius: 4px;
     font-size: 0.75rem;
     color: var(--text-secondary);
+
+    @media (max-width: 480px) {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+    }
   }
 
   .statusBadge {
@@ -106,6 +153,11 @@
     &.completion {
       background: rgba(56, 189, 248, 0.2);
       color: #38bdf8;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
     }
   }
 }

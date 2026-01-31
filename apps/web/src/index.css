@@ -29,6 +29,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* 移动端触摸优化 */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -36,6 +38,8 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  /* 移动端滚动优化 */
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
@@ -45,8 +49,45 @@ body {
   padding: 2rem;
 }
 
+/* 移动端适配 */
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 0.75rem;
+  }
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* 移动端按钮触摸优化 */
+@media (max-width: 768px) {
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 改善滚动性能 */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 防止双击缩放 */
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
 }
 
 @keyframes spin {

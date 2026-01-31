@@ -121,6 +121,10 @@
     overflow: hidden;
     position: relative;
     width: 100%;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
   }
 
   .gameCoverContainer {
@@ -168,6 +172,25 @@
       color: rgba(255, 255, 255, 0.3);
       font-weight: bold;
     }
+
+    @media (max-width: 768px) {
+      width: 240px;
+      height: 93px;
+
+      .gameCoverPlaceholder {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+      height: 120px;
+      border-radius: 1rem 1rem 0 0;
+
+      .gameCoverPlaceholder {
+        font-size: 2.5rem;
+      }
+    }
   }
 
   .gameContent {
@@ -178,6 +201,15 @@
     justify-content: center;
     min-width: 0;
     gap: 0.75rem;
+
+    @media (max-width: 768px) {
+      padding: 0.875rem 1rem;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
   }
 
   .gameHeader {
@@ -185,6 +217,16 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
   }
 
   .gameTitleArea {
@@ -215,6 +257,14 @@
       color: var(--accent-color) !important;
       text-decoration: underline !important;
     }
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+    }
   }
 
   .earlyAccessBadge {
@@ -238,6 +288,16 @@
     text-shadow:
       0 2px 4px rgba(0, 0, 0, 0.6),
       0 0 12px rgba(0, 0, 0, 0.5);
+
+    @media (max-width: 768px) {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.65rem;
+    }
   }
 
   .gameMeta {
@@ -247,6 +307,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+      margin-top: 0.375rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.75rem;
+    }
   }
 
   .metaRow {
@@ -321,6 +390,10 @@
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      width: 100%;
+    }
   }
 
   .gameStatusBtn {
@@ -389,6 +462,19 @@
 
     .spinner {
       animation: spin 1s linear infinite;
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.45rem 0.875rem;
+      font-size: 0.8rem;
+      min-width: 100px;
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      min-width: unset;
     }
   }
 
