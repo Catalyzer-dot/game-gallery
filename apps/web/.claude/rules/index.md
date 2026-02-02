@@ -12,7 +12,8 @@
 ├── README.md                 # 规范说明文档
 ├── codeStyles/              # 代码风格规范
 │   ├── 01-happy-path.md     # Happy Path 模式
-│   └── 02-unified-exports.md # 统一末尾导出
+│   ├── 02-unified-exports.md # 统一末尾导出
+│   └── 03-no-any.md         # 禁止使用 any 类型
 └── services/                # 服务层规范
     ├── 01-api-type-and-error-handling.md  # API 类型定义与错误处理
     └── 02-api-url-management.md           # API 地址统一管理
@@ -24,10 +25,11 @@
 
 ### 代码风格规范 (codeStyles/)
 
-| 编号 | 规范名称        | 文件路径                                                               | 说明                                                         |
-| ---- | --------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 01   | Happy Path 模式 | [codeStyles/01-happy-path.md](./codeStyles/01-happy-path.md)           | 使用 Happy Path 模式编写条件判断，优先处理错误情况，减少嵌套 |
-| 02   | 统一末尾导出    | [codeStyles/02-unified-exports.md](./codeStyles/02-unified-exports.md) | 所有导出统一在文件末尾，适用于所有 .ts 和 .tsx 文件          |
+| 编号 | 规范名称          | 文件路径                                                               | 说明                                                         |
+| ---- | ----------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 01   | Happy Path 模式   | [codeStyles/01-happy-path.md](./codeStyles/01-happy-path.md)           | 使用 Happy Path 模式编写条件判断，优先处理错误情况，减少嵌套 |
+| 02   | 统一末尾导出      | [codeStyles/02-unified-exports.md](./codeStyles/02-unified-exports.md) | 所有导出统一在文件末尾，适用于所有 .ts 和 .tsx 文件          |
+| 03   | 禁止使用 any 类型 | [codeStyles/03-no-any.md](./codeStyles/03-no-any.md)                   | 严格禁止使用 any，使用 unknown、泛型或具体类型代替           |
 
 ### 服务层规范 (services/)
 
@@ -42,7 +44,7 @@
 
 ### 编写新功能
 
-- 代码风格 → `codeStyles/01-happy-path.md`, `codeStyles/02-unified-exports.md`
+- 代码风格 → `codeStyles/01-happy-path.md`, `codeStyles/02-unified-exports.md`, `codeStyles/03-no-any.md`
 - API 开发 → `services/01-api-type-and-error-handling.md`, `services/02-api-url-management.md`
 
 ### 重构代码
@@ -50,13 +52,14 @@
 - 条件判断重构 → `codeStyles/01-happy-path.md`
 - 导出重构 → `codeStyles/02-unified-exports.md`
 - 错误处理重构 → `services/01-api-type-and-error-handling.md`
+- 类型安全重构 → `codeStyles/03-no-any.md`
 
 ### 按文件类型
 
-- **Service 文件** (.ts) → `services/01-*.md`, `services/02-*.md`
-- **React 组件** (.tsx) → `codeStyles/01-*.md`, `codeStyles/02-*.md`
-- **Hooks** (.ts) → `codeStyles/02-*.md`
-- **类型定义** (.ts) → `codeStyles/02-*.md`
+- **Service 文件** (.ts) → `services/01-*.md`, `services/02-*.md`, `codeStyles/03-*.md`
+- **React 组件** (.tsx) → `codeStyles/01-*.md`, `codeStyles/02-*.md`, `codeStyles/03-*.md`
+- **Hooks** (.ts) → `codeStyles/02-*.md`, `codeStyles/03-*.md`
+- **类型定义** (.ts) → `codeStyles/02-*.md`, `codeStyles/03-*.md`
 
 ---
 
@@ -70,5 +73,6 @@
 
 ## 🔄 更新日志
 
+- 2026-02-02: 添加规则 3 - 禁止使用 any 类型
 - 2026-02-02: 创建规范索引文件
 - 2026-02-02: 重构目录结构，拆分规则为独立文件
