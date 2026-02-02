@@ -13,7 +13,7 @@ import { githubService } from '../services/github'
  * - 更新后统一保存到 GitHub（使用并发安全的 concurrentUpdateGames）
  * - 防止 API 限流（每个游戏之间延迟 1 秒）
  */
-export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): void {
+function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): void {
   // 使用 ref 保存最新的 games 状态，避免闭包陷阱
   const gamesRef = useRef(games)
 
@@ -70,9 +70,9 @@ export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => 
             game.isEarlyAccess === true
 
           const [reviews, releaseInfo] = await Promise.all([
-            steamService.getGameReviews(appId),
+            steamService.getGameReviews({ appId }),
             needsReleaseInfo
-              ? steamService.getGameReleaseDate(appId)
+              ? steamService.getGameReleaseDate({ appId })
               : Promise.resolve({
                   releaseDate: game.releaseDate,
                   comingSoon: game.comingSoon,
@@ -80,6 +80,12 @@ export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => 
                   genres: null,
                 }),
           ])
+
+          // 如果任何一个请求失败，跳过此游戏
+          if (!reviews || !releaseInfo) {
+            console.warn(`Failed to fetch info for game ${appId}`)
+            continue
+          }
 
           // 如果获取到了数据，或者数据有变化时更新
           const needsUpdate =
@@ -137,36 +143,40 @@ export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => 
       console.log(prioritizeMissing ? '游戏信息刷新完成（已刷新抢先体验状态）' : '好评率刷新完成')
 
       // 所有游戏刷新完成后，统一保存一次到 GitHub
-      if (hasAnyUpdate) {
-        try {
-          const finalGames = await githubService.concurrentUpdateGames((remoteGames) => {
-            // 将最新的好评率数据合并到远程数据中
-            // 以远程数据为基准，只更新好评率相关字段
-            const updatedRemoteGames = remoteGames.map((remoteGame) => {
-              const localUpdate = gamesRef.current.find((g) => g.id === remoteGame.id)
-              if (localUpdate) {
-                // 如果本地有更新（好评率等），应用到远程数据
-                return {
-                  ...remoteGame,
-                  positivePercentage: localUpdate.positivePercentage,
-                  totalReviews: localUpdate.totalReviews,
-                  releaseDate: localUpdate.releaseDate,
-                  comingSoon: localUpdate.comingSoon,
-                  isEarlyAccess: localUpdate.isEarlyAccess,
-                }
-              }
-              return remoteGame
-            })
-            return updatedRemoteGames
-          }, 'Update games info after refresh')
-
-          // 更新本地状态以匹配远程
-          onGamesUpdate(finalGames)
-          console.log('已保存所有游戏信息到 GitHub')
-        } catch (err) {
-          console.error('保存游戏信息到 GitHub 失败:', err)
-        }
+      if (!hasAnyUpdate) {
+        return
       }
+
+      const finalGames = await githubService.concurrentUpdateGames((remoteGames) => {
+        // 将最新的好评率数据合并到远程数据中
+        // 以远程数据为基准，只更新好评率相关字段
+        const updatedRemoteGames = remoteGames.map((remoteGame) => {
+          const localUpdate = gamesRef.current.find((g) => g.id === remoteGame.id)
+          if (localUpdate) {
+            // 如果本地有更新（好评率等），应用到远程数据
+            return {
+              ...remoteGame,
+              positivePercentage: localUpdate.positivePercentage,
+              totalReviews: localUpdate.totalReviews,
+              releaseDate: localUpdate.releaseDate,
+              comingSoon: localUpdate.comingSoon,
+              isEarlyAccess: localUpdate.isEarlyAccess,
+            }
+          }
+          return remoteGame
+        })
+        return updatedRemoteGames
+      }, 'Update games info after refresh')
+
+      // Happy Path: 保存失败
+      if (!finalGames) {
+        console.error('保存游戏信息到 GitHub 失败')
+        return
+      }
+
+      // 更新本地状态以匹配远程
+      onGamesUpdate(finalGames)
+      console.log('已保存所有游戏信息到 GitHub')
     }
 
     // 延迟 2 秒后进行首次刷新，优先处理缺少好评率的游戏
@@ -182,3 +192,7 @@ export function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
+
+// ==================== Exports ====================
+
+export { useGameRefresh }

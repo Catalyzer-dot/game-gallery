@@ -10,7 +10,7 @@ import type { SearchResult } from '../components/SearchBar'
  * - 搜索小游戏（按名称和描述）
  * - 返回统一的搜索结果格式
  */
-export function useGameSearch(games: Game[], searchTerm: string): SearchResult[] {
+function useGameSearch(games: Game[], searchTerm: string): SearchResult[] {
   return useMemo(() => {
     if (!searchTerm) return []
 
@@ -61,3 +61,7 @@ export function useGameSearch(games: Game[], searchTerm: string): SearchResult[]
     return results
   }, [games, searchTerm])
 }
+
+// ==================== Exports ====================
+
+export { useGameSearch }

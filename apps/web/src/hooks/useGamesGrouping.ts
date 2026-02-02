@@ -10,7 +10,7 @@ import type { Game, GameStatus } from '../types'
  *   - 置顶的游戏排在前面
  *   - 相同置顶状态的游戏按最后更新时间倒序排列
  */
-export function useGamesGrouping(games: Game[]): {
+function useGamesGrouping(games: Game[]): {
   playing: Game[]
   queueing: Game[]
   completion: Game[]
@@ -35,3 +35,7 @@ export function useGamesGrouping(games: Game[]): {
     }
   }, [games])
 }
+
+// ==================== Exports ====================
+
+export { useGamesGrouping }

@@ -60,43 +60,55 @@ function App() {
   // Fetch games on mount
   useEffect(() => {
     const loadGames = async () => {
+      // Happy Path: GitHub 未配置
       if (!githubService.isConfigured()) {
         setShowSettings(true)
         return
       }
 
       setIsLoading(true)
-      try {
-        const data = await githubService.fetchGames()
 
-        // 数据迁移：将 pending 状态迁移为 queueing
-        const hasPendingGames = data.games.some((g: Game) => (g.status as string) === 'pending')
+      const data = await githubService.fetchGames()
 
-        if (hasPendingGames) {
-          console.log('Migrating pending games to queueing...')
-          const migratedGames = data.games.map((g: Game) =>
-            (g.status as string) === 'pending' ? { ...g, status: 'queueing' as GameStatus } : g
-          )
-
-          // 保存迁移后的数据
-          await githubService.updateGames(
-            { games: migratedGames },
-            'Migrate pending status to queueing'
-          )
-
-          setGames(migratedGames)
-          showToast('数据已自动迁移：pending → queueing')
-          console.log('Migration completed')
-        } else {
-          setGames(data.games)
-        }
-      } catch (err) {
-        console.error('Failed to fetch games:', err)
+      // Happy Path: 加载失败
+      if (!data) {
         showToast('加载游戏失败。请检查 GitHub 配置。')
         setShowSettings(true)
-      } finally {
         setIsLoading(false)
+        return
       }
+
+      // 数据迁移：将 pending 状态迁移为 queueing
+      const hasPendingGames = data.games.some((g: Game) => (g.status as string) === 'pending')
+
+      if (hasPendingGames) {
+        console.log('Migrating pending games to queueing...')
+        const migratedGames = data.games.map((g: Game) =>
+          (g.status as string) === 'pending' ? { ...g, status: 'queueing' as GameStatus } : g
+        )
+
+        // 保存迁移后的数据
+        const updatedGames = await githubService.updateGames(
+          { games: migratedGames },
+          'Migrate pending status to queueing'
+        )
+
+        // Happy Path: 保存失败
+        if (!updatedGames) {
+          showToast('数据迁移失败')
+          setGames(data.games) // 使用未迁移的数据
+          setIsLoading(false)
+          return
+        }
+
+        setGames(updatedGames)
+        showToast('数据已自动迁移：pending → queueing')
+        console.log('Migration completed')
+      } else {
+        setGames(data.games)
+      }
+
+      setIsLoading(false)
     }
 
     loadGames()
@@ -160,168 +172,191 @@ function App() {
       isEarlyAccess,
     }
 
-    try {
-      // 使用 concurrentUpdateGames 确保在添加时获取最新数据，避免覆盖他人更改
-      const finalGames = await githubService.concurrentUpdateGames(
-        (currentGames) => {
-          // 再次检查是否已存在（防止并发添加）
-          const duplicate = currentGames.find((g) => g.name.toLowerCase() === name.toLowerCase())
-          if (duplicate) {
-            throw new Error(`"${name}" 已经在队列中！`)
-          }
-          return [newGame, ...currentGames]
-        },
-        `Add game via web: ${name} (${steamUrl.split('/').pop()})`
-      )
+    // 使用 concurrentUpdateGames 确保在添加时获取最新数据，避免覆盖他人更改
+    const finalGames = await githubService.concurrentUpdateGames(
+      (currentGames) => {
+        // 再次检查是否已存在（防止并发添加）
+        const duplicate = currentGames.find((g) => g.name.toLowerCase() === name.toLowerCase())
+        if (duplicate) {
+          return currentGames // 游戏已存在，返回原列表不修改
+        }
+        return [newGame, ...currentGames]
+      },
+      `Add game via web: ${name} (${steamUrl.split('/').pop()})`
+    )
 
-      setGames(finalGames)
+    // Happy Path: 添加失败
+    if (!finalGames) {
+      showToast('添加游戏失败')
+      return
+    }
 
-      showToast(`从 Steam 添加了 "${name}"`)
-      setHighlightId(newGame.id)
+    // 检查游戏是否真的添加成功（可能因为重复而未添加）
+    const gameAdded = finalGames.some((g) => g.id === newGame.id)
+    if (!gameAdded) {
+      showToast(`"${name}" 已经在队列中！`)
+      return
+    }
 
-      // 如果没有好评率或发布日期数据，立即拉取
-      if (
-        positivePercentage === undefined ||
-        positivePercentage === null ||
-        totalReviews === undefined ||
-        totalReviews === null ||
-        !newGame.releaseDate ||
-        isEarlyAccess === undefined ||
-        isEarlyAccess === null
-      ) {
-        const match = steamUrl.match(/\/app\/(\d+)/)
-        if (match) {
-          const appId = parseInt(match[1])
-          console.log(`正在获取 ${name} 的信息...`)
+    setGames(finalGames)
+    showToast(`从 Steam 添加了 "${name}"`)
+    setHighlightId(newGame.id)
 
-          try {
-            const [reviews, releaseInfo] = await Promise.all([
-              steamService.getGameReviews(appId),
-              steamService.getGameReleaseDate(appId),
-            ])
+    // 如果没有好评率或发布日期数据，立即拉取
+    const needsAdditionalInfo =
+      positivePercentage === undefined ||
+      positivePercentage === null ||
+      totalReviews === undefined ||
+      totalReviews === null ||
+      !newGame.releaseDate ||
+      isEarlyAccess === undefined ||
+      isEarlyAccess === null
 
-            if (
-              reviews.positivePercentage !== null ||
-              reviews.totalReviews !== null ||
-              releaseInfo.releaseDate !== null ||
-              releaseInfo.isEarlyAccess !== null
-            ) {
-              // 更新本地状态
-              setGames((prevGames) =>
-                prevGames.map((g) => {
-                  if (g.id === newGame.id) {
-                    // 使用最新的游戏状态，只更新好评率相关字段
-                    return {
-                      ...g,
-                      positivePercentage: reviews.positivePercentage ?? positivePercentage,
-                      totalReviews: reviews.totalReviews ?? totalReviews,
-                      releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
-                      comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
-                      isEarlyAccess: releaseInfo.isEarlyAccess ?? g.isEarlyAccess,
-                    }
-                  }
-                  return g
-                })
-              )
+    if (!needsAdditionalInfo) {
+      return
+    }
 
-              // 保存更新到 GitHub
-              try {
-                await githubService.concurrentUpdateGames((currentGames) => {
-                  return currentGames.map((g) => {
-                    if (g.id === newGame.id) {
-                      return {
-                        ...g,
-                        positivePercentage: reviews.positivePercentage ?? positivePercentage,
-                        totalReviews: reviews.totalReviews ?? totalReviews,
-                        releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
-                        comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
-                        isEarlyAccess: releaseInfo.isEarlyAccess ?? g.isEarlyAccess,
-                      }
-                    }
-                    return g
-                  })
-                }, `Update game via web: ${name}`)
+    const match = steamUrl.match(/\/app\/(\d+)/)
+    if (!match) {
+      return
+    }
 
-                console.log(
-                  `已获取并保存 ${name} 的信息: 好评率 ${reviews.positivePercentage}%, 发布日期 ${releaseInfo.releaseDate}, 抢先体验 ${releaseInfo.isEarlyAccess}`
-                )
-              } catch (saveErr) {
-                console.error(`保存 ${name} 信息到 GitHub 失败:`, saveErr)
-              }
-            }
-          } catch (err) {
-            console.error(`获取 ${name} 信息失败:`, err)
+    const appId = parseInt(match[1])
+    console.log(`正在获取 ${name} 的信息...`)
+
+    const [reviews, releaseInfo] = await Promise.all([
+      steamService.getGameReviews({ appId }),
+      steamService.getGameReleaseDate({ appId }),
+    ])
+
+    // Happy Path: 获取信息失败或没有新数据
+    if (
+      !reviews ||
+      !releaseInfo ||
+      (reviews.positivePercentage === null &&
+        reviews.totalReviews === null &&
+        releaseInfo.releaseDate === null &&
+        releaseInfo.isEarlyAccess === null)
+    ) {
+      return
+    }
+
+    // 更新本地状态
+    setGames((prevGames) =>
+      prevGames.map((g) => {
+        if (g.id === newGame.id) {
+          return {
+            ...g,
+            positivePercentage: reviews.positivePercentage ?? positivePercentage,
+            totalReviews: reviews.totalReviews ?? totalReviews,
+            releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
+            comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
+            isEarlyAccess: releaseInfo.isEarlyAccess ?? g.isEarlyAccess,
           }
         }
-      }
-    } catch (err) {
-      console.error('Failed to add game:', err)
-      showToast('添加游戏失败')
-      setGames(games) // 回滚
-      throw err // 重新抛出错误以便 SteamSearch 组件可以处理
+        return g
+      })
+    )
+
+    // 保存更新到 GitHub
+    const updatedGames = await githubService.concurrentUpdateGames((currentGames) => {
+      return currentGames.map((g) => {
+        if (g.id === newGame.id) {
+          return {
+            ...g,
+            positivePercentage: reviews.positivePercentage ?? positivePercentage,
+            totalReviews: reviews.totalReviews ?? totalReviews,
+            releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
+            comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
+            isEarlyAccess: releaseInfo.isEarlyAccess ?? g.isEarlyAccess,
+          }
+        }
+        return g
+      })
+    }, `Update game via web: ${name}`)
+
+    // Happy Path: 保存失败（不影响主流程，已经添加成功了）
+    if (!updatedGames) {
+      console.error(`保存 ${name} 信息到 GitHub 失败`)
+      return
     }
+
+    console.log(
+      `已获取并保存 ${name} 的信息: 好评率 ${reviews.positivePercentage}%, 发布日期 ${releaseInfo.releaseDate}, 抢先体验 ${releaseInfo.isEarlyAccess}`
+    )
   }
 
   const handleUpdateGame = async (id: string, updates: Partial<Game>) => {
+    // Happy Path: 游戏不存在
     const game = games.find((g) => g.id === id)
-    if (!game) return
-
-    try {
-      const finalGames = await githubService.concurrentUpdateGames((currentGames) => {
-        return currentGames.map((g) =>
-          g.id === id ? { ...g, ...updates, lastUpdated: new Date().toISOString() } : g
-        )
-      }, `Update game via web: ${game.name}`)
-
-      setGames(finalGames)
-    } catch (err) {
-      console.error('Failed to update game:', err)
-      showToast('更新游戏失败')
-      // 不需要回滚，因为我们没有提前更新本地状态
+    if (!game) {
+      return
     }
+
+    const finalGames = await githubService.concurrentUpdateGames((currentGames) => {
+      return currentGames.map((g) =>
+        g.id === id ? { ...g, ...updates, lastUpdated: new Date().toISOString() } : g
+      )
+    }, `Update game via web: ${game.name}`)
+
+    // Happy Path: 更新失败
+    if (!finalGames) {
+      showToast('更新游戏失败')
+      return
+    }
+
+    setGames(finalGames)
   }
 
   const handleDeleteGame = async (id: string) => {
+    // Happy Path: 游戏不存在
     const game = games.find((g) => g.id === id)
-    if (!game) return
-
-    try {
-      const finalGames = await githubService.concurrentUpdateGames((currentGames) => {
-        return currentGames.filter((g) => g.id !== id)
-      }, `Remove game via web: ${game.name}`)
-
-      setGames(finalGames)
-      showToast(`移除了 "${game.name}"`)
-    } catch (err) {
-      console.error('Failed to delete game:', err)
-      showToast('删除游戏失败')
+    if (!game) {
+      return
     }
+
+    const finalGames = await githubService.concurrentUpdateGames((currentGames) => {
+      return currentGames.filter((g) => g.id !== id)
+    }, `Remove game via web: ${game.name}`)
+
+    // Happy Path: 删除失败
+    if (!finalGames) {
+      showToast('删除游戏失败')
+      return
+    }
+
+    setGames(finalGames)
+    showToast(`移除了 "${game.name}"`)
   }
 
   const handlePinGame = async (id: string) => {
+    // Happy Path: 游戏不存在
     const game = games.find((g) => g.id === id)
-    if (!game) return
+    if (!game) {
+      return
+    }
 
     const newPinnedState = !game.isPinned
 
-    try {
-      const finalGames = await githubService.concurrentUpdateGames(
-        (currentGames) => {
-          return currentGames.map((g) =>
-            g.id === id
-              ? { ...g, isPinned: newPinnedState, lastUpdated: new Date().toISOString() }
-              : g
-          )
-        },
-        `${newPinnedState ? 'Pin' : 'Unpin'} game via web: ${game.name}`
-      )
+    const finalGames = await githubService.concurrentUpdateGames(
+      (currentGames) => {
+        return currentGames.map((g) =>
+          g.id === id
+            ? { ...g, isPinned: newPinnedState, lastUpdated: new Date().toISOString() }
+            : g
+        )
+      },
+      `${newPinnedState ? 'Pin' : 'Unpin'} game via web: ${game.name}`
+    )
 
-      setGames(finalGames)
-      showToast(newPinnedState ? `已置顶 "${game.name}"` : `已取消置顶 "${game.name}"`)
-    } catch (err) {
-      console.error('Failed to pin game:', err)
+    // Happy Path: 操作失败
+    if (!finalGames) {
       showToast('操作失败')
+      return
     }
+
+    setGames(finalGames)
+    showToast(newPinnedState ? `已置顶 "${game.name}"` : `已取消置顶 "${game.name}"`)
   }
 
   const handleSearch = (term: string) => {
@@ -334,15 +369,24 @@ function App() {
     }
   }
 
-  const handleSettingsClose = () => {
+  const handleSettingsClose = async () => {
     setShowSettings(false)
-    // 重新加载游戏数据（如果配置已更新）
-    if (githubService.isConfigured()) {
-      githubService
-        .fetchGames()
-        .then((data) => setGames(data.games))
-        .catch((err) => console.error('Failed to reload games:', err))
+
+    // Happy Path: GitHub 未配置
+    if (!githubService.isConfigured()) {
+      return
     }
+
+    // 重新加载游戏数据（如果配置已更新）
+    const data = await githubService.fetchGames()
+
+    // Happy Path: 加载失败
+    if (!data) {
+      console.error('Failed to reload games after settings change')
+      return
+    }
+
+    setGames(data.games)
   }
 
   return (

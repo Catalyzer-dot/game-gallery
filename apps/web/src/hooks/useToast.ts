@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
  * - 显示提示消息
  * - 3 秒后自动清除
  */
-export function useToast(): {
+function useToast(): {
   toast: string | null
   showToast: (message: string) => void
 } {
@@ -26,3 +26,7 @@ export function useToast(): {
 
   return { toast, showToast }
 }
+
+// ==================== Exports ====================
+
+export { useToast }

@@ -4,7 +4,8 @@ node_modules
 .idea/
 
 # Claude Code配置
-.claude/
+.claude/*
+!.claude/rules/
 
 # 使用 npm，忽略 yarn
 yarn.lock

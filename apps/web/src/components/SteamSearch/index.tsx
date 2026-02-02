@@ -28,30 +28,31 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
 
   // 异步获取单个游戏的好评率和发布日期
   const fetchGameReviews = async (game: SteamGame) => {
-    try {
-      const [reviews, releaseInfo] = await Promise.all([
-        steamService.getGameReviews(game.id),
-        steamService.getGameReleaseDate(game.id),
-      ])
+    const [reviews, releaseInfo] = await Promise.all([
+      steamService.getGameReviews({ appId: game.id }),
+      steamService.getGameReleaseDate({ appId: game.id }),
+    ])
 
-      // 更新该游戏的好评率和发布日期数据
-      setResults((prevResults) =>
-        prevResults.map((g) =>
-          g.id === game.id
-            ? {
-                ...g,
-                positivePercentage: reviews.positivePercentage,
-                totalReviews: reviews.totalReviews,
-                releaseDate: releaseInfo.releaseDate,
-                comingSoon: releaseInfo.comingSoon,
-                isEarlyAccess: releaseInfo.isEarlyAccess,
-              }
-            : g
-        )
-      )
-    } catch (err) {
-      console.error(`Failed to fetch reviews for game ${game.id}:`, err)
+    if (!reviews || !releaseInfo) {
+      console.warn(`Failed to fetch info for game ${game.id}`)
+      return
     }
+
+    // 更新该游戏的好评率和发布日期数据
+    setResults((prevResults) =>
+      prevResults.map((g) =>
+        g.id === game.id
+          ? {
+              ...g,
+              positivePercentage: reviews.positivePercentage,
+              totalReviews: reviews.totalReviews,
+              releaseDate: releaseInfo.releaseDate,
+              comingSoon: releaseInfo.comingSoon,
+              isEarlyAccess: releaseInfo.isEarlyAccess,
+            }
+          : g
+      )
+    )
   }
 
   // 实时搜索：输入时自动搜索，带防抖
@@ -65,20 +66,22 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
     setError(null)
 
     const timer = setTimeout(async () => {
-      try {
-        const games = await steamService.search(query)
-        setResults(games)
+      const games = await steamService.search({ query })
 
-        // 先显示基本信息，然后异步获取每个游戏的好评率
-        games.forEach((game) => {
-          fetchGameReviews(game)
-        })
-      } catch (err) {
+      if (games === null) {
         setError('搜索失败，请重试')
-        console.error('Steam search error:', err)
-      } finally {
         setIsSearching(false)
+        return
       }
+
+      setResults(games)
+
+      // 先显示基本信息，然后异步获取每个游戏的好评率
+      games.forEach((game) => {
+        fetchGameReviews(game)
+      })
+
+      setIsSearching(false)
     }, 500) // 500ms 防抖
 
     return () => {

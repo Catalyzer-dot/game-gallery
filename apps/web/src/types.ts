@@ -1,11 +1,13 @@
-export type GameStatus = 'playing' | 'queueing' | 'completion'
+// ==================== Types ====================
 
-export interface Genre {
+type GameStatus = 'playing' | 'queueing' | 'completion'
+
+interface Genre {
   id: string
   description: string
 }
 
-export interface Game {
+interface Game {
   id: string
   name: string
   status: GameStatus
@@ -22,6 +24,10 @@ export interface Game {
   isPinned?: boolean
 }
 
-export interface GameQueueData {
+interface GameQueueData {
   games: Game[]
 }
+
+// ==================== Exports ====================
+
+export type { GameStatus, Genre, Game, GameQueueData }
