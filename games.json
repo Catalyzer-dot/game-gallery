@@ -11,8 +11,7 @@
       "positivePercentage": 79,
       "totalReviews": 67000,
       "releaseDate": "2024 年 4 月 18 日",
-      "isEarlyAccess": true,
-      "comingSoon": false
+      "isEarlyAccess": true
     },
     {
       "id": "1769603561123",
@@ -25,8 +24,7 @@
       "positivePercentage": 80,
       "totalReviews": 7449,
       "releaseDate": "2025 年 6 月 19 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1769135748555",
@@ -49,7 +47,7 @@
       "steamUrl": "https://store.steampowered.com/app/413150",
       "coverImage": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/capsule_231x87.jpg?t=1754692865",
       "positivePercentage": 98,
-      "totalReviews": 973781,
+      "totalReviews": 973791,
       "releaseDate": "2016 年 2 月 26 日",
       "isEarlyAccess": false,
       "comingSoon": false
@@ -65,8 +63,7 @@
       "positivePercentage": 87,
       "totalReviews": 72330,
       "releaseDate": "2017 年 8 月 28 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768977866985",
@@ -112,8 +109,7 @@
           "description": "抢先体验"
         }
       ],
-      "isPinned": false,
-      "comingSoon": false
+      "isPinned": false
     },
     {
       "id": "1768977160839",
@@ -152,8 +148,7 @@
       "positivePercentage": 85,
       "totalReviews": 2085,
       "releaseDate": "2025 年 11 月 12 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768975225795",
@@ -166,8 +161,7 @@
       "positivePercentage": 85,
       "totalReviews": 396864,
       "releaseDate": "2016 年 8 月 12 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768966833572",
@@ -180,8 +174,7 @@
       "positivePercentage": 89,
       "totalReviews": 130393,
       "releaseDate": "2024 年 5 月 8 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768928497887",
@@ -194,8 +187,7 @@
       "positivePercentage": 60,
       "totalReviews": 74756,
       "releaseDate": "2025 年 9 月 11 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768927929101",
@@ -208,8 +200,7 @@
       "positivePercentage": 81,
       "totalReviews": 22813,
       "releaseDate": "2023 年 8 月 25 日",
-      "isEarlyAccess": true,
-      "comingSoon": false
+      "isEarlyAccess": true
     },
     {
       "id": "1768927818475",
@@ -222,8 +213,7 @@
       "positivePercentage": 96,
       "totalReviews": 51163,
       "releaseDate": "2025 年 7 月 22 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768923219470",
@@ -236,8 +226,7 @@
       "positivePercentage": 80,
       "totalReviews": 8125,
       "releaseDate": "2025 年 4 月 14 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768923143796",
@@ -250,8 +239,7 @@
       "positivePercentage": 97,
       "totalReviews": 259703,
       "releaseDate": "2024 年 9 月 10 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768922875013",
@@ -319,8 +307,7 @@
       "totalReviews": 121545,
       "releaseDate": "2025 年 6 月 17 日",
       "isEarlyAccess": false,
-      "isPinned": false,
-      "comingSoon": false
+      "isPinned": false
     },
     {
       "id": "1768900923580",
@@ -333,8 +320,7 @@
       "positivePercentage": 90,
       "totalReviews": 58824,
       "releaseDate": "2024 年 6 月 19 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768900763027",
@@ -403,8 +389,7 @@
       "positivePercentage": 85,
       "totalReviews": 1909,
       "releaseDate": "2025 年 9 月 16 日",
-      "isEarlyAccess": true,
-      "comingSoon": false
+      "isEarlyAccess": true
     },
     {
       "id": "1768900234397",
@@ -431,8 +416,7 @@
       "positivePercentage": 85,
       "totalReviews": 12622,
       "releaseDate": "2025 年 8 月 11 日",
-      "isEarlyAccess": false,
-      "comingSoon": false
+      "isEarlyAccess": false
     },
     {
       "id": "1768900063685",
@@ -446,8 +430,7 @@
       "totalReviews": 9357267,
       "releaseDate": "2017 年 9 月 15 日",
       "isEarlyAccess": false,
-      "isPinned": false,
-      "comingSoon": false
+      "isPinned": false
     },
     {
       "id": "1768900029158",
@@ -461,8 +444,7 @@
       "totalReviews": 95110,
       "releaseDate": "2024 年 1 月 24 日",
       "isEarlyAccess": true,
-      "isPinned": false,
-      "comingSoon": false
+      "isPinned": false
     }
   ]
 }
