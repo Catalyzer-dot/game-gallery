@@ -124,6 +124,9 @@ function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): 
                     ...g,
                     positivePercentage: reviews.positivePercentage ?? g.positivePercentage,
                     totalReviews: reviews.totalReviews ?? g.totalReviews,
+                    chinesePositivePercentage:
+                      reviews.chinesePositivePercentage ?? g.chinesePositivePercentage,
+                    chineseTotalReviews: reviews.chineseTotalReviews ?? g.chineseTotalReviews,
                     releaseDate: releaseInfo.releaseDate ?? g.releaseDate,
                     comingSoon: releaseInfo.comingSoon ?? g.comingSoon,
                     isEarlyAccess: releaseInfo.isEarlyAccess ?? g.isEarlyAccess,
@@ -135,7 +138,7 @@ function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): 
             )
 
             console.log(
-              `已更新 ${game.name} 的信息: 好评率 ${reviews.positivePercentage}%, 发布日期 ${releaseInfo.releaseDate}, 未发售 ${releaseInfo.comingSoon}, 抢先体验 ${releaseInfo.isEarlyAccess}`
+              `已更新 ${game.name} 的信息: 全球好评率 ${reviews.positivePercentage}% (${reviews.totalReviews}条), 中文好评率 ${reviews.chinesePositivePercentage}% (${reviews.chineseTotalReviews}条), 发布日期 ${releaseInfo.releaseDate}, 未发售 ${releaseInfo.comingSoon}, 抢先体验 ${releaseInfo.isEarlyAccess}`
             )
           }
         } catch (err) {
@@ -166,6 +169,8 @@ function useGameRefresh(games: Game[], onGamesUpdate: (games: Game[]) => void): 
               ...remoteGame,
               positivePercentage: localUpdate.positivePercentage,
               totalReviews: localUpdate.totalReviews,
+              chinesePositivePercentage: localUpdate.chinesePositivePercentage,
+              chineseTotalReviews: localUpdate.chineseTotalReviews,
               releaseDate: localUpdate.releaseDate,
               comingSoon: localUpdate.comingSoon,
               isEarlyAccess: localUpdate.isEarlyAccess,

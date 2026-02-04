@@ -46,8 +46,10 @@ interface GameReleaseInfo {
 }
 
 interface GameReviewsInfo {
-  positivePercentage: number | null
-  totalReviews: number | null
+  positivePercentage: number | null // 全球好评率
+  totalReviews: number | null // 全球评论数
+  chinesePositivePercentage: number | null // 中文区好评率
+  chineseTotalReviews: number | null // 中文区评论数
 }
 
 // ==================== Steam API Types ====================
@@ -250,14 +252,39 @@ class SteamService {
   }
 
   /**
-   * 获取游戏评论统计
+   * 获取游戏评论统计（同时获取全球和中文评论）
    * @param params 请求参数
    * @returns 成功时返回评论信息，失败时返回各字段为 null 的对象
    */
   async getGameReviews(params: GetGameReviewsRequest): Promise<GameReviewsInfo> {
     const { appId } = params
-    const reviewsUrl = `${STEAM_REVIEWS_API_BASE}/${appId}?json=1&language=all&purchase_type=all&num_per_page=0`
-    const response = await this.fetchWithProxy(reviewsUrl, `reviews: ${appId}`)
+
+    // 并行获取全球评论和中文评论
+    const [globalReviews, chineseReviews] = await Promise.all([
+      this.fetchReviewsByLanguage(appId, 'all'),
+      this.fetchReviewsByLanguage(appId, 'schinese'),
+    ])
+
+    return {
+      positivePercentage: globalReviews.positivePercentage,
+      totalReviews: globalReviews.totalReviews,
+      chinesePositivePercentage: chineseReviews.positivePercentage,
+      chineseTotalReviews: chineseReviews.totalReviews,
+    }
+  }
+
+  /**
+   * 根据语言获取评论统计
+   * @param appId 游戏ID
+   * @param language 语言代码（all=全球, schinese=简体中文）
+   * @returns 好评率和评论数
+   */
+  private async fetchReviewsByLanguage(
+    appId: number,
+    language: string
+  ): Promise<{ positivePercentage: number | null; totalReviews: number | null }> {
+    const reviewsUrl = `${STEAM_REVIEWS_API_BASE}/${appId}?json=1&language=${language}&purchase_type=all&num_per_page=0`
+    const response = await this.fetchWithProxy(reviewsUrl, `reviews: ${appId} (${language})`)
 
     if (!response) {
       return { positivePercentage: null, totalReviews: null }
@@ -267,7 +294,9 @@ class SteamService {
       const data = (await response.json()) as SteamReviewsResponse
 
       if (!data.query_summary) {
-        console.warn(`[SteamService] No query_summary in reviews response for app ${appId}`)
+        console.warn(
+          `[SteamService] No query_summary in reviews response for app ${appId} (${language})`
+        )
         return { positivePercentage: null, totalReviews: null }
       }
 
@@ -285,7 +314,10 @@ class SteamService {
 
       return { positivePercentage, totalReviews }
     } catch (error) {
-      console.error(`[SteamService] Error parsing reviews response for ${appId}:`, error)
+      console.error(
+        `[SteamService] Error parsing reviews response for ${appId} (${language}):`,
+        error
+      )
       return { positivePercentage: null, totalReviews: null }
     }
   }

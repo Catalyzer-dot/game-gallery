@@ -15,8 +15,10 @@ interface Game {
   lastUpdated: string
   steamUrl?: string
   coverImage?: string
-  positivePercentage?: number
-  totalReviews?: number
+  positivePercentage?: number // 全球好评率
+  totalReviews?: number // 全球评论数
+  chinesePositivePercentage?: number // 中文区好评率
+  chineseTotalReviews?: number // 中文区评论数
   releaseDate?: string
   comingSoon?: boolean
   isEarlyAccess?: boolean
