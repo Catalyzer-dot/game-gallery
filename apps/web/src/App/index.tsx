@@ -26,6 +26,7 @@ const SteamSearch = lazy(() =>
 const Settings = lazy(() =>
   import('../components/Settings').then((module) => ({ default: module.Settings }))
 )
+const AuthCallback = lazy(() => import('../components/AuthCallback'))
 
 function App() {
   // 状态管理
@@ -45,8 +46,6 @@ function App() {
 
   // 定时刷新游戏信息
   useGameRefresh(games, setGames)
-
-  // Note: Steam login callback is now handled by AuthCallback component (route: /auth/callback)
 
   // Fetch games on mount
   useEffect(() => {
@@ -378,6 +377,33 @@ function App() {
     }
 
     setGames(data.games)
+  }
+
+  // 检查是否是回调页面
+  const isCallbackPage = window.location.pathname === '/callback'
+
+  // 处理 Steam 登录回调
+  const handleAuthSuccess = () => {
+    // 清除 URL 并跳转到主页
+    window.history.replaceState({}, document.title, '/')
+    showToast('登录成功！')
+    // 强制刷新页面状态
+    window.location.reload()
+  }
+
+  const handleAuthError = (error: string) => {
+    // 清除 URL 并跳转到主页
+    window.history.replaceState({}, document.title, '/')
+    showToast(`登录失败: ${error}`)
+  }
+
+  // 如果是回调页面，显示 AuthCallback 组件
+  if (isCallbackPage) {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <AuthCallback onSuccess={handleAuthSuccess} onError={handleAuthError} />
+      </Suspense>
+    )
   }
 
   return (

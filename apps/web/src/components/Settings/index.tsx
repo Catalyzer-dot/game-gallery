@@ -104,7 +104,8 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   }
 
   const handleSteamLogin = async () => {
-    await steamLogin()
+    // 传递前端回调 URL，后端验证成功后会重定向到这里
+    await steamLogin(window.location.origin + '/callback')
   }
 
   const handleSteamLogout = async () => {
