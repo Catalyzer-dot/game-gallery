@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { X, Save, CheckCircle, XCircle, Loader2, LogOut } from 'lucide-react'
 import { githubService } from '../../services/github'
-import { getCurrentSteamUser, initiateSteamLogin, logoutSteam } from '../../services/steamAuth'
+import { useAuth } from '../../hooks/useAuth'
 import styles from './index.module.scss'
 
 interface SettingsProps {
@@ -14,7 +14,7 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [isTesting, setIsTesting] = useState(false)
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
-  const [steamUser, setSteamUser] = useState(getCurrentSteamUser())
+  const { user: steamUser, login: steamLogin, logout: steamLogout } = useAuth()
 
   const FIXED_OWNER = 'catalyzer-dot'
   const FIXED_REPO = 'game-gallery'
@@ -103,13 +103,12 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
     }
   }
 
-  const handleSteamLogin = () => {
-    initiateSteamLogin()
+  const handleSteamLogin = async () => {
+    await steamLogin(window.location.origin + '/auth/callback')
   }
 
-  const handleSteamLogout = () => {
-    logoutSteam()
-    setSteamUser(null)
+  const handleSteamLogout = async () => {
+    await steamLogout()
   }
 
   return (
@@ -128,14 +127,14 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
             {steamUser ? (
               <div className={styles.steamProfile}>
                 <img
-                  src={steamUser.avatar}
+                  src={steamUser.avatar_url}
                   alt={steamUser.username}
                   className={styles.steamAvatar}
                 />
                 <div className={styles.steamInfo}>
                   <div className={styles.steamUsername}>{steamUser.username}</div>
                   <a
-                    href={steamUser.profileUrl}
+                    href={steamUser.profile_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.steamLink}

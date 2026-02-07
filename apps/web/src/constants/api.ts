@@ -82,17 +82,49 @@ export const getGitHubRepoApiUrl = (owner: string, repo: string) =>
 export const getGitHubFileApiUrl = (owner: string, repo: string, path: string) =>
   `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`
 
-// ==================== Steam Auth API ====================
+// ==================== Backend API ====================
 
 /**
- * Steam 认证 API 基础地址
+ * 后端 API 基础地址
  * 根据环境变量自动选择正确的 API 地址
- * 用于支持跨域部署（GitHub Pages + Vercel）
+ * 开发环境: http://localhost:8080
+ * 生产环境: 通过 VITE_API_URL 环境变量配置
  */
-export const STEAM_AUTH_API_BASE = import.meta.env.VITE_API_URL || ''
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://degenerates.site'
+
+// ==================== Auth API ====================
 
 /**
- * Steam 登录认证 API
- * 用于初始化 Steam OAuth 登录流程
+ * 获取 Steam 登录 URL
+ * 用于获取 Steam OpenID 登录链接
+ * @param return_url - 可选，登录成功后的前端回调 URL
+ * @returns 返回包含 login_url 的响应对象
+ * @note 需要将用户重定向到返回的 login_url
  */
-export const STEAM_LOGIN_API = `${STEAM_AUTH_API_BASE}/api/auth/steam`
+export const AUTH_LOGIN_API = `${API_BASE_URL}/api/auth/login`
+
+/**
+ * Steam 登录回调处理
+ * Steam OpenID 验证成功后会重定向到此接口
+ * @note 此接口由后端处理，前端通常不直接调用
+ * @returns 返回用户信息和 JWT token
+ */
+export const AUTH_CALLBACK_API = `${API_BASE_URL}/api/auth/callback`
+
+/**
+ * 刷新 JWT Token
+ * 使用当前 token 获取新的 JWT token
+ * @requires Authorization header with Bearer token
+ * @returns 返回新的 JWT token
+ * @note Token 有效期 24 小时，建议在过期前 1 小时刷新
+ */
+export const AUTH_REFRESH_API = `${API_BASE_URL}/api/auth/refresh`
+
+/**
+ * 用户登出
+ * 退出登录（客户端应删除本地存储的 token）
+ * @requires Authorization header with Bearer token
+ * @returns 返回成功消息
+ * @note 服务端不维护 token 黑名单，token 失效由客户端处理
+ */
+export const AUTH_LOGOUT_API = `${API_BASE_URL}/api/auth/logout`

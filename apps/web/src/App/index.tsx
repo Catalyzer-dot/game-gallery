@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { SettingsIcon, Loader2, Play, Bookmark, CheckCircle, Library, Sparkles } from 'lucide-react'
 import { githubService } from '../services/github'
 import { steamService } from '../services/steam'
-import { handleSteamCallback } from '../services/steamAuth'
 import styles from './index.module.scss'
 
 // 导入自定义 hooks
@@ -47,15 +46,7 @@ function App() {
   // 定时刷新游戏信息
   useGameRefresh(games, setGames)
 
-  // Handle Steam login callback
-  useEffect(() => {
-    const result = handleSteamCallback()
-    if (result.success && result.user) {
-      showToast(`欢迎，${result.user.username}！Steam 登录成功`)
-    } else if (result.error) {
-      showToast('Steam 登录失败，请重试')
-    }
-  }, [showToast])
+  // Note: Steam login callback is now handled by AuthCallback component (route: /auth/callback)
 
   // Fetch games on mount
   useEffect(() => {

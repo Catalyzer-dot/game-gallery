@@ -1,5 +1,36 @@
 // ==================== Types ====================
 
+// Auth Types
+interface User {
+  id: string
+  steam_id: string
+  username: string
+  avatar_url: string
+  profile_url: string
+  is_active: boolean
+  last_login_at: string
+  created_at: string
+  updated_at: string
+}
+
+interface AuthResponse {
+  user: User
+  token: string
+}
+
+interface LoginUrlResponse {
+  login_url: string
+}
+
+interface RefreshTokenResponse {
+  token: string
+}
+
+interface LogoutResponse {
+  message: string
+}
+
+// Game Types
 type GameStatus = 'playing' | 'queueing' | 'completion'
 
 interface Genre {
@@ -32,4 +63,14 @@ interface GameQueueData {
 
 // ==================== Exports ====================
 
-export type { GameStatus, Genre, Game, GameQueueData }
+export type {
+  User,
+  AuthResponse,
+  LoginUrlResponse,
+  RefreshTokenResponse,
+  LogoutResponse,
+  GameStatus,
+  Genre,
+  Game,
+  GameQueueData,
+}
