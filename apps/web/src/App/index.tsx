@@ -662,7 +662,13 @@ function App() {
             href="https://beian.mps.gov.cn/#/query/webSearch?code=45010502001153"
             rel="noreferrer"
             target="_blank"
+            className={styles.gongan}
           >
+            <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADDklEQVR4nK2UXUhTYRjH/+85Z+fM5drmNJ3OD9QkKwvRCKQPiijoIqiLbkKiLrroJiLqppu66CIiSCKIIogI6qKLvkC6MAWJtExNM3POj7mdbc7t7Jw57X0PvjNXRBf1h4f3/X/e5/f/3uf9A/iHBABoVSpV7L/ABwHo/pYYBGDR6/Xx/wTn8XgAQRAQCARQLBYRDAYPAbLZLLxeL0wmkyacTmfM4/Eor/P5fDAajVAqlejo6EBbWxsURYHf74fP5wPLsiRJkqjX60Emk4nH4/F0h8NBkskkfD4fRFHEkSNH0NzcjOLiYhSLRaytrWF6ehrT09PIZDLgOE6r1+vx8PGTUCqVUnm9XhgMBhQKBUxMTODSpUsIBALY2dmBz+dDa2srBgcHoVKpUCwWkU6nwXGctuFyOZ+NjY2lOY5DLBaDz+fD9PQ0AoEAstksisUi7ty5g7q6OhgMBpw5cwbHjh1DLpeDJEnQDA4OUg0NDeFMJgOe57G1tQWWZdHS0oIrV65go6cH5+vr0d3djatXr+L79++4efMmWJaFKIqHYfX19d/S6TTK5TJ4nkcoFMLZs2fxsL8fvFoNjVoNZnwc/YODuHPvHrq6uhAKhcCyLARBOAw7e+ZMKJfLQRTFHzG/f/8+Pn7+jC9fvyKbzUIURdTU1CCTySCVSkGWZYTDYciyfBjW0tJCVVVVxXK5HGRZRiKRQE1NDTiOQzKZBM/z6OzsBMdxiEQi2N3dJSEiFUIIqqqqfuPaLly4EM1ms5BlGYlEAuXl5dja2oIsy/B6vdje3kYqlUI0GkU+n4fJZEJZWRlu3br1a4+fW11dXb8FAARBQDwex6VLl+D1epFMJhGPx5FOp8FxHHw+Hzo7O1FfXw+VSoXi4mLcvXv3p567d+9GR48eDYqiCEEQEI1GYTKZ8OjRI5SUlODl69fIZDIIh8PoGxhAbW0tKioq0N7ejvPnz/+M6ejo+PT06dN4MBhERUUFuru7YbFYYDabwbIstm/fhsPhQGlpKWpra2GxWNDW1kaOHz/+M2p0dNT78OHD9bm5OfA8D6vVivr6eni9XoyMjMBms2FhYQEjIyPo7e3F2NhY7NSpU3v/X1oVPQBJoZdH4fyOzgAAAABJRU5ErkJggg=="
+              alt="公安备案"
+              className={styles.beianIcon}
+            />
             桂公网安备45010502001153号
           </a>
         </div>
