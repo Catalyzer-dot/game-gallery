@@ -73,7 +73,7 @@ function LoginButton({ mode = 'compact', onLoginSuccess }: LoginButtonProps = {}
                 <LogIn size={18} />
                 已登录：{user.username}
               </div>
-              <p className={styles.helpText}>认证状态通过 Cookie 管理，有效期 60 天</p>
+              <p className={styles.helpText}>认证状态通过 Token 管理，保存在 localStorage 中</p>
             </div>
             <button onClick={logout} className={styles.btnLogoutFull}>
               <LogOut size={18} />
