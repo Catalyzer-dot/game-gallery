@@ -289,58 +289,56 @@ function App() {
       return
     }
 
-    // appId 已经在上面定义过了，这里直接使用
+    // 异步补齐信息，不阻塞添加成功后的 UI 反馈与弹窗关闭
+    void (async () => {
+      const [reviews, releaseInfo] = await Promise.all([
+        steamService.getGameReviews({ appId }),
+        steamService.getGameReleaseDate({ appId }),
+      ])
 
-    const [reviews, releaseInfo] = await Promise.all([
-      steamService.getGameReviews({ appId }),
-      steamService.getGameReleaseDate({ appId }),
-    ])
+      // Happy Path: 获取信息失败或没有新数据
+      if (
+        !reviews ||
+        !releaseInfo ||
+        (reviews.positivePercentage === null &&
+          reviews.totalReviews === null &&
+          releaseInfo.releaseDate === null &&
+          releaseInfo.isEarlyAccess === null)
+      ) {
+        return
+      }
 
-    // Happy Path: 获取信息失败或没有新数据
-    if (
-      !reviews ||
-      !releaseInfo ||
-      (reviews.positivePercentage === null &&
-        reviews.totalReviews === null &&
-        releaseInfo.releaseDate === null &&
-        releaseInfo.isEarlyAccess === null)
-    ) {
-      return
-    }
-
-    // 更新后端数据库（包括评论数据）
-    const updatedBackendGame = await gameService.updateGame(newGame.id, {
-      positive_percentage: reviews.positivePercentage ?? positivePercentage,
-      total_reviews: reviews.totalReviews ?? totalReviews,
-      release_date: releaseInfo.releaseDate ?? newGame.releaseDate,
-      coming_soon: releaseInfo.comingSoon ?? newGame.comingSoon,
-      is_early_access: releaseInfo.isEarlyAccess ?? newGame.isEarlyAccess,
-    })
-
-    // Happy Path: 更新失败（不影响主流程，已经添加成功了）
-    if (!updatedBackendGame) {
-      // 即使后端更新失败，也继续更新本地状态
-    }
-
-    // 更新本地状态
-    setGames((prevGames) =>
-      prevGames.map((g) => {
-        if (g.id === newGame.id) {
-          return {
-            ...g,
-            positivePercentage: reviews.positivePercentage ?? positivePercentage,
-            totalReviews: reviews.totalReviews ?? totalReviews,
-            chinesePositivePercentage: reviews.chinesePositivePercentage ?? undefined,
-            chineseTotalReviews: reviews.chineseTotalReviews ?? undefined,
-            releaseDate: releaseInfo.releaseDate ?? newGame.releaseDate,
-            comingSoon: releaseInfo.comingSoon ?? newGame.comingSoon,
-            isEarlyAccess: releaseInfo.isEarlyAccess ?? newGame.isEarlyAccess,
-            lastUpdated: new Date().toISOString(),
-          }
-        }
-        return g
+      // 更新后端数据库（包括评论数据）
+      await gameService.updateGame(newGame.id, {
+        positive_percentage: reviews.positivePercentage ?? positivePercentage,
+        total_reviews: reviews.totalReviews ?? totalReviews,
+        release_date: releaseInfo.releaseDate ?? newGame.releaseDate,
+        coming_soon: releaseInfo.comingSoon ?? newGame.comingSoon,
+        is_early_access: releaseInfo.isEarlyAccess ?? newGame.isEarlyAccess,
       })
-    )
+
+      // 更新本地状态
+      setGames((prevGames) =>
+        prevGames.map((g) => {
+          if (g.id === newGame.id) {
+            return {
+              ...g,
+              positivePercentage: reviews.positivePercentage ?? positivePercentage,
+              totalReviews: reviews.totalReviews ?? totalReviews,
+              chinesePositivePercentage: reviews.chinesePositivePercentage ?? undefined,
+              chineseTotalReviews: reviews.chineseTotalReviews ?? undefined,
+              releaseDate: releaseInfo.releaseDate ?? newGame.releaseDate,
+              comingSoon: releaseInfo.comingSoon ?? newGame.comingSoon,
+              isEarlyAccess: releaseInfo.isEarlyAccess ?? newGame.isEarlyAccess,
+              lastUpdated: new Date().toISOString(),
+            }
+          }
+          return g
+        })
+      )
+    })().catch((error) => {
+      console.error('补齐 Steam 游戏信息失败:', error)
+    })
   }
 
   const handleUpdateGame = async (id: string, updates: Partial<Game>) => {
