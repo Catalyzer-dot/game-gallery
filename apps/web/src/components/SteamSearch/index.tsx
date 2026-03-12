@@ -33,32 +33,31 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
   const enrichSearchResults = async (games: SteamGame[], requestId: number) => {
     if (games.length === 0) return
 
-    let cursor = 0
-    const worker = async () => {
-      while (cursor < games.length) {
-        const index = cursor
-        cursor += 1
-        const game = games[index]
+    // 处理单个游戏的辅助函数
+    const processGame = async (index: number): Promise<void> => {
+      // 边界检查：索引超出范围或请求已被取消
+      if (index >= games.length || latestSearchRequestIdRef.current !== requestId) {
+        return
+      }
 
-        const [reviews, releaseInfo] = await Promise.all([
-          steamService.getGameReviews({ appId: game.id }),
-          steamService.getGameReleaseDate({ appId: game.id }),
-        ])
+      const game = games[index]
+      const [reviews, releaseInfo] = await Promise.all([
+        steamService.getGameReviews({ appId: game.id }),
+        steamService.getGameReleaseDate({ appId: game.id }),
+      ])
 
-        if (latestSearchRequestIdRef.current !== requestId) {
-          return
-        }
+      // 再次检查请求是否已被取消（网络请求期间可能有新搜索）
+      if (latestSearchRequestIdRef.current !== requestId) {
+        return
+      }
 
-        const hasAnyData =
-          reviews.positivePercentage !== null ||
-          reviews.totalReviews !== null ||
-          releaseInfo.releaseDate !== null ||
-          releaseInfo.isEarlyAccess !== null
+      const hasAnyData =
+        reviews.positivePercentage !== null ||
+        reviews.totalReviews !== null ||
+        releaseInfo.releaseDate !== null ||
+        releaseInfo.isEarlyAccess !== null
 
-        if (!hasAnyData) {
-          continue
-        }
-
+      if (hasAnyData) {
         setResults((prevResults) =>
           prevResults.map((g) =>
             g.id === game.id
@@ -74,10 +73,17 @@ export const SteamSearch: React.FC<SteamSearchProps> = ({ onAddGame, onClose }) 
           )
         )
       }
+
+      // 递归处理下一个游戏：每个 worker 处理自己的 index，
+      // 然后跳过 ENRICH_CONCURRENCY 个位置处理下一个，
+      // 这样能保证最多 ENRICH_CONCURRENCY 个并发请求
+      return processGame(index + ENRICH_CONCURRENCY)
     }
 
-    const workerCount = Math.min(ENRICH_CONCURRENCY, games.length)
-    await Promise.all(Array.from({ length: workerCount }, () => worker()))
+    // 并发启动 ENRICH_CONCURRENCY 个 worker，
+    // 分别处理 index 0, 1, 2... 的游戏
+    const workers = Array.from({ length: ENRICH_CONCURRENCY }, (_, i) => processGame(i))
+    await Promise.all(workers)
   }
 
   // 实时搜索：输入时自动搜索，带防抖
