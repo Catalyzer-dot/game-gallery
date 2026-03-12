@@ -37,6 +37,7 @@ interface Game {
   name: string
   status: GameStatus
   addedAt: string
+  sortOrder?: number
   lastUpdated: string
   steamUrl?: string
   coverImage?: string
@@ -109,7 +110,9 @@ interface UserGame {
   game_id: string
   status: GameStatus
   is_pinned: boolean
-  added_at: string
+  sort_order?: number
+  added_at?: string
+  created_at?: string
   updated_at: string
 }
 
@@ -118,6 +121,7 @@ interface UserGameWithDetails extends BackendGame {
   status: GameStatus
   is_pinned: boolean
   sort_order: number
+  added_at?: string
 }
 
 // Game API Request/Response Types

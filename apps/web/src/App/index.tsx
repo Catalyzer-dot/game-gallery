@@ -92,11 +92,13 @@ function App() {
     }
   }
 
-  // 初始化：加载所有状态的第一页
-  useEffect(() => {
-    const loadAllGames = async () => {
+  // 重新加载各状态第一页，并重置分页游标
+  const reloadLibraryFirstPages = async (showLoading: boolean = false) => {
+    if (showLoading) {
       setIsLoading(true)
+    }
 
+    try {
       const [playingResult, queueingResult, completionResult] = await Promise.all([
         loadGamesByStatus('playing', 1),
         loadGamesByStatus('queueing', 1),
@@ -111,13 +113,22 @@ function App() {
         queueing: queueingResult.totalCount,
         completion: completionResult.totalCount,
       })
+      setPlayingPage(1)
+      setQueueingPage(1)
+      setCompletionPage(1)
       setHasMorePlaying(playingResult.hasMore)
       setHasMoreQueueing(queueingResult.hasMore)
       setHasMoreCompletion(completionResult.hasMore)
-      setIsLoading(false)
+    } finally {
+      if (showLoading) {
+        setIsLoading(false)
+      }
     }
+  }
 
-    loadAllGames()
+  // 初始化：加载所有状态的第一页
+  useEffect(() => {
+    reloadLibraryFirstPages(true)
   }, [])
 
   // 以下 useEffect 已被提取到自定义 hooks 中：
@@ -177,6 +188,8 @@ function App() {
     })
 
     let gameId: string
+    let userAddedAt: string | undefined
+    let userSortOrder = 0
 
     // 2. 如果游戏不存在数据库，先创建游戏
     if (addResult && 'error' in addResult && addResult.error === 'game_not_found') {
@@ -214,12 +227,16 @@ function App() {
       }
 
       gameId = createdGame.id
+      userAddedAt = addResult2.added_at ?? addResult2.created_at
+      userSortOrder = addResult2.sort_order ?? 0
     } else if (!addResult || 'error' in addResult) {
       // Happy Path: 添加失败
       showToast('添加游戏失败')
       return
     } else {
       gameId = addResult.game_id
+      userAddedAt = addResult.added_at ?? addResult.created_at
+      userSortOrder = addResult.sort_order ?? 0
     }
 
     // 4. 获取完整的游戏信息
@@ -237,7 +254,8 @@ function App() {
       name: backendGame.name,
       status: 'queueing',
       isPinned: false,
-      addedAt: backendGame.created_at,
+      sortOrder: userSortOrder,
+      addedAt: userAddedAt ?? backendGame.created_at,
       lastUpdated: backendGame.updated_at,
       steamUrl: backendGame.steam_url,
       coverImage: backendGame.capsule_image,
@@ -419,6 +437,7 @@ function App() {
       )
       showToast('操作失败，请重试')
     } else {
+      await reloadLibraryFirstPages()
       showToast(newPinnedState ? '已置顶' : '已取消置顶')
     }
   }
@@ -435,28 +454,7 @@ function App() {
 
   const handleSettingsClose = async () => {
     setShowSettings(false)
-
-    // 重新加载游戏数据（如果用户刚登录）
-    const [playingResult, queueingResult, completionResult] = await Promise.all([
-      loadGamesByStatus('playing', 1),
-      loadGamesByStatus('queueing', 1),
-      loadGamesByStatus('completion', 1),
-    ])
-
-    const allGames = [...playingResult.games, ...queueingResult.games, ...completionResult.games]
-
-    setGames(allGames)
-    setStatusCounts({
-      playing: playingResult.totalCount,
-      queueing: queueingResult.totalCount,
-      completion: completionResult.totalCount,
-    })
-    setPlayingPage(1)
-    setQueueingPage(1)
-    setCompletionPage(1)
-    setHasMorePlaying(playingResult.hasMore)
-    setHasMoreQueueing(queueingResult.hasMore)
-    setHasMoreCompletion(completionResult.hasMore)
+    await reloadLibraryFirstPages()
   }
 
   // 加载更多游戏
@@ -500,7 +498,11 @@ function App() {
         const nextPage = currentPage + 1
         const result = await loadGamesByStatus(status, nextPage)
 
-        setGames((prevGames) => [...prevGames, ...result.games])
+        setGames((prevGames) => {
+          const existingIds = new Set(prevGames.map((g) => g.id))
+          const newGames = result.games.filter((g) => !existingIds.has(g.id))
+          return [...prevGames, ...newGames]
+        })
         setPage(nextPage)
         setHasMore(result.hasMore)
       } catch (error) {
