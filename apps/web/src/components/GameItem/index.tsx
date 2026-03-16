@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import classNames from 'classnames'
 import type { Game, GameStatus } from '../../types'
-import { Trash2, Loader2, Pin } from 'lucide-react'
+import { Trash2, Loader2, Pin, AlertTriangle } from 'lucide-react'
 import { isGameReleased } from '../../utils/dateUtils'
 import styles from './index.module.scss'
 
@@ -30,6 +30,7 @@ export const GameItem: React.FC<GameItemProps> = ({
   const [isUpdating, setIsUpdating] = useState(false)
   const [isPinning, setIsPinning] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
   const statusBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -37,6 +38,23 @@ export const GameItem: React.FC<GameItemProps> = ({
       itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [isHighlighted])
+
+  useEffect(() => {
+    if (!isDeleteConfirming) {
+      return
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!itemRef.current?.contains(event.target as Node)) {
+        setIsDeleteConfirming(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [isDeleteConfirming])
 
   const getNextStatus = (status: GameStatus): GameStatus => {
     const statusFlow: Record<GameStatus, GameStatus> = {
@@ -59,6 +77,7 @@ export const GameItem: React.FC<GameItemProps> = ({
   const handleStatusClick = async () => {
     if (isAnimating || isUpdating) return
 
+    setIsDeleteConfirming(false)
     const nextStatus = getNextStatus(game.status)
 
     // 进入 loading 状态
@@ -254,6 +273,7 @@ export const GameItem: React.FC<GameItemProps> = ({
   const handlePinClick = async () => {
     if (isPinning) return
 
+    setIsDeleteConfirming(false)
     setIsPinning(true)
     try {
       await onPin(game.id)
@@ -265,7 +285,8 @@ export const GameItem: React.FC<GameItemProps> = ({
   const handleDeleteClick = async () => {
     if (isDeleting) return
 
-    if (!window.confirm(`确定要删除 "${game.name}"?`)) {
+    if (!isDeleteConfirming) {
+      setIsDeleteConfirming(true)
       return
     }
 
@@ -274,6 +295,7 @@ export const GameItem: React.FC<GameItemProps> = ({
       await onDelete(game.id)
     } finally {
       setIsDeleting(false)
+      setIsDeleteConfirming(false)
     }
   }
 
@@ -303,11 +325,24 @@ export const GameItem: React.FC<GameItemProps> = ({
 
       <button
         onClick={handleDeleteClick}
-        className={classNames(styles.deleteBtnAbsolute, { [styles.loading]: isDeleting })}
-        title="删除游戏"
+        className={classNames(styles.deleteBtnAbsolute, {
+          [styles.loading]: isDeleting,
+          [styles.confirming]: isDeleteConfirming,
+        })}
+        title={isDeleteConfirming ? `再次点击删除 "${game.name}"` : '删除游戏'}
         disabled={isDeleting}
+        aria-label={isDeleteConfirming ? `确认删除 ${game.name}` : `删除 ${game.name}`}
       >
-        {isDeleting ? <Loader2 size={16} className={styles.spinner} /> : <Trash2 size={16} />}
+        {isDeleting ? (
+          <Loader2 size={16} className={styles.spinner} />
+        ) : isDeleteConfirming ? (
+          <>
+            <AlertTriangle size={16} />
+            <span>确认删除</span>
+          </>
+        ) : (
+          <Trash2 size={16} />
+        )}
       </button>
 
       <div className={styles.gameWrapper}>
