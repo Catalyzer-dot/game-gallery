@@ -33,6 +33,7 @@ function mergeGameData(
         chinesePositivePercentage: undefined,
         chineseTotalReviews: undefined,
         releaseDate: backendGame.release_date ?? backendGame.release_date_text,
+        lastUpdatePublishedAt: backendGame.last_update_published_at,
         comingSoon: backendGame.categories?.includes('Coming Soon'),
         isEarlyAccess:
           backendGame.is_early_access ?? backendGame.categories?.includes('Early Access'),
@@ -74,6 +75,7 @@ function mergeGameData(
       chinesePositivePercentage: undefined,
       chineseTotalReviews: undefined,
       releaseDate: backendGame.release_date ?? backendGame.release_date_text,
+      lastUpdatePublishedAt: backendGame.last_update_published_at,
       comingSoon: backendGame.categories?.includes('Coming Soon'),
       isEarlyAccess:
         backendGame.is_early_access ?? backendGame.categories?.includes('Early Access'),

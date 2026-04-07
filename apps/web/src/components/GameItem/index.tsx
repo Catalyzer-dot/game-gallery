@@ -33,6 +33,19 @@ export const GameItem: React.FC<GameItemProps> = ({
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
   const statusBtnRef = useRef<HTMLButtonElement>(null)
 
+  const formatPublishedAt = (value?: string): string | null => {
+    if (!value) return null
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) {
+      return value
+    }
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+  }
+
   useEffect(() => {
     if (isHighlighted && itemRef.current) {
       itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -408,6 +421,11 @@ export const GameItem: React.FC<GameItemProps> = ({
                     ) : (
                       <span className={styles.releaseDate}>发布于 {game.releaseDate}</span>
                     )}
+                  </div>
+                )}
+                {game.lastUpdatePublishedAt && (
+                  <div className={styles.lastUpdateInfo}>
+                    开发商最后更新: {formatPublishedAt(game.lastUpdatePublishedAt)}
                   </div>
                 )}
               </div>

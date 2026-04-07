@@ -259,6 +259,7 @@ function App() {
       chinesePositivePercentage: undefined,
       chineseTotalReviews: undefined,
       releaseDate: backendGame.release_date ?? backendGame.release_date_text,
+      lastUpdatePublishedAt: backendGame.last_update_published_at,
       comingSoon: comingSoon ?? backendGame.categories?.includes('Coming Soon'),
       isEarlyAccess: isEarlyAccess ?? backendGame.categories?.includes('Early Access'),
       genres: backendGame.genres?.map((name) => ({ id: name, description: name })),

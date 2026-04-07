@@ -46,6 +46,7 @@ interface Game {
   chinesePositivePercentage?: number // 中文区好评率
   chineseTotalReviews?: number // 中文区评论数
   releaseDate?: string
+  lastUpdatePublishedAt?: string
   comingSoon?: boolean
   isEarlyAccess?: boolean
   genres?: Genre[]
@@ -83,6 +84,7 @@ interface BackendGame {
   genres?: string[]
   release_date?: string
   release_date_text?: string
+  last_update_published_at?: string
   developers?: string[]
   publishers?: string[]
   metacritic_score?: number
