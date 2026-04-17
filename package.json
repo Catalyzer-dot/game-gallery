@@ -14,6 +14,7 @@
   },
   "lint-staged": {
     "apps/web/**/*.{js,jsx,ts,tsx}": [
+      "bash -c 'cd apps/web && npx tsc --noEmit -p tsconfig.app.json'",
       "eslint --config apps/web/eslint.config.js --fix",
       "prettier --write"
     ],
