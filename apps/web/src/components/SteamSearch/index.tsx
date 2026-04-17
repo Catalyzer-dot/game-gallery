@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Plus, X, Loader2 } from 'lucide-react'
+import { Plus, X, Loader2 } from '../icons/Icons'
 import classNames from 'classnames'
 import { steamService, type SteamGame } from '../../services/steam'
 import styles from './index.module.scss'

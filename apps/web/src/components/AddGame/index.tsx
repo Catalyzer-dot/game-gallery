@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus } from '../icons/Icons'
 import styles from './index.module.scss'
 
 interface AddGameProps {

@@ -83,6 +83,37 @@
         gap: 0.75rem;
       }
 
+      .styleToggle {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .styleOption {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-family: 'Fredoka', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background: rgba(124, 58, 237, 0.15);
+          color: var(--text-primary);
+        }
+      }
+
+      .styleOptionActive {
+        background: rgba(124, 58, 237, 0.2);
+        border-color: var(--accent-color);
+        color: var(--accent-light);
+        box-shadow: var(--neon-purple);
+      }
+
       .sectionTitle {
         color: var(--text-primary);
         font-family: 'Fredoka', sans-serif;

@@ -10,6 +10,7 @@ import { JumpJump } from './JumpJump'
 import { FruitCatcher } from './FruitCatcher'
 import { Sokoban } from './Sokoban'
 import { GameIcon } from './GameIcon'
+import { Play } from '../icons/Icons'
 import styles from './index.module.scss'
 
 interface MiniGame {
@@ -123,7 +124,7 @@ export const MiniGames: React.FC<MiniGamesProps> = ({ onClose: _onClose }) => {
                       handlePlayGame(game.id)
                     }}
                   >
-                    开始游戏 <span className={styles.playIcon}>▶</span>
+                    开始游戏 <Play size={12} />
                   </button>
                 </div>
               </div>

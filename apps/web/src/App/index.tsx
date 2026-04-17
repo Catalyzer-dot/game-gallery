@@ -10,11 +10,12 @@ import {
   Play,
   Bookmark,
   CheckCircle,
-  Library,
-  Sparkles,
   PackageOpen,
   Plus,
-} from 'lucide-react'
+  GamesIcon,
+  PlaygroundIcon,
+  LogoIcon,
+} from '../components/icons/Icons'
 import { gameService } from '../services/game'
 import { userGameService } from '../services/userGame'
 import { steamService } from '../services/steam'
@@ -556,7 +557,10 @@ function App() {
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        <h1>GameGallery</h1>
+        <h1>
+          <LogoIcon size={32} className={styles.logoIcon} />
+          GameGallery
+        </h1>
         <div className={styles.headerActions}>
           <SearchBar
             value={searchTerm}
@@ -578,7 +582,7 @@ function App() {
             [styles.mainTabActive]: mainTab === 'steamgames',
           })}
         >
-          <Library size={18} />
+          <GamesIcon size={18} />
           Games
         </button>
         <button
@@ -587,7 +591,7 @@ function App() {
             [styles.mainTabActive]: mainTab === 'playground',
           })}
         >
-          <Sparkles size={18} />
+          <PlaygroundIcon size={18} />
           Playground
         </button>
       </div>

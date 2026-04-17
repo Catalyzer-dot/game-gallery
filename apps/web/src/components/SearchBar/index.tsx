@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search } from '../icons/Icons'
 import styles from './index.module.scss'
 
 export interface SearchResult {

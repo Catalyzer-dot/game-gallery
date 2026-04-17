@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import classNames from 'classnames'
 import type { Game, GameStatus } from '../../types'
-import { Trash2, Loader2, Pin, AlertTriangle } from 'lucide-react'
+import { Trash2, Loader2, Pin, AlertTriangle } from '../icons/Icons'
 import { isGameReleased } from '../../utils/dateUtils'
 import styles from './index.module.scss'
 

@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { Loader2, LogIn, LogOut } from 'lucide-react'
+import { Loader2, LogIn, LogOut } from './icons/Icons'
 import styles from './LoginButton.module.scss'
 
 // ==================== Types ====================
