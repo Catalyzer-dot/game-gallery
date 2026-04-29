@@ -53,14 +53,16 @@
 }
 
 .up {
-  background: rgba(255, 107, 99, 0.13);
-  border-color: rgba(255, 107, 99, 0.34);
+  background: rgba(255, 107, 99, 0.22);
+  border-color: rgba(255, 107, 99, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(255, 107, 99, 0.1);
   color: var(--red);
 }
 
 .down {
-  background: rgba(47, 209, 124, 0.13);
-  border-color: rgba(47, 209, 124, 0.34);
+  background: rgba(47, 209, 124, 0.22);
+  border-color: rgba(47, 209, 124, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(47, 209, 124, 0.1);
   color: var(--green);
 }
 
