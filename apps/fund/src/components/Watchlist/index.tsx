@@ -25,13 +25,21 @@ function toNumber(value: string | null | undefined): number | null {
   return Number.isFinite(num) ? num : null
 }
 
+function getTodayDateString(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
   const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 2)])
   const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
   const latest = latestRows[0]
   const previous = latestRows[1]
 
-  if (!latest?.dwjz) {
+  if (!latest?.dwjz || latest.date !== getTodayDateString()) {
     return { fund, gz }
   }
 

@@ -36,6 +36,14 @@ function toNumber(value: string | null | undefined): number | null {
   return Number.isFinite(numValue) ? numValue : null
 }
 
+function getTodayDateString(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function deriveDailyChange(latestValue: string, previousValue: string, fallback: string): string {
   if (fallback) {
     return fallback
@@ -208,6 +216,8 @@ export default function Detail({ code }: Props) {
   const latestDailyRows = useMemo(() => sortDailyRowsDesc(daily?.rows), [daily])
   const latestDaily = latestDailyRows[0]
   const previousDaily = latestDailyRows[1]
+  const todayDate = getTodayDateString()
+  const hasTodayDaily = latestDaily?.date === todayDate && !!latestDaily.dwjz
   const latestDailyChange = useMemo(
     () =>
       deriveDailyChange(
@@ -218,7 +228,7 @@ export default function Detail({ code }: Props) {
     [latestDaily, previousDaily]
   )
 
-  const displaySnapshot = latestDaily?.dwjz
+  const displaySnapshot = hasTodayDaily
     ? {
         title: `最新净值（${latestDaily.date}）`,
         label: '净值',
