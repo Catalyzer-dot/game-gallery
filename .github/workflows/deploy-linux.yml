@@ -144,12 +144,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           envs: WEB_CHANGED,FUND_CHANGED,GODOT_CHANGED,FORCE_ALL
-          timeout: 10m
-          command_timeout: 10m
+          timeout: 25m
+          command_timeout: 25m
           script: |
             set -e
 
-            # codeload + ghfast / ghproxy fallback 下载分支 tarball
+            # 通用下载（小分支：codeload 优先）
             download_branch_to() {
               local repo="$1" branch="$2" target="$3"
               local tmp="/tmp/${branch}-$$.tar.gz"
@@ -160,7 +160,7 @@ jobs:
               )
               for url in "${urls[@]}"; do
                 echo "==== try: $url"
-                if curl -fsSL --retry 3 --retry-delay 5 --max-time 600 -o "$tmp" "$url"; then
+                if curl -fsSL --retry 3 --retry-delay 5 --max-time 300 -o "$tmp" "$url"; then
                   mkdir -p "$target"
                   rm -rf "$target"/*
                   tar -xzf "$tmp" --strip-components=1 -C "$target"
@@ -172,6 +172,34 @@ jobs:
                 echo "⚠️  $url 失败，尝试下一个"
               done
               echo "❌ $branch 全部源失败"
+              return 1
+            }
+
+            # godot 专用（67MB，国内访问 codeload 直连超慢，优先走镜像）
+            download_godot_to() {
+              local repo="$1" target="$2"
+              local tmp="/tmp/godot-assets-$$.tar.gz"
+              local urls=(
+                "https://ghfast.top/https://github.com/${repo}/archive/refs/heads/godot-assets.tar.gz"
+                "https://ghproxy.com/https://github.com/${repo}/archive/refs/heads/godot-assets.tar.gz"
+                "https://codeload.github.com/${repo}/tar.gz/refs/heads/godot-assets"
+              )
+              for url in "${urls[@]}"; do
+                echo "==== godot try: $url"
+                if curl -fsSL --retry 2 --retry-delay 5 --max-time 1200 \
+                       --speed-time 30 --speed-limit 10240 \
+                       -o "$tmp" "$url"; then
+                  mkdir -p "$target"
+                  rm -rf "$target"/*
+                  tar -xzf "$tmp" --strip-components=1 -C "$target"
+                  rm -f "$tmp"
+                  echo "✅ godot → $target"
+                  return 0
+                fi
+                rm -f "$tmp"
+                echo "⚠️  godot 源失败，换下一个"
+              done
+              echo "❌ godot 全部源失败"
               return 1
             }
 
@@ -193,8 +221,8 @@ jobs:
             # 服务器若没拿过 godot 资源，即使 godot 没变化也强制拉一次（首次部署兜底）
             if [ "$GODOT_CHANGED" = "true" ] || [ "$FORCE_ALL" = "true" ] \
                || [ ! -d /opt/godot-assets/godot-tower-defense ]; then
-              download_branch_to "$REPO" godot-assets /opt/godot-assets \
-                || echo "⚠️ godot-assets 分支不可用（首次部署需手动 dispatch 一次 force_all=true 来 publish）"
+              download_godot_to "$REPO" /opt/godot-assets \
+                || echo "⚠️ godot-assets 分支不可用，可在服务器手动跑一次：curl -fL https://ghfast.top/https://github.com/${REPO}/archive/refs/heads/godot-assets.tar.gz | tar xz --strip-components=1 -C /opt/godot-assets"
             else
               echo "skip godot (no changes)"
             fi
