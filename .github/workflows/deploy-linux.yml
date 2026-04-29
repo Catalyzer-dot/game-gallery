@@ -53,20 +53,6 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy web build ${{ github.sha }}'
 
-      - name: Push web to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          source: './apps/web/dist/*'
-          target: '/tmp/game-gallery-frontend/'
-          strip_components: 3
-          rm: true
-          timeout: 15m
-          command_timeout: 15m
-
       # ===== fund-tracker 子前端 apps/fund =====
       - name: Build fund frontend
         working-directory: ./apps/fund
@@ -74,21 +60,18 @@ jobs:
           VITE_BASE_PATH: /
         run: npm run build
 
-      - name: Push fund to server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy fund to fund-dist branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          source: './apps/fund/dist/*'
-          target: '/tmp/fund-frontend/'
-          strip_components: 3
-          rm: true
-          timeout: 10m
-          command_timeout: 10m
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/fund/dist
+          publish_branch: fund-dist
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy fund build ${{ github.sha }}'
 
-      # ===== 服务器侧部署 =====
+      # ===== 服务器侧部署：git pull（跨境比 SCP 稳得多） =====
       - name: Deploy to Linux Server
         uses: appleboy/ssh-action@master
         with:
@@ -100,48 +83,50 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
+            REPO_URL="https://github.com/${{ github.repository }}.git"
 
-            # ----- web (game-gallery) -----
-            if [ -d /tmp/game-gallery-frontend ]; then
-              echo "Deploying web frontend..."
-              mkdir -p /opt/game-gallery/web/dist
-              rm -rf /opt/game-gallery/web/dist/*
-              cp -r /tmp/game-gallery-frontend/* /opt/game-gallery/web/dist/
-              rm -rf /tmp/game-gallery-frontend
-              echo "✅ web → /opt/game-gallery/web/dist"
-            fi
+            sync_branch_to() {
+              local branch="$1" target="$2"
+              echo "==== sync $branch → $target"
+              if [ -d "$target/.git" ]; then
+                cd "$target"
+                git fetch --depth 1 origin "$branch" --quiet
+                git reset --hard "origin/$branch" --quiet
+                git clean -fd --quiet
+              else
+                rm -rf "$target"
+                git clone --depth 1 --branch "$branch" "$REPO_URL" "$target"
+              fi
+            }
 
-            # ----- fund-tracker frontend -----
-            if [ -d /tmp/fund-frontend ]; then
-              echo "Deploying fund frontend..."
-              mkdir -p /opt/fund-tracker/web/dist
-              rm -rf /opt/fund-tracker/web/dist/*
-              cp -r /tmp/fund-frontend/* /opt/fund-tracker/web/dist/
-              rm -rf /tmp/fund-frontend
-              echo "✅ fund → /opt/fund-tracker/web/dist"
-            fi
+            # ----- web 静态：dist 分支 -----
+            sync_branch_to dist /opt/game-gallery/web/dist
+            echo "✅ web → /opt/game-gallery/web/dist"
 
-            # ----- fund-tracker docker container（顺带 sync data + 拉新镜像） -----
+            # ----- fund 静态：fund-dist 分支 -----
+            sync_branch_to fund-dist /opt/fund-tracker/web/dist
+            echo "✅ fund → /opt/fund-tracker/web/dist"
+
+            # ----- fund-tracker docker container -----
             FT=/opt/fund-tracker
             if [ ! -d "$FT/.git" ]; then
-              echo "首次 clone fund-tracker repo → $FT"
-              git clone https://github.com/YBoomer/fund-tracker.git "$FT.repo"
-              # 把 .git 与脚本搬进 $FT，保持 web/dist + data 不变
-              mv "$FT.repo/.git" "$FT/"
-              cp -n "$FT.repo/deploy/docker-compose.yml" "$FT/" 2>/dev/null || true
-              cp -n "$FT.repo/deploy/deploy.sh" "$FT/" 2>/dev/null || true
-              cp -n "$FT.repo/deploy/sync-data.sh" "$FT/" 2>/dev/null || true
-              chmod +x "$FT"/*.sh 2>/dev/null || true
-              rm -rf "$FT.repo"
+              echo "首次 init fund-tracker repo → $FT"
+              # 用临时目录 clone，把 .git 搬过去（避免删除已存在的 web/dist 与 data）
+              git clone --depth 1 https://github.com/YBoomer/fund-tracker.git "${FT}.tmp"
+              mv "${FT}.tmp/.git" "$FT/"
+              cd "$FT"
+              # 用仓库 HEAD 覆盖工作树（已有 web/dist 与 data 不在仓库里，不会被动）
+              git checkout -- . 2>/dev/null || true
+              rm -rf "${FT}.tmp"
+            else
+              cd "$FT"
+              echo "🔄 git pull fund-tracker"
+              git fetch --depth 1 --quiet
+              git reset --hard origin/main --quiet
             fi
 
-            cd "$FT"
-            echo "🔄 sync fund-tracker repo (data/)"
-            git fetch --quiet
-            git reset --hard origin/main --quiet
-
-            # 总是用最新仓库副本覆盖部署脚本
-            cp deploy/docker-compose.yml deploy.sh sync-data.sh ./ 2>/dev/null || cp deploy/docker-compose.yml deploy/deploy.sh deploy/sync-data.sh ./
+            # 把 deploy/* 拷到部署根方便 sync-data 找
+            cp deploy/docker-compose.yml deploy/deploy.sh deploy/sync-data.sh ./
             chmod +x deploy.sh sync-data.sh
 
             echo "📥 docker pull fund-tracker latest"
