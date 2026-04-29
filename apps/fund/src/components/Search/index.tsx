@@ -23,7 +23,6 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
   const [addError, setAddError] = useState('')
   const debounceRef = useRef<number | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
-  const lastQueryRef = useRef('')
   const searchRequestRef = useRef(0)
   const quickRequestRef = useRef(0)
 
@@ -40,18 +39,22 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
   function onChange(value: string) {
     setQ(value)
     if (debounceRef.current) window.clearTimeout(debounceRef.current)
+
+    searchRequestRef.current += 1
+    quickRequestRef.current += 1
+    setResults([])
+    setShowResults(false)
+    setQuick(null)
+    setAddError('')
+    setSearchError('')
+
     if (!value.trim()) {
-      searchRequestRef.current += 1
-      setResults([])
-      setShowResults(false)
       setSearching(false)
-      setSearchError('')
       return
     }
+
     setSearching(true)
-    setSearchError('')
-    const requestId = searchRequestRef.current + 1
-    searchRequestRef.current = requestId
+    const requestId = searchRequestRef.current
     debounceRef.current = window.setTimeout(() => {
       void doSearch(value.trim(), requestId)
     }, 250)
@@ -59,12 +62,6 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
 
   async function doSearch(key: string, requestId: number) {
     if (searchRequestRef.current !== requestId) return
-    if (key === lastQueryRef.current) {
-      setSearching(false)
-      setShowResults(true)
-      return
-    }
-    lastQueryRef.current = key
     try {
       const list = await searchFunds(key)
       if (searchRequestRef.current !== requestId) return
