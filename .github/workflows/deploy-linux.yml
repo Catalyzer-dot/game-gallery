@@ -104,9 +104,9 @@ jobs:
             # ----- web (game-gallery) -----
             if [ -d /tmp/game-gallery-frontend ]; then
               echo "Deploying web frontend..."
-              sudo mkdir -p /opt/game-gallery/web/dist
-              sudo rm -rf /opt/game-gallery/web/dist/*
-              sudo cp -r /tmp/game-gallery-frontend/* /opt/game-gallery/web/dist/
+              mkdir -p /opt/game-gallery/web/dist
+              rm -rf /opt/game-gallery/web/dist/*
+              cp -r /tmp/game-gallery-frontend/* /opt/game-gallery/web/dist/
               rm -rf /tmp/game-gallery-frontend
               echo "✅ web → /opt/game-gallery/web/dist"
             fi
@@ -114,9 +114,9 @@ jobs:
             # ----- fund (fund-tracker frontend) -----
             if [ -d /tmp/fund-frontend ]; then
               echo "Deploying fund frontend..."
-              sudo mkdir -p /opt/fund-tracker/web/dist
-              sudo rm -rf /opt/fund-tracker/web/dist/*
-              sudo cp -r /tmp/fund-frontend/* /opt/fund-tracker/web/dist/
+              mkdir -p /opt/fund-tracker/web/dist
+              rm -rf /opt/fund-tracker/web/dist/*
+              cp -r /tmp/fund-frontend/* /opt/fund-tracker/web/dist/
               rm -rf /tmp/fund-frontend
               echo "✅ fund → /opt/fund-tracker/web/dist"
             fi
