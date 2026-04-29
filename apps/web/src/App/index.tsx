@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense, useRef, useCallback } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import classNames from 'classnames'
 import { GameItem } from '../components/GameItem'
 import { SearchBar, type SearchResult } from '../components/SearchBar'
@@ -44,8 +45,33 @@ const SteamSearch = lazy(() =>
 const Settings = lazy(() =>
   import('../components/Settings').then((module) => ({ default: module.Settings }))
 )
+const TowerDefensePage = lazy(() =>
+  import('../pages/TowerDefense').then((module) => ({ default: module.TowerDefensePage }))
+)
 
 function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/tower-defense"
+        element={
+          <Suspense
+            fallback={
+              <div className={styles.loadingContainer}>
+                <Loader2 className={`${styles.loaderIcon} animate-spin`} size={32} />
+              </div>
+            }
+          >
+            <TowerDefensePage />
+          </Suspense>
+        }
+      />
+    </Routes>
+  )
+}
+
+function HomePage() {
   // 状态管理
   const [games, setGames] = useState<Game[]>([])
   const [searchTerm, setSearchTerm] = useState('')
