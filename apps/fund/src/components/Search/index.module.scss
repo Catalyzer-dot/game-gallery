@@ -1,5 +1,7 @@
 .box {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .input {
@@ -19,16 +21,10 @@
   }
 }
 
-.searchHint {
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 12px;
-  margin-top: 6px;
-}
-
 .results {
   list-style: none;
-  margin: 8px 0 0;
+  margin: 0;
+  min-height: 164px;
   padding: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
@@ -37,10 +33,6 @@
   max-height: min(380px, calc(100vh - 220px));
   overflow-y: auto;
   overscroll-behavior: contain;
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 10;
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -108,9 +100,14 @@
   min-width: 58px;
 }
 
-.errorItem {
-  color: var(--red);
-  padding: 9px 10px;
+.statusItem {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  min-height: 146px;
+  justify-content: center;
+  padding: 12px;
+  text-align: center;
 }
 
 .name {

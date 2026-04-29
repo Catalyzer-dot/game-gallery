@@ -1,5 +1,5 @@
 /* 搜索区：调后端 /api/fund/search + /api/fund/realtime */
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { addWatchlist, fetchGz, searchFunds } from '@services/api'
 import type { GzData, SearchHit, WatchFund } from '@/types'
 import { pct, pctClass } from '@/utils/format'
@@ -20,24 +20,12 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
   const [q, setQ] = useState('')
   const [results, setResults] = useState<SearchHit[]>([])
   const [previews, setPreviews] = useState<Record<string, ResultPreview>>({})
-  const [showResults, setShowResults] = useState(false)
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [addingCode, setAddingCode] = useState<string | null>(null)
   const [addError, setAddError] = useState<Record<string, string>>({})
   const debounceRef = useRef<number | null>(null)
-  const wrapRef = useRef<HTMLDivElement | null>(null)
   const searchRequestRef = useRef(0)
-
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        setShowResults(false)
-      }
-    }
-    document.addEventListener('click', onClick)
-    return () => document.removeEventListener('click', onClick)
-  }, [])
 
   function onChange(value: string) {
     setQ(value)
@@ -46,7 +34,6 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
     searchRequestRef.current += 1
     setResults([])
     setPreviews({})
-    setShowResults(false)
     setAddError({})
     setSearchError('')
 
@@ -68,13 +55,11 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
       const list = await searchFunds(key)
       if (searchRequestRef.current !== requestId) return
       setResults(list)
-      setShowResults(true)
       setSearchError('')
       void loadResultPreviews(list.slice(0, 8), requestId)
     } catch (e) {
       if (searchRequestRef.current !== requestId) return
       setResults([])
-      setShowResults(true)
       setSearchError(e instanceof Error ? e.message : String(e))
     } finally {
       if (searchRequestRef.current === requestId) {
@@ -131,7 +116,7 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
       <div className={shared.cardHead}>
         <h2>搜索基金</h2>
       </div>
-      <div className={styles.box} ref={wrapRef}>
+      <div className={styles.box}>
         <input
           type="search"
           value={q}
@@ -141,13 +126,14 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
           className={styles.input}
           aria-label="搜索基金"
         />
-        {searching && <div className={styles.searchHint}>搜索中…</div>}
-        {showResults && (
+        {q.trim() && (
           <ul className={styles.results}>
             {searchError ? (
-              <li className={styles.errorItem}>搜索失败：{searchError}</li>
+              <li className={styles.statusItem}>搜索失败：{searchError}</li>
+            ) : searching ? (
+              <li className={styles.statusItem}>搜索中…</li>
             ) : !results.length ? (
-              <li className="muted">{searching ? '搜索中…' : '无结果'}</li>
+              <li className={styles.statusItem}>无结果</li>
             ) : (
               results.map((r) => {
                 const preview = previews[r.code]
