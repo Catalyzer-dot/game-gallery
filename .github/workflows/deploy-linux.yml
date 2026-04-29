@@ -92,12 +92,14 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy web build ${{ github.sha }}'
 
-      # ===== fund 子前端 apps/fund =====
+      # ===== fund 子前端 apps/fund (挂载到 degenerates.site/fund/) =====
       - name: Build fund frontend
         if: env.FUND_CHANGED == 'true' || env.FORCE_ALL == 'true'
         working-directory: ./apps/fund
         env:
-          VITE_BASE_PATH: /
+          VITE_BASE_PATH: /fund/
+          # API 同源，相对路径就够（前端 fetch /api/fund/...）
+          VITE_API_URL: ''
         run: npm run build
 
       - name: Deploy fund to fund-dist branch
