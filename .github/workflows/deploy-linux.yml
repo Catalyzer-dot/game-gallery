@@ -37,10 +37,12 @@ jobs:
               - '!apps/web/public/godot-tower-defense/**'
               - 'package.json'
               - 'package-lock.json'
+              - '.github/workflows/deploy-linux.yml'
             fund:
               - 'apps/fund/**'
               - 'package.json'
               - 'package-lock.json'
+              - '.github/workflows/deploy-linux.yml'
             godot:
               - 'apps/web/public/godot-tower-defense/**'
 
