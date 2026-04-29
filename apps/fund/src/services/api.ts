@@ -137,14 +137,14 @@ export const loadHoldings = async (code: string): Promise<HoldingsData | null> =
   }
 }
 
-export const loadDaily = async (code: string): Promise<DailyData | null> => {
+export const loadDaily = async (code: string, days = 90): Promise<DailyData | null> => {
   try {
     interface BackendDailyRow {
       date: string
       dwjz: number
       jzzzl: number | null
     }
-    const rows = await request<BackendDailyRow[]>(`/api/fund/${code}/daily?days=90`)
+    const rows = await request<BackendDailyRow[]>(`/api/fund/${code}/daily?days=${days}`)
     const mapped: DailyRow[] = rows.map((r) => ({
       date: r.date,
       dwjz: String(r.dwjz),

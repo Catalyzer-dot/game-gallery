@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
 import { Trash2 } from 'lucide-react'
-import { fetchGz, removeWatchlist } from '@services/api'
+import { fetchGz, loadDaily, removeWatchlist } from '@services/api'
 import type { GzData, WatchFund } from '@/types'
 import { pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
@@ -17,6 +17,47 @@ interface Props {
 interface Row {
   fund: WatchFund
   gz?: GzData | null
+}
+
+function toNumber(value: string | null | undefined): number | null {
+  if (!value) return null
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
+async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
+  const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 2)])
+  const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
+  const latest = latestRows[0]
+  const previous = latestRows[1]
+
+  if (!latest?.dwjz) {
+    return { fund, gz }
+  }
+
+  const prevNet = previous?.dwjz || gz?.dwjz || ''
+  const latestNet = latest.dwjz || gz?.gsz || ''
+  const derivedChange =
+    latest.jzzzl ||
+    (() => {
+      const prev = toNumber(prevNet)
+      const current = toNumber(latestNet)
+      if (!prev || current == null) return ''
+      return (((current - prev) / prev) * 100).toFixed(2)
+    })()
+
+  return {
+    fund,
+    gz: {
+      fundcode: gz?.fundcode || fund.code,
+      name: gz?.name || fund.name,
+      jzrq: previous?.date || gz?.jzrq || '',
+      dwjz: prevNet,
+      gsz: latestNet,
+      gszzl: derivedChange,
+      gztime: `${latest.date} 15:00`,
+    },
+  }
 }
 
 async function mapWithConcurrency<T, R>(
@@ -60,10 +101,7 @@ export default function Watchlist({ funds, onChange }: Props) {
     setLoading(true)
     setError('')
     try {
-      const results = await mapWithConcurrency(funds, 4, async (f) => ({
-        fund: f,
-        gz: await fetchGz(f.code),
-      }))
+      const results = await mapWithConcurrency(funds, 4, fetchWatchlistSnapshot)
       if (refreshRequestRef.current !== requestId) return
       setRows(results)
       if (results.some((r) => r.gz === null)) {
