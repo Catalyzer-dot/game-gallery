@@ -96,8 +96,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          timeout: 5m
-          command_timeout: 5m
+          timeout: 10m
+          command_timeout: 10m
           script: |
             set -e
 
@@ -111,7 +111,7 @@ jobs:
               echo "✅ web → /opt/game-gallery/web/dist"
             fi
 
-            # ----- fund (fund-tracker frontend) -----
+            # ----- fund-tracker frontend -----
             if [ -d /tmp/fund-frontend ]; then
               echo "Deploying fund frontend..."
               mkdir -p /opt/fund-tracker/web/dist
@@ -120,6 +120,39 @@ jobs:
               rm -rf /tmp/fund-frontend
               echo "✅ fund → /opt/fund-tracker/web/dist"
             fi
+
+            # ----- fund-tracker docker container（顺带 sync data + 拉新镜像） -----
+            FT=/opt/fund-tracker
+            if [ ! -d "$FT/.git" ]; then
+              echo "首次 clone fund-tracker repo → $FT"
+              git clone https://github.com/YBoomer/fund-tracker.git "$FT.repo"
+              # 把 .git 与脚本搬进 $FT，保持 web/dist + data 不变
+              mv "$FT.repo/.git" "$FT/"
+              cp -n "$FT.repo/deploy/docker-compose.yml" "$FT/" 2>/dev/null || true
+              cp -n "$FT.repo/deploy/deploy.sh" "$FT/" 2>/dev/null || true
+              cp -n "$FT.repo/deploy/sync-data.sh" "$FT/" 2>/dev/null || true
+              chmod +x "$FT"/*.sh 2>/dev/null || true
+              rm -rf "$FT.repo"
+            fi
+
+            cd "$FT"
+            echo "🔄 sync fund-tracker repo (data/)"
+            git fetch --quiet
+            git reset --hard origin/main --quiet
+
+            # 总是用最新仓库副本覆盖部署脚本
+            cp deploy/docker-compose.yml deploy.sh sync-data.sh ./ 2>/dev/null || cp deploy/docker-compose.yml deploy/deploy.sh deploy/sync-data.sh ./
+            chmod +x deploy.sh sync-data.sh
+
+            echo "📥 docker pull fund-tracker latest"
+            docker pull ghcr.io/yboomer/fund-tracker:latest
+
+            echo "🔄 docker compose up"
+            IMAGE=ghcr.io/yboomer/fund-tracker:latest docker compose up -d --force-recreate
+
+            sleep 3
+            docker compose ps fund-tracker || true
+            echo "✅ fund-tracker container deployed"
 
       - name: Done
         run: |
