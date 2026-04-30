@@ -17,7 +17,8 @@ export default defineConfig({
     strictPort: true,
     open: true,
     proxy: {
-      // 本地开发：前端 5174 → fund-tracker 容器 / 本地 node 8787
+      // 仅在未显式设置 VITE_API_URL 且请求相对路径时使用。
+      // 当前前端开发默认会直连 https://degenerates.site。
       '/api': 'http://localhost:8787',
       '/data': 'http://localhost:8787',
     },

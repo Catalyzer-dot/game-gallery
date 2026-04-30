@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
+import Settings from '@components/Settings'
 import Watchlist from '@components/Watchlist'
 import Search from '@components/Search'
 import FundRankings from '@components/FundRankings'
@@ -8,10 +9,14 @@ import type { WatchFund } from '@/types'
 import shared from '@/styles/shared.module.scss'
 
 const REPO_URL = 'https://github.com/Catalyzer-dot/game-gallery/tree/main/apps/fund'
+const ADVANCED_POSITION_KEY = 'fund_tracker_show_advanced_position'
 
 export default function Home() {
   const [watchlist, setWatchlist] = useState<WatchFund[]>([])
   const [authRequired, setAuthRequired] = useState(false)
+  const [showAdvancedPosition, setShowAdvancedPosition] = useState(() => {
+    return window.localStorage.getItem(ADVANCED_POSITION_KEY) === '1'
+  })
 
   const reload = useCallback(async () => {
     if (!getSessionToken()) {
@@ -35,6 +40,10 @@ export default function Home() {
     void reload()
   }, [reload])
 
+  useEffect(() => {
+    window.localStorage.setItem(ADVANCED_POSITION_KEY, showAdvancedPosition ? '1' : '0')
+  }, [showAdvancedPosition])
+
   return (
     <div className={shared.page}>
       <header className={shared.header}>
@@ -43,6 +52,10 @@ export default function Home() {
           <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
             repo <ExternalLink size={11} style={{ verticalAlign: 'middle' }} />
           </a>
+          <Settings
+            showAdvancedPosition={showAdvancedPosition}
+            onToggleAdvancedPosition={() => setShowAdvancedPosition((value) => !value)}
+          />
         </div>
       </header>
 
@@ -58,7 +71,11 @@ export default function Home() {
           <>
             <FundRankings />
             <Search watchlist={watchlist} onWatchlistChange={reload} />
-            <Watchlist funds={watchlist} onChange={reload} />
+            <Watchlist
+              funds={watchlist}
+              onChange={reload}
+              showAdvancedPosition={showAdvancedPosition}
+            />
           </>
         )}
       </main>

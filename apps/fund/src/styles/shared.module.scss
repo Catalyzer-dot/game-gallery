@@ -29,15 +29,15 @@
     font-size: 12px;
     font-family: var(--mono);
 
-    a,
-    span {
+    > a,
+    > span {
       border: 1px solid var(--line);
       border-radius: 999px;
       padding: 5px 10px;
       background: rgba(255, 255, 255, 0.03);
     }
 
-    a:hover {
+    > a:hover {
       border-color: rgba(110, 198, 255, 0.6);
       text-decoration: none;
     }

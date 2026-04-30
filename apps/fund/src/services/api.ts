@@ -20,7 +20,8 @@ import type {
   WatchFund,
 } from '@/types'
 
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+const DEFAULT_API_BASE = import.meta.env.DEV ? 'https://degenerates.site' : ''
+const API_BASE = (import.meta.env.VITE_API_URL || DEFAULT_API_BASE).replace(/\/$/, '')
 const TOKEN_KEY = 'session_token'
 
 const url = (path: string): string => `${API_BASE}${path}`
@@ -91,15 +92,21 @@ export const addWatchlist = (code: string, name?: string, industry?: string): Pr
 
 export const updateWatchlistPosition = (
   code: string,
-  holdingAmount: number | null,
-  navPrice?: number | null
+  payload: {
+    holdingAmount?: number | null
+    navPrice?: number | null
+    holdingShares?: number | null
+    holdingCostPrice?: number | null
+  }
 ): Promise<WatchFund> =>
   request<WatchFund>(`/api/fund/watchlist/${code}/position`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      holding_amount: holdingAmount,
-      nav_price: navPrice,
+      holding_amount: payload.holdingAmount,
+      nav_price: payload.navPrice,
+      holding_shares: payload.holdingShares,
+      holding_cost_price: payload.holdingCostPrice,
     }),
   })
 

@@ -10,6 +10,7 @@ import styles from './index.module.scss'
 
 interface Props {
   funds: WatchFund[]
+  showAdvancedPosition: boolean
   /** 当 watchlist 本身（增/删）变化时触发上层 reload */
   onChange?: () => void
 }
@@ -25,6 +26,14 @@ function toNumber(value: string | null | undefined): number | null {
   if (!value) return null
   const num = Number(value)
   return Number.isFinite(num) ? num : null
+}
+
+function parsePositiveNumber(value: string): number | null {
+  const raw = value.trim().replace(/,/g, '')
+  if (!raw) return null
+  const parsed = Number(raw)
+  if (!Number.isFinite(parsed) || parsed <= 0) return null
+  return parsed
 }
 
 function getTodayDateString(): string {
@@ -66,7 +75,8 @@ function getCurrentChange(gz: GzData | null | undefined, daily: DailyRow | null 
   }
 }
 
-function getLatestNavPrice(
+function getValuationPrice(
+  gz: GzData | null | undefined,
   daily: DailyRow | null | undefined,
   previousDaily: DailyRow | null | undefined
 ) {
@@ -75,6 +85,41 @@ function getLatestNavPrice(
     return {
       value: currentNav,
       date: daily?.date || '',
+    }
+  }
+
+  const estimatePrice = toNumber(gz?.gsz)
+  if (estimatePrice != null) {
+    return {
+      value: estimatePrice,
+      date: gz?.gztime || '',
+    }
+  }
+
+  return {
+    value: toNumber(previousDaily?.dwjz),
+    date: previousDaily?.date || gz?.jzrq || '',
+  }
+}
+
+function getNavPrice(
+  gz: GzData | null | undefined,
+  daily: DailyRow | null | undefined,
+  previousDaily: DailyRow | null | undefined
+) {
+  const currentNav = toNumber(daily?.dwjz)
+  if (currentNav != null) {
+    return {
+      value: currentNav,
+      date: daily?.date || '',
+    }
+  }
+
+  const realtimeNav = toNumber(gz?.dwjz)
+  if (realtimeNav != null) {
+    return {
+      value: realtimeNav,
+      date: gz?.jzrq || '',
     }
   }
 
@@ -98,6 +143,14 @@ function formatMoney(value: number | null | undefined): string {
   return value.toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+  })
+}
+
+function formatValue(value: number | null | undefined, digits: number): string {
+  if (value == null || !Number.isFinite(value)) return '—'
+  return value.toLocaleString('zh-CN', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   })
 }
 
@@ -157,14 +210,18 @@ async function mapWithConcurrency<T, R>(
   return results
 }
 
-export default function Watchlist({ funds, onChange }: Props) {
+export default function Watchlist({ funds, showAdvancedPosition, onChange }: Props) {
   const [rows, setRows] = useState<Row[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [editingCode, setEditingCode] = useState('')
   const [amountDraft, setAmountDraft] = useState('')
+  const [holdingPopoverCode, setHoldingPopoverCode] = useState('')
+  const [sharesDraft, setSharesDraft] = useState('')
+  const [costDraft, setCostDraft] = useState('')
   const [savingCode, setSavingCode] = useState('')
   const refreshRequestRef = useRef(0)
+  const popoverCloseTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     setRows(funds.map((f) => ({ fund: f })))
@@ -174,6 +231,14 @@ export default function Watchlist({ funds, onChange }: Props) {
     void refreshAll()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [funds])
+
+  useEffect(() => {
+    return () => {
+      if (popoverCloseTimerRef.current != null) {
+        window.clearTimeout(popoverCloseTimerRef.current)
+      }
+    }
+  }, [])
 
   async function refreshAll() {
     const requestId = refreshRequestRef.current + 1
@@ -197,6 +262,13 @@ export default function Watchlist({ funds, onChange }: Props) {
     }
   }
 
+  function clearPopoverCloseTimer() {
+    if (popoverCloseTimerRef.current != null) {
+      window.clearTimeout(popoverCloseTimerRef.current)
+      popoverCloseTimerRef.current = null
+    }
+  }
+
   function go(code: string) {
     window.location.hash = `#/fund/${code}`
   }
@@ -212,39 +284,77 @@ export default function Watchlist({ funds, onChange }: Props) {
     }
   }
 
-  function startEdit(e: React.MouseEvent, code: string, currentAmount: number | null) {
+  function startCurrentValueEdit(e: React.MouseEvent, code: string, currentAmount: number | null) {
     e.stopPropagation()
+    clearPopoverCloseTimer()
+    setHoldingPopoverCode('')
+    setSharesDraft('')
+    setCostDraft('')
     setEditingCode(code)
     setAmountDraft(currentAmount != null ? currentAmount.toFixed(2) : '')
   }
 
-  function cancelEdit(e: React.MouseEvent) {
+  function cancelCurrentValueEdit(e: React.MouseEvent) {
     e.stopPropagation()
     setEditingCode('')
     setAmountDraft('')
   }
 
-  async function savePosition(e: React.SyntheticEvent, fund: WatchFund, navPrice: number | null) {
+  function openHoldingPopover(fund: WatchFund) {
+    if (!showAdvancedPosition || savingCode || editingCode === fund.code) return
+    clearPopoverCloseTimer()
+    setHoldingPopoverCode(fund.code)
+    setSharesDraft(
+      fund.holding_shares != null && Number.isFinite(fund.holding_shares)
+        ? String(fund.holding_shares)
+        : ''
+    )
+    setCostDraft(
+      fund.holding_cost_price != null && Number.isFinite(fund.holding_cost_price)
+        ? String(fund.holding_cost_price)
+        : ''
+    )
+  }
+
+  function scheduleCloseHoldingPopover(code: string) {
+    clearPopoverCloseTimer()
+    popoverCloseTimerRef.current = window.setTimeout(() => {
+      if (savingCode === code) return
+      setHoldingPopoverCode((current) => (current === code ? '' : current))
+      setSharesDraft('')
+      setCostDraft('')
+      popoverCloseTimerRef.current = null
+    }, 120)
+  }
+
+  async function saveCurrentValuePosition(
+    e: React.SyntheticEvent,
+    fund: WatchFund,
+    navPrice: number | null
+  ) {
     e.stopPropagation()
     const raw = amountDraft.trim().replace(/,/g, '')
     if (!raw) {
-      await clearPosition(e, fund)
+      await clearCurrentValuePosition(e, fund)
       return
     }
 
     const amount = Number(raw)
     if (!Number.isFinite(amount) || amount < 0) {
-      alert('请输入有效的持有金额')
+      alert('请输入有效的当前持有金额')
       return
     }
     if (amount > 0 && (!navPrice || navPrice <= 0)) {
-      alert('当前净值或估值不可用，暂时不能设置持有金额')
+      alert('当前净值或估值不可用，暂时不能设置当前持有金额')
       return
     }
 
     try {
       setSavingCode(fund.code)
-      await updateWatchlistPosition(fund.code, amount > 0 ? amount : null, navPrice)
+      await updateWatchlistPosition(fund.code, {
+        holdingAmount: amount > 0 ? amount : null,
+        navPrice,
+      })
       setEditingCode('')
       setAmountDraft('')
       onChange?.()
@@ -255,11 +365,14 @@ export default function Watchlist({ funds, onChange }: Props) {
     }
   }
 
-  async function clearPosition(e: React.SyntheticEvent, fund: WatchFund) {
+  async function clearCurrentValuePosition(e: React.SyntheticEvent, fund: WatchFund) {
     e.stopPropagation()
     try {
       setSavingCode(fund.code)
-      await updateWatchlistPosition(fund.code, null, null)
+      await updateWatchlistPosition(fund.code, {
+        holdingAmount: null,
+        navPrice: null,
+      })
       setEditingCode('')
       setAmountDraft('')
       onChange?.()
@@ -270,16 +383,47 @@ export default function Watchlist({ funds, onChange }: Props) {
     }
   }
 
+  async function saveHoldingPosition(e: React.SyntheticEvent, fund: WatchFund) {
+    e.stopPropagation()
+    const shares = parsePositiveNumber(sharesDraft)
+    const costPrice = parsePositiveNumber(costDraft)
+
+    if (shares == null && costPrice == null) {
+      setHoldingPopoverCode('')
+      return
+    }
+    if (shares == null || costPrice == null) {
+      alert('请同时输入有效的持有份额和持仓成本价')
+      return
+    }
+
+    try {
+      setSavingCode(fund.code)
+      await updateWatchlistPosition(fund.code, {
+        holdingShares: shares,
+        holdingCostPrice: costPrice,
+      })
+      setHoldingPopoverCode('')
+      setSharesDraft('')
+      setCostDraft('')
+      onChange?.()
+    } catch (err) {
+      alert('保存失败：' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setSavingCode('')
+    }
+  }
+
   const totalProfit = rows.reduce<number | null>((total, { fund, gz, daily, previousDaily }) => {
     const holdingUnits = fund.holding_units ?? null
     if (holdingUnits == null) return total
 
-    const latestNavPrice = getLatestNavPrice(daily, previousDaily)
-    if (latestNavPrice.value == null) return total
+    const navPrice = getNavPrice(gz, daily, previousDaily)
+    if (navPrice.value == null) return total
 
     const currentChange = getCurrentChange(gz, daily)
-    const holdingAmount = holdingUnits * latestNavPrice.value
-    const changeAmount = getChangeAmount(holdingAmount, currentChange.value)
+    const marketValue = holdingUnits * navPrice.value
+    const changeAmount = getChangeAmount(marketValue, currentChange.value)
     if (changeAmount == null) return total
 
     return (total ?? 0) + changeAmount
@@ -344,20 +488,47 @@ export default function Watchlist({ funds, onChange }: Props) {
                   const previousState = pctClass(previousDaily?.jzzzl)
                   const currentChange = getCurrentChange(gz, daily)
                   const currentState = pctClass(currentChange.value)
-                  const latestNavPrice = getLatestNavPrice(daily, previousDaily)
+                  const valuationPrice = getValuationPrice(gz, daily, previousDaily)
+                  const navPrice = getNavPrice(gz, daily, previousDaily)
                   const holdingUnits = fund.holding_units ?? null
-                  const holdingAmount =
-                    holdingUnits != null && latestNavPrice.value != null
-                      ? holdingUnits * latestNavPrice.value
+                  const marketValue =
+                    holdingUnits != null && navPrice.value != null
+                      ? holdingUnits * navPrice.value
                       : null
-                  const holdingDelta = getChangeAmount(holdingAmount, currentChange.value)
+                  const holdingShares = fund.holding_shares ?? null
+                  const holdingCostPrice = fund.holding_cost_price ?? null
+                  const costAmount =
+                    fund.holding_amount ??
+                    (holdingShares != null && holdingCostPrice != null
+                      ? holdingShares * holdingCostPrice
+                      : null)
+                  const currentHolding = marketValue ?? costAmount
+                  const holdingAmount =
+                    fund.holding_amount ??
+                    (holdingShares != null && holdingCostPrice != null
+                      ? holdingShares * holdingCostPrice
+                      : marketValue)
+                  const holdingDelta = getChangeAmount(currentHolding, currentChange.value)
                   const holdingState = moneyClass(holdingDelta)
+                  const holdingAmountPreview =
+                    parsePositiveNumber(sharesDraft) != null &&
+                    parsePositiveNumber(costDraft) != null
+                      ? parsePositiveNumber(sharesDraft)! * parsePositiveNumber(costDraft)!
+                      : null
+                  const positionMeta = showAdvancedPosition
+                    ? holdingShares != null && holdingCostPrice != null
+                      ? `${formatValue(holdingShares, 2)} 份 · 成本 ¥${formatValue(holdingCostPrice, 4)}`
+                      : '悬停设置份额 / 成本价'
+                    : '点击编辑当前持有'
                   const isEditing = editingCode === fund.code
                   const isSaving = savingCode === fund.code
+                  const isHoldingPopoverOpen =
+                    showAdvancedPosition && holdingPopoverCode === fund.code
+
                   return (
                     <tr key={fund.code} onClick={() => go(fund.code)}>
                       <td>{fund.code}</td>
-                      <td>{fund.name}</td>
+                      <td className={styles.nameCell}>{fund.name}</td>
                       <td className="num">
                         <span
                           title={previousDaily?.date ? `净值日期 ${previousDaily.date}` : undefined}
@@ -400,7 +571,7 @@ export default function Watchlist({ funds, onChange }: Props) {
                                 styles.changeAmount,
                                 holdingState ? styles[holdingState] : styles.flat
                               )}
-                              title="当前持有金额变化"
+                              title="按当前持有金额估算的变化"
                             >
                               {holdingDelta > 0 ? '+' : ''}
                               {formatMoney(holdingDelta)}
@@ -408,18 +579,21 @@ export default function Watchlist({ funds, onChange }: Props) {
                           )}
                         </span>
                       </td>
-                      <td className="num" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className={classNames('num', styles.positionCellTd)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {isEditing ? (
                           <span className={styles.positionEditor}>
                             <input
                               value={amountDraft}
                               inputMode="decimal"
                               placeholder="10000"
-                              aria-label={`${fund.name} 持有金额`}
+                              aria-label={`${fund.name} 当前持有`}
                               onChange={(e) => setAmountDraft(e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                  void savePosition(e, fund, latestNavPrice.value)
+                                  void saveCurrentValuePosition(e, fund, valuationPrice.value)
                                 }
                                 if (e.key === 'Escape') {
                                   setEditingCode('')
@@ -430,9 +604,11 @@ export default function Watchlist({ funds, onChange }: Props) {
                             <button
                               type="button"
                               className={styles.iconBtn}
-                              title="保存持有金额"
+                              title="保存当前持有"
                               disabled={isSaving}
-                              onClick={(e) => void savePosition(e, fund, latestNavPrice.value)}
+                              onClick={(e) =>
+                                void saveCurrentValuePosition(e, fund, valuationPrice.value)
+                              }
                             >
                               <Check size={13} />
                             </button>
@@ -441,34 +617,115 @@ export default function Watchlist({ funds, onChange }: Props) {
                               className={styles.iconBtn}
                               title="取消"
                               disabled={isSaving}
-                              onClick={cancelEdit}
+                              onClick={cancelCurrentValueEdit}
                             >
                               <X size={13} />
                             </button>
                           </span>
                         ) : (
-                          <span className={styles.positionCell}>
-                            <button
-                              type="button"
-                              className={styles.positionValue}
-                              title={
-                                latestNavPrice.date
-                                  ? `按最新净值 ${latestNavPrice.value ?? '—'}（${latestNavPrice.date}）计算`
-                                  : undefined
-                              }
-                              onClick={(e) => startEdit(e, fund.code, holdingAmount)}
-                            >
-                              <span>¥{formatMoney(holdingAmount)}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className={styles.iconBtn}
-                              title={holdingUnits != null ? '更新持有金额' : '设置持有金额'}
-                              onClick={(e) => startEdit(e, fund.code, holdingAmount)}
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          </span>
+                          <div
+                            className={styles.positionWrap}
+                            onMouseEnter={() => openHoldingPopover(fund)}
+                            onMouseLeave={() => scheduleCloseHoldingPopover(fund.code)}
+                          >
+                            <span className={styles.positionCell}>
+                              <button
+                                type="button"
+                                className={styles.positionValue}
+                                title={
+                                  holdingShares != null && holdingCostPrice != null
+                                    ? `${formatValue(holdingShares, 2)} 份 × ¥${formatValue(holdingCostPrice, 4)}`
+                                    : navPrice.date
+                                      ? `按基金净值 ${navPrice.value ?? '—'}（${navPrice.date}）计算`
+                                      : undefined
+                                }
+                                onClick={(e) => startCurrentValueEdit(e, fund.code, currentHolding)}
+                              >
+                                <span>¥{formatMoney(currentHolding)}</span>
+                                <em>{positionMeta}</em>
+                              </button>
+                              <button
+                                type="button"
+                                className={styles.iconBtn}
+                                title={currentHolding != null ? '更新当前持有' : '设置当前持有'}
+                                onClick={(e) => startCurrentValueEdit(e, fund.code, currentHolding)}
+                              >
+                                <Pencil size={12} />
+                              </button>
+                            </span>
+                            {isHoldingPopoverOpen && (
+                              <div
+                                className={styles.holdingPopover}
+                                onMouseEnter={clearPopoverCloseTimer}
+                                onMouseLeave={() => scheduleCloseHoldingPopover(fund.code)}
+                              >
+                                <div className={styles.popoverTitle}>设置持有份额和成本价</div>
+                                <label className={styles.popoverField}>
+                                  <span>持有份额</span>
+                                  <input
+                                    value={sharesDraft}
+                                    inputMode="decimal"
+                                    placeholder="1000"
+                                    aria-label={`${fund.name} 持有份额`}
+                                    onChange={(e) => setSharesDraft(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        void saveHoldingPosition(e, fund)
+                                      }
+                                      if (e.key === 'Escape') {
+                                        setHoldingPopoverCode('')
+                                      }
+                                    }}
+                                  />
+                                </label>
+                                <label className={styles.popoverField}>
+                                  <span>持仓成本价</span>
+                                  <input
+                                    value={costDraft}
+                                    inputMode="decimal"
+                                    placeholder="1.2345"
+                                    aria-label={`${fund.name} 持仓成本价`}
+                                    onChange={(e) => setCostDraft(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        void saveHoldingPosition(e, fund)
+                                      }
+                                      if (e.key === 'Escape') {
+                                        setHoldingPopoverCode('')
+                                      }
+                                    }}
+                                  />
+                                </label>
+                                <div className={styles.popoverHint}>
+                                  预估持有金额：¥
+                                  {formatMoney(holdingAmountPreview ?? holdingAmount)}
+                                </div>
+                                <div className={styles.popoverActions}>
+                                  <button
+                                    type="button"
+                                    className={styles.iconBtn}
+                                    title="保存份额和成本价"
+                                    disabled={isSaving}
+                                    onClick={(e) => void saveHoldingPosition(e, fund)}
+                                  >
+                                    <Check size={13} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.iconBtn}
+                                    title="关闭"
+                                    disabled={isSaving}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setHoldingPopoverCode('')
+                                    }}
+                                  >
+                                    <X size={13} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </td>
                       <td className="num muted">{(currentChange.time || '').slice(-5) || '—'}</td>

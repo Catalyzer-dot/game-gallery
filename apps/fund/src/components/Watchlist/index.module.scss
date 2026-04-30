@@ -69,14 +69,8 @@
   min-width: 1000px;
   table-layout: fixed;
 
-  th,
-  td {
+  th {
     overflow: hidden;
-  }
-
-  td:nth-child(2) {
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 
@@ -100,12 +94,21 @@
   width: 188px;
 }
 
+.positionCellTd {
+  overflow: visible;
+}
+
 .updateCol {
   width: 72px;
 }
 
 .actionCol {
   width: 48px;
+}
+
+.nameCell {
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .changeBadge {
@@ -149,6 +152,14 @@
   white-space: nowrap;
 }
 
+.positionWrap {
+  display: inline-flex;
+  justify-content: flex-end;
+  padding-bottom: 10px;
+  position: relative;
+  vertical-align: middle;
+}
+
 .positionCell {
   align-items: center;
   display: inline-flex;
@@ -177,6 +188,22 @@
   min-width: 132px;
   width: 132px;
   padding: 5px 8px;
+
+  span {
+    display: block;
+  }
+
+  em {
+    color: var(--muted);
+    display: block;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 500;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   &:hover {
     background: rgba(110, 198, 255, 0.08);
@@ -276,6 +303,72 @@
   background: rgba(244, 201, 93, 0.1);
   border-color: rgba(244, 201, 93, 0.28);
   color: var(--amber);
+}
+
+.holdingPopover {
+  background: rgba(10, 16, 22, 0.98);
+  border: 1px solid rgba(110, 198, 255, 0.24);
+  border-radius: 12px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  padding: 12px;
+  position: absolute;
+  right: 0;
+  top: calc(100% - 2px);
+  width: 220px;
+  z-index: 20;
+}
+
+.popoverTitle {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.popoverField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 9px;
+
+  span {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  input {
+    background: rgba(3, 9, 14, 0.72);
+    border: 1px solid rgba(110, 198, 255, 0.28);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    height: 34px;
+    outline: none;
+    padding: 0 10px;
+    text-align: right;
+
+    &:focus {
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 2px rgba(110, 198, 255, 0.16);
+    }
+  }
+}
+
+.popoverHint {
+  color: var(--muted-strong);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.popoverActions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 @media (max-width: 700px) {

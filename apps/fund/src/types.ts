@@ -4,9 +4,12 @@ export interface WatchFund {
   code: string
   name: string
   industry: string
-  added: string
+  added_at?: string
   holding_units?: number | null
   holding_updated_at?: string | null
+  holding_shares?: number | null
+  holding_cost_price?: number | null
+  holding_amount?: number | null
 }
 
 export interface IndustryEtf {
