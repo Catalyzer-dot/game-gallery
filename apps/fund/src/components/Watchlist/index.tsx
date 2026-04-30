@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
 import { Trash2 } from 'lucide-react'
 import { fetchGz, loadDaily, removeWatchlist } from '@services/api'
-import type { GzData, WatchFund } from '@/types'
+import type { DailyRow, GzData, WatchFund } from '@/types'
 import { pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
 import styles from './index.module.scss'
@@ -17,6 +17,7 @@ interface Props {
 interface Row {
   fund: WatchFund
   gz?: GzData | null
+  daily?: DailyRow | null
 }
 
 function toNumber(value: string | null | undefined): number | null {
@@ -38,21 +39,26 @@ async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
   const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
   const latest = latestRows[0]
   const previous = latestRows[1]
-
-  if (!latest?.dwjz || latest.date !== getTodayDateString()) {
-    return { fund, gz }
-  }
-
   const prevNet = previous?.dwjz || gz?.dwjz || ''
-  const latestNet = latest.dwjz || gz?.gsz || ''
+  const latestNet = latest?.dwjz || ''
   const derivedChange =
-    latest.jzzzl ||
+    latest?.jzzzl ||
     (() => {
       const prev = toNumber(prevNet)
       const current = toNumber(latestNet)
       if (!prev || current == null) return ''
       return (((current - prev) / prev) * 100).toFixed(2)
     })()
+  const latestDaily = latest
+    ? {
+        ...latest,
+        jzzzl: derivedChange,
+      }
+    : null
+
+  if (!latest?.dwjz || latest.date !== getTodayDateString()) {
+    return { fund, gz, daily: latestDaily }
+  }
 
   return {
     fund,
@@ -65,6 +71,7 @@ async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
       gszzl: derivedChange,
       gztime: `${latest.date} 15:00`,
     },
+    daily: latestDaily,
   }
 }
 
@@ -112,8 +119,8 @@ export default function Watchlist({ funds, onChange }: Props) {
       const results = await mapWithConcurrency(funds, 4, fetchWatchlistSnapshot)
       if (refreshRequestRef.current !== requestId) return
       setRows(results)
-      if (results.some((r) => r.gz === null)) {
-        setError('部分实时估值暂时不可用')
+      if (results.some((r) => r.gz === null || r.daily === null)) {
+        setError('部分实时估值或真实净值暂时不可用')
       }
     } catch (e) {
       if (refreshRequestRef.current !== requestId) return
@@ -166,14 +173,14 @@ export default function Watchlist({ funds, onChange }: Props) {
                   <th>简称</th>
                   <th className="num">上日净值</th>
                   <th className="num">估值</th>
-                  <th className="num">日涨跌</th>
+                  <th className="num">净值涨跌</th>
                   <th className="num">更新</th>
                   <th className="num"></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ fund, gz }) => {
-                  const changeState = pctClass(gz?.gszzl)
+                {rows.map(({ fund, gz, daily }) => {
+                  const changeState = pctClass(daily?.jzzzl)
                   return (
                     <tr key={fund.code} onClick={() => go(fund.code)}>
                       <td>{fund.code}</td>
@@ -182,12 +189,13 @@ export default function Watchlist({ funds, onChange }: Props) {
                       <td className="num">{gz?.gsz || '—'}</td>
                       <td className="num">
                         <span
+                          title={daily?.date ? `净值日期 ${daily.date}` : undefined}
                           className={classNames(
                             styles.changeBadge,
                             changeState ? styles[changeState] : styles.flat
                           )}
                         >
-                          {pct(gz?.gszzl)}
+                          {pct(daily?.jzzzl)}
                         </span>
                       </td>
                       <td className="num muted">{(gz?.gztime || '').slice(-5) || '—'}</td>
