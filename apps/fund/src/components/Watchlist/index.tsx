@@ -334,32 +334,18 @@ export default function Watchlist({ funds, onChange }: Props) {
                       </td>
                       <td className="num">
                         <span className={styles.currentChangeGroup}>
-                          <span className={styles.currentChange}>
-                            <span
-                              title={
-                                currentChange.time
-                                  ? `${currentChange.label || '数据'}时间 ${currentChange.time}`
-                                  : undefined
-                              }
-                              className={classNames(
-                                styles.changeBadge,
-                                currentState ? styles[currentState] : styles.flat
-                              )}
-                            >
-                              {pct(currentChange.value)}
-                            </span>
-                            {currentChange.label && (
-                              <span
-                                className={classNames(
-                                  styles.changeTag,
-                                  currentChange.label === '估值'
-                                    ? styles.estimateTag
-                                    : styles.navTag
-                                )}
-                              >
-                                {currentChange.label}
-                              </span>
+                          <span
+                            title={
+                              currentChange.time
+                                ? `${currentChange.label || '数据'}时间 ${currentChange.time}`
+                                : undefined
+                            }
+                            className={classNames(
+                              styles.changeBadge,
+                              currentState ? styles[currentState] : styles.flat
                             )}
+                          >
+                            {pct(currentChange.value)}
                           </span>
                           {holdingDelta != null && (
                             <span
@@ -371,6 +357,16 @@ export default function Watchlist({ funds, onChange }: Props) {
                             >
                               {holdingDelta > 0 ? '+' : ''}
                               {formatMoney(holdingDelta)}
+                            </span>
+                          )}
+                          {currentChange.label && (
+                            <span
+                              className={classNames(
+                                styles.changeTag,
+                                currentChange.label === '估值' ? styles.estimateTag : styles.navTag
+                              )}
+                            >
+                              {currentChange.label}
                             </span>
                           )}
                         </span>
