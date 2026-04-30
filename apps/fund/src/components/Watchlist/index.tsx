@@ -384,6 +384,16 @@ export default function Watchlist({ funds, onChange }: Props) {
                           >
                             {pct(currentChange.value)}
                           </span>
+                          {currentChange.label && (
+                            <span
+                              className={classNames(
+                                styles.changeTag,
+                                currentChange.label === '估值' ? styles.estimateTag : styles.navTag
+                              )}
+                            >
+                              {currentChange.label}
+                            </span>
+                          )}
                           {holdingDelta != null && (
                             <span
                               className={classNames(
@@ -394,16 +404,6 @@ export default function Watchlist({ funds, onChange }: Props) {
                             >
                               {holdingDelta > 0 ? '+' : ''}
                               {formatMoney(holdingDelta)}
-                            </span>
-                          )}
-                          {currentChange.label && (
-                            <span
-                              className={classNames(
-                                styles.changeTag,
-                                currentChange.label === '估值' ? styles.estimateTag : styles.navTag
-                              )}
-                            >
-                              {currentChange.label}
                             </span>
                           )}
                         </span>
