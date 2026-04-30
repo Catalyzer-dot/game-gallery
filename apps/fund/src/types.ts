@@ -43,6 +43,28 @@ export interface SearchHit {
   type?: string
 }
 
+export interface FundRankRow {
+  code: string
+  name: string
+  ftype?: string | null
+  latest_date: string
+  base_date?: string | null
+  latest_nav?: number | null
+  base_nav?: number | null
+  return_pct: number
+  updated_at: string
+}
+
+export interface FundDailyRankRow {
+  code: string
+  name: string
+  ftype?: string | null
+  date: string
+  nav?: number | null
+  return_pct: number
+  updated_at: string
+}
+
 /** 持仓股 */
 export interface HoldingRow {
   code: string

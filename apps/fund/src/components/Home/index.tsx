@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import Watchlist from '@components/Watchlist'
 import Search from '@components/Search'
+import FundRankings from '@components/FundRankings'
 import { getSessionToken, isUnauthorizedError, loadWatchlist } from '@services/api'
 import type { WatchFund } from '@/types'
 import shared from '@/styles/shared.module.scss'
@@ -55,6 +56,7 @@ export default function Home() {
           </div>
         ) : (
           <>
+            <FundRankings />
             <Search watchlist={watchlist} onWatchlistChange={reload} />
             <Watchlist funds={watchlist} onChange={reload} />
           </>

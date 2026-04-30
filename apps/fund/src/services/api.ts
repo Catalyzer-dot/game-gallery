@@ -7,7 +7,9 @@
 import type {
   DailyData,
   DailyRow,
+  FundDailyRankRow,
   FundMeta,
+  FundRankRow,
   FundIndexItem,
   GzData,
   HoldingsData,
@@ -118,6 +120,12 @@ export const searchFunds = async (key: string): Promise<SearchHit[]> => {
   if (!trimmed) return []
   return request<SearchHit[]>(`/api/fund/search?q=${encodeURIComponent(trimmed)}`)
 }
+
+export const loadTop30dFunds = (limit = 10): Promise<FundRankRow[]> =>
+  request<FundRankRow[]>(`/api/fund/rank/30d?limit=${limit}`)
+
+export const loadTopPreviousDayFunds = (limit = 10): Promise<FundDailyRankRow[]> =>
+  request<FundDailyRankRow[]>(`/api/fund/rank/previous-day?limit=${limit}`)
 
 /** 兼容旧 import：本地索引已迁到后端，前端不再 bundle */
 export const loadFundsIndex = async (): Promise<FundIndexItem[]> => []

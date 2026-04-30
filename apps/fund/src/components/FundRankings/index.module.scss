@@ -1,0 +1,158 @@
+.rankPanels {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rankPanel {
+  min-width: 0;
+}
+
+.panelHead {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  h3 {
+    color: var(--text);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  span {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+}
+
+.rankList {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rankItem {
+  align-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  min-height: 58px;
+  padding: 9px 10px;
+
+  &:hover {
+    background: var(--bg-hover);
+    border-color: rgba(110, 198, 255, 0.32);
+    text-decoration: none;
+  }
+}
+
+.rankNo {
+  align-items: center;
+  background: rgba(110, 198, 255, 0.08);
+  border: 1px solid rgba(110, 198, 255, 0.18);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  display: inline-flex;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.fundMain {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.fundTitle {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.code,
+.meta {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.code {
+  flex: 0 0 auto;
+}
+
+.meta {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.returnBadge {
+  align-items: center;
+  background: rgba(146, 160, 170, 0.08);
+  border: 1px solid rgba(146, 160, 170, 0.18);
+  border-radius: 999px;
+  display: inline-flex;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  justify-content: center;
+  min-width: 74px;
+  padding: 4px 8px;
+}
+
+.status,
+.error {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 18px 12px;
+  text-align: center;
+}
+
+.error {
+  background: rgba(255, 107, 99, 0.08);
+  border-color: rgba(255, 107, 99, 0.26);
+  color: var(--red);
+}
+
+@media (max-width: 920px) {
+  .rankPanels {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .rankItem {
+    min-height: 64px;
+  }
+}
