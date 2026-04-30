@@ -18,6 +18,7 @@ interface Row {
   fund: WatchFund
   gz?: GzData | null
   daily?: DailyRow | null
+  previousDaily?: DailyRow | null
 }
 
 function toNumber(value: string | null | undefined): number | null {
@@ -34,55 +35,50 @@ function getTodayDateString(): string {
   return `${year}-${month}-${day}`
 }
 
-function getLatestValue(gz: GzData | null | undefined, daily: DailyRow | null | undefined) {
-  const hasTodayNav = Boolean(daily?.dwjz && daily.date === getTodayDateString())
+function withDerivedChange(row: DailyRow | undefined, previous: DailyRow | undefined) {
+  if (!row) return null
+  if (row.jzzzl) return row
+
+  const prev = toNumber(previous?.dwjz)
+  const current = toNumber(row.dwjz)
+  if (!prev || current == null) return row
+
+  return {
+    ...row,
+    jzzzl: (((current - prev) / prev) * 100).toFixed(2),
+  }
+}
+
+function getCurrentChange(gz: GzData | null | undefined, daily: DailyRow | null | undefined) {
+  const hasTodayNav = Boolean(daily?.jzzzl && daily.date === getTodayDateString())
   if (hasTodayNav) {
     return {
-      value: daily?.dwjz || '',
+      value: daily?.jzzzl || '',
       label: '净值',
       time: daily?.date || '',
     }
   }
 
-  if (gz?.gsz) {
-    return {
-      value: gz.gsz,
-      label: '估值',
-      time: gz.gztime || '',
-    }
-  }
-
   return {
-    value: daily?.dwjz || '',
-    label: daily?.dwjz ? '净值' : '',
-    time: daily?.date || '',
+    value: gz?.gszzl || '',
+    label: gz?.gszzl ? '估值' : '',
+    time: gz?.gztime || '',
   }
 }
 
 async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
-  const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 2)])
+  const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 3)])
   const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
-  const latest = latestRows[0]
-  const previous = latestRows[1]
+  const latest = withDerivedChange(latestRows[0], latestRows[1])
+  const previous = withDerivedChange(latestRows[1], latestRows[2])
+  const hasTodayNav = latest?.dwjz && latest.date === getTodayDateString()
+  const currentDaily = hasTodayNav ? latest : null
+  const previousDaily = hasTodayNav ? previous : latest
   const prevNet = previous?.dwjz || gz?.dwjz || ''
-  const latestNet = latest?.dwjz || ''
-  const derivedChange =
-    latest?.jzzzl ||
-    (() => {
-      const prev = toNumber(prevNet)
-      const current = toNumber(latestNet)
-      if (!prev || current == null) return ''
-      return (((current - prev) / prev) * 100).toFixed(2)
-    })()
-  const latestDaily = latest
-    ? {
-        ...latest,
-        jzzzl: derivedChange,
-      }
-    : null
+  const latestNet = currentDaily?.dwjz || ''
 
-  if (!latest?.dwjz || latest.date !== getTodayDateString()) {
-    return { fund, gz, daily: latestDaily }
+  if (!currentDaily?.dwjz) {
+    return { fund, gz, daily: currentDaily, previousDaily }
   }
 
   return {
@@ -93,10 +89,11 @@ async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
       jzrq: previous?.date || gz?.jzrq || '',
       dwjz: prevNet,
       gsz: latestNet,
-      gszzl: derivedChange,
-      gztime: `${latest.date} 15:00`,
+      gszzl: gz?.gszzl || '',
+      gztime: `${currentDaily.date} 15:00`,
     },
-    daily: latestDaily,
+    daily: currentDaily,
+    previousDaily,
   }
 }
 
@@ -144,7 +141,7 @@ export default function Watchlist({ funds, onChange }: Props) {
       const results = await mapWithConcurrency(funds, 4, fetchWatchlistSnapshot)
       if (refreshRequestRef.current !== requestId) return
       setRows(results)
-      if (results.some((r) => r.gz === null || r.daily === null)) {
+      if (results.some((r) => r.gz === null && r.previousDaily === null)) {
         setError('部分实时估值或真实净值暂时不可用')
       }
     } catch (e) {
@@ -196,43 +193,51 @@ export default function Watchlist({ funds, onChange }: Props) {
                 <tr>
                   <th>代码</th>
                   <th>简称</th>
-                  <th className="num">上交易日涨跌</th>
-                  <th className="num">最新净值/估值</th>
+                  <th className="num">上交易日净值涨跌</th>
+                  <th className="num">当前净值/估值涨跌</th>
                   <th className="num">更新</th>
                   <th className="num"></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ fund, gz, daily }) => {
-                  const changeState = pctClass(daily?.jzzzl)
-                  const latestValue = getLatestValue(gz, daily)
+                {rows.map(({ fund, gz, daily, previousDaily }) => {
+                  const previousState = pctClass(previousDaily?.jzzzl)
+                  const currentChange = getCurrentChange(gz, daily)
+                  const currentState = pctClass(currentChange.value)
                   return (
                     <tr key={fund.code} onClick={() => go(fund.code)}>
                       <td>{fund.code}</td>
                       <td>{fund.name}</td>
                       <td className="num">
                         <span
-                          title={daily?.date ? `净值日期 ${daily.date}` : undefined}
+                          title={previousDaily?.date ? `净值日期 ${previousDaily.date}` : undefined}
                           className={classNames(
                             styles.changeBadge,
-                            changeState ? styles[changeState] : styles.flat
+                            previousState ? styles[previousState] : styles.flat
                           )}
                         >
-                          {pct(daily?.jzzzl)}
+                          {pct(previousDaily?.jzzzl)}
                         </span>
                       </td>
                       <td className="num">
                         <span
-                          className={styles.valueCell}
-                          title={latestValue.time ? `数据时间 ${latestValue.time}` : undefined}
+                          title={
+                            currentChange.time
+                              ? `${currentChange.label || '数据'}时间 ${currentChange.time}`
+                              : undefined
+                          }
+                          className={classNames(
+                            styles.changeBadge,
+                            currentState ? styles[currentState] : styles.flat
+                          )}
                         >
-                          <span>{latestValue.value || '—'}</span>
-                          {latestValue.label && (
-                            <span className={styles.valueTag}>{latestValue.label}</span>
+                          <span>{pct(currentChange.value)}</span>
+                          {currentChange.label && (
+                            <span className={styles.changeTag}>{currentChange.label}</span>
                           )}
                         </span>
                       </td>
-                      <td className="num muted">{(latestValue.time || '').slice(-5) || '—'}</td>
+                      <td className="num muted">{(currentChange.time || '').slice(-5) || '—'}</td>
                       <td className="num">
                         <button
                           type="button"

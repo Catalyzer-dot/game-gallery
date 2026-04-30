@@ -70,22 +70,15 @@
   color: var(--muted);
 }
 
-.valueCell {
-  align-items: center;
-  display: inline-flex;
-  gap: 7px;
-  justify-content: flex-end;
-  min-width: 104px;
-}
-
-.valueTag {
-  background: rgba(110, 198, 255, 0.1);
-  border: 1px solid rgba(110, 198, 255, 0.24);
+.changeTag {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  color: var(--accent-strong);
+  color: currentColor;
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
+  margin-left: 6px;
   padding: 3px 6px;
 }
 
@@ -100,7 +93,7 @@
     padding: 4px 8px;
   }
 
-  .valueCell {
-    min-width: 96px;
+  .changeTag {
+    margin-left: 5px;
   }
 }
