@@ -140,7 +140,6 @@ function DailyNavChart({ points }: { points: DailyChartPoint[] }) {
     <div className={styles.navChart}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        preserveAspectRatio="none"
         role="img"
         aria-label="近30天净值走势图"
         onPointerMove={handlePointerMove}
@@ -338,6 +337,26 @@ export default function Detail({ code }: Props) {
         {loadError && <div className={shared.errorBox}>{loadError}</div>}
 
         <section className={shared.card}>
+          <div className={shared.cardHead}>
+            <h2>近 30 天净值</h2>
+            {dailyChartPoints.length && dailyReturn != null && (
+              <span className="muted small">
+                {dailyChartPoints.length} 个交易日，累计{' '}
+                <span className={pctClass(dailyReturn)}>
+                  {dailyReturn >= 0 ? '+' : ''}
+                  {dailyReturn.toFixed(2)}%
+                </span>
+              </span>
+            )}
+          </div>
+          {dailyChartPoints.length >= 2 ? (
+            <DailyNavChart points={dailyChartPoints} />
+          ) : (
+            <div className={styles.empty}>暂无历史净值数据</div>
+          )}
+        </section>
+
+        <section className={shared.card}>
           <div className={styles.metaGrid}>
             <div>
               <label>类型</label>
@@ -410,26 +429,6 @@ export default function Detail({ code }: Props) {
                 </tbody>
               </table>
             </div>
-          )}
-        </section>
-
-        <section className={shared.card}>
-          <div className={shared.cardHead}>
-            <h2>近 30 天净值</h2>
-            {dailyChartPoints.length && dailyReturn != null && (
-              <span className="muted small">
-                {dailyChartPoints.length} 个交易日，累计{' '}
-                <span className={pctClass(dailyReturn)}>
-                  {dailyReturn >= 0 ? '+' : ''}
-                  {dailyReturn.toFixed(2)}%
-                </span>
-              </span>
-            )}
-          </div>
-          {dailyChartPoints.length >= 2 ? (
-            <DailyNavChart points={dailyChartPoints} />
-          ) : (
-            <div className={styles.empty}>暂无历史净值数据</div>
           )}
         </section>
       </main>
