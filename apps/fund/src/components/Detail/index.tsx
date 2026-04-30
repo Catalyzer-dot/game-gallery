@@ -133,7 +133,7 @@ export default function Detail({ code }: Props) {
         loadIntraday(code),
         loadHoldings(code),
         loadDaily(code),
-        loadWatchlist(),
+        loadWatchlist().catch(() => []),
       ])
       if (loadRequestRef.current !== requestId) return
 

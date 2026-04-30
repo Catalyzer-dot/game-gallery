@@ -19,6 +19,7 @@ import type {
 } from '@/types'
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+const TOKEN_KEY = 'session_token'
 
 const url = (path: string): string => `${API_BASE}${path}`
 
@@ -27,11 +28,40 @@ interface BackendError {
   message?: string
 }
 
+export class ApiError extends Error {
+  status: number
+
+  constructor(status: number, statusText: string, detail = '') {
+    super(`${status} ${statusText}${detail ? ': ' + detail : ''}`)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+export function getSessionToken(): string | null {
+  return window.localStorage.getItem(TOKEN_KEY)
+}
+
+export function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 401
+}
+
+function authHeaders(headers?: HeadersInit): Headers {
+  const next = new Headers(headers)
+  if (!next.has('Accept')) next.set('Accept', 'application/json')
+
+  const token = getSessionToken()
+  if (token && !next.has('Authorization')) {
+    next.set('Authorization', `Bearer ${token}`)
+  }
+  return next
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url(path), {
-    headers: { Accept: 'application/json' },
     cache: 'no-cache',
     ...init,
+    headers: authHeaders(init?.headers),
   })
   if (!res.ok) {
     let detail = ''
@@ -41,7 +71,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // ignore
     }
-    throw new Error(`${res.status} ${res.statusText}${detail ? ': ' + detail : ''}`)
+    throw new ApiError(res.status, res.statusText, detail)
   }
   return (await res.json()) as T
 }
@@ -53,14 +83,17 @@ export const loadWatchlist = (): Promise<WatchFund[]> => request<WatchFund[]>('/
 export const addWatchlist = (code: string, name?: string, industry?: string): Promise<WatchFund> =>
   request<WatchFund>('/api/fund/watchlist', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code, name, industry }),
   })
 
 export const removeWatchlist = async (code: string): Promise<void> => {
-  const res = await fetch(url(`/api/fund/watchlist/${code}`), { method: 'DELETE' })
+  const res = await fetch(url(`/api/fund/watchlist/${code}`), {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
   if (!res.ok && res.status !== 204) {
-    throw new Error(`${res.status} ${res.statusText}`)
+    throw new ApiError(res.status, res.statusText)
   }
 }
 

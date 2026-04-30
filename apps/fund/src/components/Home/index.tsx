@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import Watchlist from '@components/Watchlist'
 import Search from '@components/Search'
-import { loadWatchlist } from '@services/api'
+import { getSessionToken, isUnauthorizedError, loadWatchlist } from '@services/api'
 import type { WatchFund } from '@/types'
 import shared from '@/styles/shared.module.scss'
 
@@ -10,12 +10,21 @@ const REPO_URL = 'https://github.com/Catalyzer-dot/game-gallery/tree/main/apps/f
 
 export default function Home() {
   const [watchlist, setWatchlist] = useState<WatchFund[]>([])
+  const [authRequired, setAuthRequired] = useState(false)
 
   const reload = useCallback(async () => {
+    if (!getSessionToken()) {
+      setWatchlist([])
+      setAuthRequired(true)
+      return
+    }
+
     try {
       setWatchlist(await loadWatchlist())
-    } catch {
+      setAuthRequired(false)
+    } catch (error) {
       setWatchlist([])
+      setAuthRequired(isUnauthorizedError(error))
     }
   }, [])
 
@@ -37,8 +46,19 @@ export default function Home() {
       </header>
 
       <main className={shared.main}>
-        <Search watchlist={watchlist} onWatchlistChange={reload} />
-        <Watchlist funds={watchlist} onChange={reload} />
+        {authRequired ? (
+          <div className={shared.statusBox}>
+            fund 跟踪清单已按登录用户隔离。请先登录后再查看或维护自己的基金列表。
+            <a href="/" style={{ marginLeft: 10 }}>
+              去登录
+            </a>
+          </div>
+        ) : (
+          <>
+            <Search watchlist={watchlist} onWatchlistChange={reload} />
+            <Watchlist funds={watchlist} onChange={reload} />
+          </>
+        )}
       </main>
 
       <footer className={shared.footer}>
