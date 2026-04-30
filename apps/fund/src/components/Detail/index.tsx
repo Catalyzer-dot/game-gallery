@@ -1,25 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import classNames from 'classnames'
-import {
-  fetchGz,
-  fetchQuotes,
-  loadDaily,
-  loadHoldings,
-  loadIntraday,
-  loadMeta,
-  loadWatchlist,
-} from '@services/api'
-import Sparkline from '@components/Sparkline'
-import type {
-  DailyData,
-  FundMeta,
-  HoldingsData,
-  IntradayData,
-  IntradayPoint,
-  QuoteRow,
-} from '@/types'
-import { isTradeMinute, num, pct, pctClass } from '@/utils/format'
+import { fetchQuotes, loadDaily, loadHoldings, loadMeta, loadWatchlist } from '@services/api'
+import type { DailyData, FundMeta, HoldingsData, QuoteRow } from '@/types'
+import { num, pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
 import styles from './index.module.scss'
 
@@ -35,14 +19,6 @@ function toNumber(value: string | null | undefined): number | null {
   if (!value) return null
   const numValue = Number(value)
   return Number.isFinite(numValue) ? numValue : null
-}
-
-function getTodayDateString(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
 }
 
 function deriveDailyChange(latestValue: string, previousValue: string, fallback: string): string {
@@ -215,7 +191,6 @@ function DailyNavChart({ points }: { points: DailyChartPoint[] }) {
 
 export default function Detail({ code }: Props) {
   const [meta, setMeta] = useState<FundMeta | null>(null)
-  const [intraday, setIntraday] = useState<IntradayData | null>(null)
   const [holdings, setHoldings] = useState<HoldingsData | null>(null)
   const [holdingQuotes, setHoldingQuotes] = useState<QuoteRow[]>([])
   const [daily, setDaily] = useState<DailyData | null>(null)
@@ -224,13 +199,8 @@ export default function Detail({ code }: Props) {
   const [loadError, setLoadError] = useState('')
   const [quoteRefreshing, setQuoteRefreshing] = useState(false)
 
-  const intradayRef = useRef<IntradayData | null>(null)
   const holdingsRef = useRef<HoldingsData | null>(null)
   const loadRequestRef = useRef(0)
-
-  useEffect(() => {
-    intradayRef.current = intraday
-  }, [intraday])
 
   useEffect(() => {
     holdingsRef.current = holdings
@@ -243,11 +213,7 @@ export default function Detail({ code }: Props) {
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      const tradeMinute = isTradeMinute()
-      if (tradeMinute) {
-        void refreshIntradayPoint()
-        void refreshHoldingQuotes()
-      }
+      void refreshHoldingQuotes()
       void refreshLatestDaily()
     }, 30000)
 
@@ -263,15 +229,13 @@ export default function Detail({ code }: Props) {
     setLoadError('')
     setFundName(code)
     setMeta(null)
-    setIntraday(null)
     setHoldings(null)
     setHoldingQuotes([])
     setDaily(null)
 
     try {
-      const [metaData, intradayData, holdingsData, dailyData, watchlist] = await Promise.all([
+      const [metaData, holdingsData, dailyData, watchlist] = await Promise.all([
         loadMeta(code),
-        loadIntraday(code),
         loadHoldings(code),
         loadDaily(code, 30),
         loadWatchlist().catch(() => []),
@@ -279,7 +243,6 @@ export default function Detail({ code }: Props) {
       if (loadRequestRef.current !== requestId) return
 
       setMeta(metaData)
-      setIntraday(intradayData)
       setHoldings(holdingsData)
       setDaily(dailyData)
 
@@ -291,7 +254,7 @@ export default function Detail({ code }: Props) {
       if (loadRequestRef.current !== requestId) return
       setHoldingQuotes(nextHoldingQuotes)
 
-      if (!metaData && !intradayData && !holdingsData && !dailyData) {
+      if (!metaData && !holdingsData && !dailyData) {
         setLoadError('Fund data is temporarily unavailable. Please try again later.')
       }
     } catch (error) {
@@ -302,24 +265,6 @@ export default function Detail({ code }: Props) {
         setLoading(false)
       }
     }
-  }
-
-  async function refreshIntradayPoint() {
-    const gz = await fetchGz(code)
-    if (!gz?.gszzl) return
-
-    const current = intradayRef.current
-    if (!current) return
-
-    const ts = gz.gztime.slice(-5)
-    const points: IntradayPoint[] = [...current.points]
-    if (points.length && points[points.length - 1].ts === ts) {
-      points[points.length - 1] = { ts, gsz: gz.gsz, gszzl: gz.gszzl }
-    } else {
-      points.push({ ts, gsz: gz.gsz, gszzl: gz.gszzl })
-    }
-
-    setIntraday({ ...current, points, updated: gz.gztime })
   }
 
   async function refreshLatestDaily() {
@@ -348,43 +293,7 @@ export default function Detail({ code }: Props) {
     }
   }
 
-  const intradayValues = useMemo(
-    () => (intraday?.points || []).map((point) => Number(point.gszzl) || 0),
-    [intraday]
-  )
-  const intradayLast = intraday?.points.at(-1)
-
   const latestDailyRows = useMemo(() => sortDailyRowsDesc(daily?.rows), [daily])
-  const latestDaily = latestDailyRows[0]
-  const previousDaily = latestDailyRows[1]
-  const todayDate = getTodayDateString()
-  const hasTodayDaily = latestDaily?.date === todayDate && !!latestDaily.dwjz
-  const latestDailyChange = useMemo(
-    () =>
-      deriveDailyChange(
-        latestDaily?.dwjz || '',
-        previousDaily?.dwjz || '',
-        latestDaily?.jzzzl || ''
-      ),
-    [latestDaily, previousDaily]
-  )
-
-  const displaySnapshot = hasTodayDaily
-    ? {
-        title: `最新净值（${latestDaily.date}）`,
-        label: '净值',
-        value: latestDaily.dwjz,
-        change: latestDailyChange,
-      }
-    : intradayLast
-      ? {
-          title: `日内估值（${intraday?.date || '-'}）`,
-          label: '估值',
-          value: intradayLast.gsz,
-          change: intradayLast.gszzl,
-        }
-      : null
-
   const dailyValues = useMemo(() => [...latestDailyRows].slice(0, 30).reverse(), [latestDailyRows])
   const dailyChartPoints = useMemo(() => buildDailyChartPoints(dailyValues), [dailyValues])
   const dailyReturn = useMemo(() => {
@@ -448,22 +357,6 @@ export default function Detail({ code }: Props) {
               <span className={pctClass(meta?.r_1y)}>{meta?.r_1y ? `${meta.r_1y}%` : '-'}</span>
             </div>
           </div>
-        </section>
-
-        <section className={shared.card}>
-          <div className={shared.cardHead}>
-            <h2>{displaySnapshot?.title || '日内估值'}</h2>
-            {displaySnapshot && (
-              <span className={classNames('muted', pctClass(displaySnapshot.change))}>
-                {displaySnapshot.label} {displaySnapshot.value} · {pct(displaySnapshot.change)}
-              </span>
-            )}
-          </div>
-          {intradayValues.length >= 2 ? (
-            <Sparkline data={intradayValues} zeroLine height={120} />
-          ) : (
-            <div className={styles.empty}>暂无日内数据</div>
-          )}
         </section>
 
         <section className={shared.card}>
