@@ -220,20 +220,29 @@ export default function Watchlist({ funds, onChange }: Props) {
                         </span>
                       </td>
                       <td className="num">
-                        <span
-                          title={
-                            currentChange.time
-                              ? `${currentChange.label || '数据'}时间 ${currentChange.time}`
-                              : undefined
-                          }
-                          className={classNames(
-                            styles.changeBadge,
-                            currentState ? styles[currentState] : styles.flat
-                          )}
-                        >
-                          <span>{pct(currentChange.value)}</span>
+                        <span className={styles.currentChange}>
+                          <span
+                            title={
+                              currentChange.time
+                                ? `${currentChange.label || '数据'}时间 ${currentChange.time}`
+                                : undefined
+                            }
+                            className={classNames(
+                              styles.changeBadge,
+                              currentState ? styles[currentState] : styles.flat
+                            )}
+                          >
+                            {pct(currentChange.value)}
+                          </span>
                           {currentChange.label && (
-                            <span className={styles.changeTag}>{currentChange.label}</span>
+                            <span
+                              className={classNames(
+                                styles.changeTag,
+                                currentChange.label === '估值' ? styles.estimateTag : styles.navTag
+                              )}
+                            >
+                              {currentChange.label}
+                            </span>
                           )}
                         </span>
                       </td>

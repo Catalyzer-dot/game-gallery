@@ -70,6 +70,13 @@
   color: var(--muted);
 }
 
+.currentChange {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .changeTag {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -78,8 +85,19 @@
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
-  margin-left: 6px;
   padding: 3px 6px;
+}
+
+.estimateTag {
+  background: rgba(110, 198, 255, 0.1);
+  border-color: rgba(110, 198, 255, 0.28);
+  color: var(--accent-strong);
+}
+
+.navTag {
+  background: rgba(244, 201, 93, 0.1);
+  border-color: rgba(244, 201, 93, 0.28);
+  color: var(--amber);
 }
 
 @media (max-width: 700px) {
@@ -93,7 +111,7 @@
     padding: 4px 8px;
   }
 
-  .changeTag {
-    margin-left: 5px;
+  .currentChange {
+    gap: 6px;
   }
 }
