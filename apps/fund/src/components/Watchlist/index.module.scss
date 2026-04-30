@@ -70,6 +70,25 @@
   color: var(--muted);
 }
 
+.valueCell {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  justify-content: flex-end;
+  min-width: 104px;
+}
+
+.valueTag {
+  background: rgba(110, 198, 255, 0.1);
+  border: 1px solid rgba(110, 198, 255, 0.24);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
 @media (max-width: 700px) {
   .removeBtn {
     min-width: 44px;
@@ -79,5 +98,9 @@
   .changeBadge {
     min-width: 68px;
     padding: 4px 8px;
+  }
+
+  .valueCell {
+    min-width: 96px;
   }
 }

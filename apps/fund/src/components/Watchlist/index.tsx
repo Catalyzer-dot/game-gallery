@@ -34,6 +34,31 @@ function getTodayDateString(): string {
   return `${year}-${month}-${day}`
 }
 
+function getLatestValue(gz: GzData | null | undefined, daily: DailyRow | null | undefined) {
+  const hasTodayNav = Boolean(daily?.dwjz && daily.date === getTodayDateString())
+  if (hasTodayNav) {
+    return {
+      value: daily?.dwjz || '',
+      label: '净值',
+      time: daily?.date || '',
+    }
+  }
+
+  if (gz?.gsz) {
+    return {
+      value: gz.gsz,
+      label: '估值',
+      time: gz.gztime || '',
+    }
+  }
+
+  return {
+    value: daily?.dwjz || '',
+    label: daily?.dwjz ? '净值' : '',
+    time: daily?.date || '',
+  }
+}
+
 async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
   const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 2)])
   const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
@@ -171,9 +196,8 @@ export default function Watchlist({ funds, onChange }: Props) {
                 <tr>
                   <th>代码</th>
                   <th>简称</th>
-                  <th className="num">上日净值</th>
-                  <th className="num">估值</th>
-                  <th className="num">净值涨跌</th>
+                  <th className="num">上交易日涨跌</th>
+                  <th className="num">最新净值/估值</th>
                   <th className="num">更新</th>
                   <th className="num"></th>
                 </tr>
@@ -181,12 +205,11 @@ export default function Watchlist({ funds, onChange }: Props) {
               <tbody>
                 {rows.map(({ fund, gz, daily }) => {
                   const changeState = pctClass(daily?.jzzzl)
+                  const latestValue = getLatestValue(gz, daily)
                   return (
                     <tr key={fund.code} onClick={() => go(fund.code)}>
                       <td>{fund.code}</td>
                       <td>{fund.name}</td>
-                      <td className="num">{gz?.dwjz || '—'}</td>
-                      <td className="num">{gz?.gsz || '—'}</td>
                       <td className="num">
                         <span
                           title={daily?.date ? `净值日期 ${daily.date}` : undefined}
@@ -198,7 +221,18 @@ export default function Watchlist({ funds, onChange }: Props) {
                           {pct(daily?.jzzzl)}
                         </span>
                       </td>
-                      <td className="num muted">{(gz?.gztime || '').slice(-5) || '—'}</td>
+                      <td className="num">
+                        <span
+                          className={styles.valueCell}
+                          title={latestValue.time ? `数据时间 ${latestValue.time}` : undefined}
+                        >
+                          <span>{latestValue.value || '—'}</span>
+                          {latestValue.label && (
+                            <span className={styles.valueTag}>{latestValue.label}</span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="num muted">{(latestValue.time || '').slice(-5) || '—'}</td>
                       <td className="num">
                         <button
                           type="button"
