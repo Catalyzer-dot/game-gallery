@@ -258,10 +258,35 @@ export default function Watchlist({ funds, onChange }: Props) {
     }
   }
 
+  const totalProfit = rows.reduce<number | null>((total, { fund, gz, daily, previousDaily }) => {
+    const holdingUnits = fund.holding_units ?? null
+    if (holdingUnits == null) return total
+
+    const currentPrice = getCurrentPrice(gz, daily)
+    const previousPrice = toNumber(previousDaily?.dwjz || gz?.dwjz)
+    if (currentPrice.value == null || previousPrice == null) return total
+
+    return (total ?? 0) + holdingUnits * (currentPrice.value - previousPrice)
+  }, null)
+  const totalProfitState = moneyClass(totalProfit)
+
   return (
     <section className={shared.card}>
       <div className={shared.cardHead}>
         <h2>跟踪清单</h2>
+        <div
+          className={classNames(
+            styles.totalProfit,
+            totalProfitState ? styles[totalProfitState] : styles.flat
+          )}
+          title="按当前净值/估值相对上一交易日净值计算"
+        >
+          <span>总盈亏</span>
+          <strong>
+            {totalProfit != null && totalProfit > 0 ? '+' : ''}
+            {formatMoney(totalProfit)}
+          </strong>
+        </div>
         <button
           type="button"
           className={shared.ghostBtn}

@@ -38,6 +38,33 @@
   padding: 9px 10px;
 }
 
+.totalProfit {
+  align-items: center;
+  background: rgba(146, 160, 170, 0.08);
+  border: 1px solid rgba(146, 160, 170, 0.18);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  display: inline-flex;
+  font-family: var(--mono);
+  gap: 8px;
+  margin-left: auto;
+  min-height: 32px;
+  padding: 5px 11px;
+  white-space: nowrap;
+
+  span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  strong {
+    color: currentColor;
+    font-size: 13px;
+    font-weight: 800;
+  }
+}
+
 .watchTable {
   min-width: 1000px;
   table-layout: fixed;
@@ -252,6 +279,10 @@
 }
 
 @media (max-width: 700px) {
+  .totalProfit {
+    margin-left: 0;
+  }
+
   .removeBtn {
     min-width: 44px;
     min-height: 44px;
