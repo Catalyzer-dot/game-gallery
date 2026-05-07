@@ -37,7 +37,7 @@ jobs:
           CI: true
 
       - name: Build
-        working-directory: ./apps/web
+        working-directory: ./apps/game-gallery
         run: npm run build
 
       - name: Setup Pages
@@ -46,7 +46,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./apps/web/dist
+          path: ./apps/game-gallery/dist
 
   deploy:
     environment:

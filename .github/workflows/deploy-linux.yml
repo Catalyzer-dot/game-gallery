@@ -33,8 +33,8 @@ jobs:
         with:
           filters: |
             web:
-              - 'apps/web/**'
-              - '!apps/web/public/godot-tower-defense/**'
+              - 'apps/game-gallery/**'
+              - '!apps/game-gallery/public/godot-tower-defense/**'
               - 'package.json'
               - 'package-lock.json'
               - '.github/workflows/deploy-linux.yml'
@@ -44,7 +44,7 @@ jobs:
               - 'package-lock.json'
               - '.github/workflows/deploy-linux.yml'
             godot:
-              - 'apps/web/public/godot-tower-defense/**'
+              - 'apps/game-gallery/public/godot-tower-defense/**'
 
   build-and-deploy:
     needs: changes
@@ -71,26 +71,26 @@ jobs:
         env:
           CI: true
 
-      # ===== 主前端 apps/web =====
+      # ===== 主前端 apps/game-gallery =====
       - name: Build web frontend
         if: env.WEB_CHANGED == 'true' || env.FORCE_ALL == 'true'
-        working-directory: ./apps/web
+        working-directory: ./apps/game-gallery
         env:
           VITE_BASE_PATH: /
           VITE_API_URL: https://degenerates.site
         run: npm run build
 
-      - name: Deploy web to dist branch
+      - name: Deploy web to game-gallery-dist branch
         if: env.WEB_CHANGED == 'true' || env.FORCE_ALL == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/web/dist
-          publish_branch: dist
+          publish_dir: ./apps/game-gallery/dist
+          publish_branch: game-gallery-dist
           force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy web build ${{ github.sha }}'
+          commit_message: 'Deploy game-gallery build ${{ github.sha }}'
 
       # ===== fund 子前端 apps/fund (挂载到 degenerates.site/fund/) =====
       - name: Build fund frontend
@@ -119,7 +119,7 @@ jobs:
         if: env.GODOT_CHANGED == 'true' || env.FORCE_ALL == 'true'
         run: |
           mkdir -p godot-staging
-          cp -R apps/web/public/godot-tower-defense godot-staging/
+          cp -R apps/game-gallery/public/godot-tower-defense godot-staging/
 
       - name: Deploy godot to godot-assets branch
         if: env.GODOT_CHANGED == 'true' || env.FORCE_ALL == 'true'
@@ -217,7 +217,7 @@ jobs:
 
             if [ "$WEB_CHANGED" = "true" ] || [ "$FORCE_ALL" = "true" ]; then
               # web 现在不含 godot（已 4MB）
-              download_branch_to "$REPO" dist /opt/degenerates-frontend/web/dist
+              download_branch_to "$REPO" game-gallery-dist /opt/degenerates-frontend/game-gallery/dist
             else
               echo "skip web (no changes)"
             fi

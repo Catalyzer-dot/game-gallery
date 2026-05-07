@@ -60,7 +60,7 @@ npm run dev
 
 ### 环境变量
 
-在 `apps/web/.env` 中配置：
+在 `apps/game-gallery/.env` 中配置：
 
 ```bash
 # API 地址

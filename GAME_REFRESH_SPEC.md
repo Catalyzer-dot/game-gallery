@@ -497,5 +497,5 @@ python3 update_backend_games.py <session_token>
 
 - [Steam Web API 文档](https://steamapi.xpaw.me/)
 - [Steam Store API](https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI)
-- 前端实现：`apps/web/src/hooks/useGameRefresh.ts`
+- 前端实现：`apps/game-gallery/src/hooks/useGameRefresh.ts`
 - 现有脚本：`update_backend_games.py`
