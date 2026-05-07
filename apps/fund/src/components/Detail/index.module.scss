@@ -45,6 +45,36 @@
   }
 }
 
+.chgGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.chgTag {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+.liveTag {
+  background: rgba(110, 198, 255, 0.1);
+  border: 1px solid rgba(110, 198, 255, 0.28);
+  color: var(--accent-strong);
+}
+
+.prevTag {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+}
+
 .navChart {
   background: var(--bg-elevated);
   border: 1px solid var(--line-soft);

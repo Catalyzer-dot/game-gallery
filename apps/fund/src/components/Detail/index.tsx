@@ -3,7 +3,7 @@ import type { PointerEvent } from 'react'
 import classNames from 'classnames'
 import { fetchQuotes, loadDaily, loadHoldings, loadMeta, loadWatchlist } from '@services/api'
 import type { DailyData, FundMeta, HoldingsData, QuoteRow } from '@/types'
-import { num, pct, pctClass } from '@/utils/format'
+import { isTradeMinute, num, pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
 import styles from './index.module.scss'
 
@@ -434,8 +434,20 @@ export default function Detail({ code }: Props) {
                         <td>{row.name}</td>
                         <td className="num">{row.ratio.toFixed(2)}%</td>
                         <td className="num">{num(quote?.price)}</td>
-                        <td className={classNames('num', pctClass(quote?.chg))}>
-                          {pct(quote?.chg)}
+                        <td className="num">
+                          <span className={styles.chgGroup}>
+                            <span className={pctClass(quote?.chg)}>{pct(quote?.chg)}</span>
+                            {quote != null && (
+                              <span
+                                className={classNames(
+                                  styles.chgTag,
+                                  isTradeMinute() ? styles.liveTag : styles.prevTag
+                                )}
+                              >
+                                {isTradeMinute() ? '实时' : '昨收'}
+                              </span>
+                            )}
+                          </span>
                         </td>
                       </tr>
                     )
