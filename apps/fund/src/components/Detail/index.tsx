@@ -422,6 +422,7 @@ export default function Detail({ code }: Props) {
                     <th>名称</th>
                     <th className="num">占比</th>
                     <th className="num">现价</th>
+                    <th className="num">昨收</th>
                     <th className="num">涨跌</th>
                   </tr>
                 </thead>
@@ -434,6 +435,7 @@ export default function Detail({ code }: Props) {
                         <td>{row.name}</td>
                         <td className="num">{row.ratio.toFixed(2)}%</td>
                         <td className="num">{num(quote?.price)}</td>
+                        <td className={classNames('num', 'muted')}>{num(quote?.prev)}</td>
                         <td className="num">
                           <span className={styles.chgGroup}>
                             <span className={pctClass(quote?.chg)}>{pct(quote?.chg)}</span>
