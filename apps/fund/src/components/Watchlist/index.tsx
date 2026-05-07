@@ -30,7 +30,6 @@ interface Row {
 }
 
 type PositionEditMode = 'set' | 'buy' | 'sell'
-const FIXED_PRINCIPAL = 100000
 
 function toNumber(value: string | null | undefined): number | null {
   if (!value) return null
@@ -233,7 +232,7 @@ async function mapWithConcurrency<T, R>(
   return results
 }
 
-export default function Watchlist({ funds, portfolio, showAdvancedPosition, onChange }: Props) {
+export default function Watchlist({ funds, showAdvancedPosition, onChange }: Props) {
   const [rows, setRows] = useState<Row[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -466,22 +465,6 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
     }
   }
 
-  const totalMarketAmount = rows.reduce<number | null>(
-    (total, { fund, gz, daily, previousDaily }) => {
-      const { shares } = getPositionBasis(fund)
-      if (shares == null) return total
-      const navPrice = getNavPrice(gz, daily, previousDaily)
-      if (navPrice.value == null) return total
-      return (total ?? 0) + shares * navPrice.value
-    },
-    null
-  )
-  const principalAmount = portfolio?.principal_amount ?? FIXED_PRINCIPAL
-  const cashAmount = portfolio?.cash_amount ?? 0
-  const totalProfit =
-    totalMarketAmount != null ? totalMarketAmount + cashAmount - principalAmount : null
-  const totalProfitState = moneyClass(totalProfit)
-
   const totalPreviousProfit = rows.reduce<number | null>((total, { fund, previousDaily }) => {
     const { shares } = getPositionBasis(fund)
     if (shares == null || !previousDaily?.dwjz) return total
@@ -517,19 +500,6 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
       <div className={shared.cardHead}>
         <h2>跟踪清单</h2>
         <div className={styles.summaryGroup}>
-          <div
-            className={classNames(
-              styles.totalProfit,
-              totalProfitState ? styles[totalProfitState] : styles.flat
-            )}
-            title={`按最新真实净值持有市值 + 现金余额 ${formatMoney(cashAmount)} - 固定本金 ${formatMoney(principalAmount)} 计算`}
-          >
-            <span>总盈亏</span>
-            <strong>
-              {totalProfit != null && totalProfit > 0 ? '+' : ''}
-              {formatMoney(totalProfit)}
-            </strong>
-          </div>
           <div
             className={classNames(
               styles.totalCost,
