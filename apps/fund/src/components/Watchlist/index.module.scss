@@ -120,7 +120,12 @@
 }
 
 .actionCol {
-  width: 42px;
+  width: 60px;
+}
+
+.watchTable th:last-child,
+.watchTable td:last-child {
+  padding-right: 20px;
 }
 
 .nameCell {
