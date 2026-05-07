@@ -61,6 +61,7 @@ export default function Home() {
     <div className={shared.page}>
       <header className={shared.header}>
         <h1>Fund Tracker</h1>
+        <Search watchlist={watchlist} onWatchlistChange={reload} inline />
         <div className={shared.meta}>
           <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
             repo <ExternalLink size={11} style={{ verticalAlign: 'middle' }} />
@@ -83,7 +84,6 @@ export default function Home() {
         ) : (
           <>
             <FundRankings />
-            <Search watchlist={watchlist} onWatchlistChange={reload} />
             <Watchlist
               funds={watchlist}
               portfolio={portfolio}

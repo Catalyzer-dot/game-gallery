@@ -9,6 +9,7 @@ import styles from './index.module.scss'
 interface Props {
   watchlist: WatchFund[]
   onWatchlistChange?: () => void
+  inline?: boolean
 }
 
 interface ResultPreview {
@@ -16,7 +17,7 @@ interface ResultPreview {
   loading: boolean
 }
 
-export default function Search({ watchlist, onWatchlistChange }: Props) {
+export default function Search({ watchlist, onWatchlistChange, inline = false }: Props) {
   const [q, setQ] = useState('')
   const [results, setResults] = useState<SearchHit[]>([])
   const [previews, setPreviews] = useState<Record<string, ResultPreview>>({})
@@ -111,76 +112,89 @@ export default function Search({ watchlist, onWatchlistChange }: Props) {
     return watchlist.some((w) => w.code === code)
   }
 
+  const inputEl = (
+    <input
+      type="search"
+      value={q}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="搜索基金代码或名称…"
+      autoComplete="off"
+      className={inline ? styles.inlineInput : styles.input}
+      aria-label="搜索基金"
+    />
+  )
+
+  const dropdown = q.trim() ? (
+    <ul className={inline ? styles.inlineResults : styles.results}>
+      {searchError ? (
+        <li className={styles.statusItem}>搜索失败：{searchError}</li>
+      ) : searching ? (
+        <li className={styles.statusItem}>搜索中…</li>
+      ) : !results.length ? (
+        <li className={styles.statusItem}>无结果</li>
+      ) : (
+        results.map((r) => {
+          const preview = previews[r.code]
+          const tracked = isTracked(r.code)
+          return (
+            <li key={r.code} className={styles.resultItem}>
+              <a className={styles.resultMain} href={`#/fund/${r.code}`}>
+                <span className={styles.resultTitle}>
+                  <span className={styles.code}>{r.code}</span>
+                  <span className={styles.name}>{r.name}</span>
+                </span>
+                <span className={styles.resultMeta}>
+                  {preview?.loading ? (
+                    '估值加载中…'
+                  ) : preview?.gz ? (
+                    <>
+                      <span>估值 {preview.gz.gsz || '—'}</span>
+                      <span className={pctClass(preview.gz.gszzl)}>{pct(preview.gz.gszzl)}</span>
+                      <span>{preview.gz.gztime.slice(-5) || '—'}</span>
+                    </>
+                  ) : (
+                    '暂无实时估值'
+                  )}
+                </span>
+                {addError[r.code] && (
+                  <span className={styles.errorText}>添加失败：{addError[r.code]}</span>
+                )}
+              </a>
+              <span className={styles.resultActions}>
+                <span className={styles.type}>{r.ftype || r.type || ''}</span>
+                <button
+                  type="button"
+                  className={styles.addBtn}
+                  onClick={() => void handleAdd(r)}
+                  disabled={tracked || addingCode === r.code}
+                >
+                  {tracked ? '已跟踪' : addingCode === r.code ? '添加中…' : '加入'}
+                </button>
+              </span>
+            </li>
+          )
+        })
+      )}
+    </ul>
+  ) : null
+
+  if (inline) {
+    return (
+      <div className={styles.inlineBox}>
+        {inputEl}
+        {dropdown}
+      </div>
+    )
+  }
+
   return (
     <section className={shared.card}>
       <div className={shared.cardHead}>
         <h2>搜索基金</h2>
       </div>
       <div className={styles.box}>
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="输入基金代码或名称（中/拼音首字母均可）"
-          autoComplete="off"
-          className={styles.input}
-          aria-label="搜索基金"
-        />
-        {q.trim() && (
-          <ul className={styles.results}>
-            {searchError ? (
-              <li className={styles.statusItem}>搜索失败：{searchError}</li>
-            ) : searching ? (
-              <li className={styles.statusItem}>搜索中…</li>
-            ) : !results.length ? (
-              <li className={styles.statusItem}>无结果</li>
-            ) : (
-              results.map((r) => {
-                const preview = previews[r.code]
-                const tracked = isTracked(r.code)
-                return (
-                  <li key={r.code} className={styles.resultItem}>
-                    <a className={styles.resultMain} href={`#/fund/${r.code}`}>
-                      <span className={styles.resultTitle}>
-                        <span className={styles.code}>{r.code}</span>
-                        <span className={styles.name}>{r.name}</span>
-                      </span>
-                      <span className={styles.resultMeta}>
-                        {preview?.loading ? (
-                          '估值加载中…'
-                        ) : preview?.gz ? (
-                          <>
-                            <span>估值 {preview.gz.gsz || '—'}</span>
-                            <span className={pctClass(preview.gz.gszzl)}>
-                              {pct(preview.gz.gszzl)}
-                            </span>
-                            <span>{preview.gz.gztime.slice(-5) || '—'}</span>
-                          </>
-                        ) : (
-                          '暂无实时估值'
-                        )}
-                      </span>
-                      {addError[r.code] && (
-                        <span className={styles.errorText}>添加失败：{addError[r.code]}</span>
-                      )}
-                    </a>
-                    <span className={styles.resultActions}>
-                      <span className={styles.type}>{r.ftype || r.type || ''}</span>
-                      <button
-                        type="button"
-                        className={styles.addBtn}
-                        onClick={() => void handleAdd(r)}
-                        disabled={tracked || addingCode === r.code}
-                      >
-                        {tracked ? '已跟踪' : addingCode === r.code ? '添加中…' : '加入'}
-                      </button>
-                    </span>
-                  </li>
-                )
-              })
-            )}
-          </ul>
-        )}
+        {inputEl}
+        {dropdown}
       </div>
     </section>
   )
