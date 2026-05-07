@@ -130,6 +130,9 @@ export const transactWatchlistPosition = (
     }),
   })
 
+export const sellWatchlistPosition = (code: string): Promise<WatchFund> =>
+  request<WatchFund>(`/api/fund/watchlist/${code}/sell`, { method: 'POST' })
+
 export const removeWatchlist = async (code: string): Promise<void> => {
   const res = await fetch(url(`/api/fund/watchlist/${code}`), {
     method: 'DELETE',

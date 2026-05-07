@@ -6,6 +6,7 @@ import {
   fetchGz,
   loadDaily,
   removeWatchlist,
+  sellWatchlistPosition,
   transactWatchlistPosition,
   updateWatchlistPosition,
 } from '@services/api'
@@ -154,10 +155,13 @@ function getDailyProfitFromEndingAmount(
 }
 
 function getPositionBasis(fund: WatchFund) {
-  const shares = fund.holding_shares ?? fund.holding_units ?? null
+  // shares: 当前持有份额（清仓后为 null），用于今日涨跌 / 当前持有显示
+  const shares = fund.holding_shares ?? null
+  // historyShares: 上次持有快照（清仓后保留在 holding_units），用于上日盈亏
+  const historyShares = fund.holding_units ?? fund.holding_shares ?? null
   const costPrice = fund.holding_cost_price ?? null
   const costAmount = shares != null && costPrice != null ? shares * costPrice : null
-  return { shares, costPrice, costAmount }
+  return { shares, historyShares, costPrice, costAmount }
 }
 
 function formatMoney(value: number | null | undefined): string {
@@ -467,8 +471,9 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
   }
 
   const totalPreviousProfit = rows.reduce<number | null>((total, { fund, previousDaily }) => {
-    const { shares } = getPositionBasis(fund)
-    if (shares == null || !previousDaily?.dwjz) return total
+    const { historyShares } = getPositionBasis(fund)
+    if (historyShares == null || !previousDaily?.dwjz) return total
+    const shares = historyShares
     const previousHoldingAmount = shares * Number(previousDaily.dwjz)
     const profit = getDailyProfitFromEndingAmount(previousHoldingAmount, previousDaily.jzzzl)
     if (profit == null) return total
@@ -857,14 +862,28 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                         {(currentChange.time || '').slice(-5) || '—'}
                       </td>
                       <td className="num">
-                        {shares != null && (
+                        {fund.holding_shares != null && (
                           <button
                             type="button"
                             className={styles.sellBtn}
-                            title="清仓（清空持有份额）"
+                            title="清仓（清空持有份额，保留上日盈亏）"
                             aria-label={`清仓 ${fund.name}`}
                             disabled={isSaving}
-                            onClick={(e) => void clearCurrentValuePosition(e, fund)}
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              if (!window.confirm(`确认清仓 ${fund.name}？`)) return
+                              try {
+                                setSavingCode(fund.code)
+                                await sellWatchlistPosition(fund.code)
+                                onChange?.()
+                              } catch (err) {
+                                alert(
+                                  '清仓失败：' + (err instanceof Error ? err.message : String(err))
+                                )
+                              } finally {
+                                setSavingCode('')
+                              }
+                            }}
                           >
                             <LogOut size={13} />
                           </button>
