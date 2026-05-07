@@ -69,26 +69,27 @@ function withDerivedChange(row: DailyRow | undefined, previous: DailyRow | undef
 }
 
 function getCurrentChange(gz: GzData | null | undefined, daily: DailyRow | null | undefined) {
-  const hasTodayNav = Boolean(daily?.jzzzl && daily.date === getTodayDateString())
-  if (hasTodayNav) {
+  // 优先：今日已有真实净值
+  if (daily?.dwjz && daily.date === getTodayDateString()) {
     return {
-      value: daily?.jzzzl || '',
+      value: daily.jzzzl || '',
       label: '净值',
-      time: daily?.date || '',
+      time: daily.date,
     }
   }
 
-  // gz 的估值时间不是今天 → 今天没有开盘，不展示涨跌
+  // 次选：今日有估值
   const gzDate = gz?.gztime?.slice(0, 10)
-  if (!gz || gzDate !== getTodayDateString()) {
-    return { value: '', label: '', time: '' }
+  if (gz?.gszzl && gzDate === getTodayDateString()) {
+    return {
+      value: gz.gszzl,
+      label: '估值',
+      time: gz.gztime,
+    }
   }
 
-  return {
-    value: gz?.gszzl || '',
-    label: gz?.gszzl ? '估值' : '',
-    time: gz?.gztime || '',
-  }
+  // 非交易日或数据未就绪 → 不显示
+  return { value: '', label: '', time: '' }
 }
 
 function getNavPrice(
@@ -156,8 +157,7 @@ function getDailyProfitFromEndingAmount(
 function getPositionBasis(fund: WatchFund) {
   const shares = fund.holding_shares ?? fund.holding_units ?? null
   const costPrice = fund.holding_cost_price ?? null
-  const costAmount =
-    fund.holding_amount ?? (shares != null && costPrice != null ? shares * costPrice : null)
+  const costAmount = shares != null && costPrice != null ? shares * costPrice : null
   return { shares, costPrice, costAmount }
 }
 
@@ -185,8 +185,8 @@ function moneyClass(value: number | null | undefined): string {
 async function fetchWatchlistSnapshot(fund: WatchFund): Promise<Row> {
   const [gz, daily] = await Promise.all([fetchGz(fund.code), loadDaily(fund.code, 3)])
   const latestRows = [...(daily?.rows || [])].sort((a, b) => b.date.localeCompare(a.date))
-  const latest = withDerivedChange(latestRows[0], latestRows[1])
-  const previous = withDerivedChange(latestRows[1], latestRows[2])
+  const latest = latestRows[0] ? withDerivedChange(latestRows[0], latestRows[1]) : undefined
+  const previous = latestRows[1] ? withDerivedChange(latestRows[1], latestRows[2]) : undefined
   const hasTodayNav = latest?.dwjz && latest.date === getTodayDateString()
   const currentDaily = hasTodayNav ? latest : null
   const previousDaily = hasTodayNav ? previous : latest
@@ -248,7 +248,13 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
   const popoverCloseTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    setRows(funds.map((f) => ({ fund: f })))
+    setRows((prev) => {
+      const prevMap = new Map(prev.map((r) => [r.fund.code, r]))
+      return funds.map((f) => {
+        const existing = prevMap.get(f.code)
+        return existing ? { ...existing, fund: f } : { fund: f }
+      })
+    })
   }, [funds])
 
   useEffect(() => {
@@ -270,7 +276,13 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
     setLoading(true)
     setError('')
     try {
-      const results = await mapWithConcurrency(funds, 4, fetchWatchlistSnapshot)
+      const results = await mapWithConcurrency(funds, 4, async (fund) => {
+        try {
+          return await fetchWatchlistSnapshot(fund)
+        } catch {
+          return { fund } as Row
+        }
+      })
       if (refreshRequestRef.current !== requestId) return
       setRows(results)
       if (results.some((r) => r.gz === null && r.previousDaily === null)) {
@@ -471,8 +483,8 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
   const totalProfitState = moneyClass(totalProfit)
 
   const totalPreviousProfit = rows.reduce<number | null>((total, { fund, previousDaily }) => {
-    const { shares, costAmount } = getPositionBasis(fund)
-    if (shares == null || costAmount == null || !previousDaily?.dwjz) return total
+    const { shares } = getPositionBasis(fund)
+    if (shares == null || !previousDaily?.dwjz) return total
     const previousHoldingAmount = shares * Number(previousDaily.dwjz)
     const profit = getDailyProfitFromEndingAmount(previousHoldingAmount, previousDaily.jzzzl)
     if (profit == null) return total
@@ -481,13 +493,17 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
   const totalPreviousProfitState = moneyClass(totalPreviousProfit)
   const totalCurrentProfit = rows.reduce<number | null>(
     (total, { fund, gz, daily, previousDaily }) => {
-      const { shares } = getPositionBasis(fund)
-      if (shares == null) return total
       const currentChange = getCurrentChange(gz, daily)
       if (!currentChange.value) return total
-      const valuationPrice = getCurrentValuationPrice(gz, daily, previousDaily)
-      if (valuationPrice.value == null) return total
-      const currentAmount = shares * valuationPrice.value
+      const { shares } = getPositionBasis(fund)
+      let currentAmount: number | null = null
+      if (shares != null) {
+        const valuationPrice = getCurrentValuationPrice(gz, daily, previousDaily)
+        if (valuationPrice.value != null) currentAmount = shares * valuationPrice.value
+      } else if (fund.holding_amount != null) {
+        currentAmount = fund.holding_amount
+      }
+      if (currentAmount == null) return total
       const profit = getDailyProfitFromEndingAmount(currentAmount, currentChange.value)
       if (profit == null) return total
       return (total ?? 0) + profit
@@ -590,7 +606,7 @@ export default function Watchlist({ funds, portfolio, showAdvancedPosition, onCh
                   const currentHoldingAmount =
                     shares != null && valuationPrice.value != null
                       ? shares * valuationPrice.value
-                      : null
+                      : (fund.holding_amount ?? null)
                   const currentProfit = getDailyProfitFromEndingAmount(
                     currentHoldingAmount,
                     currentChange.value
