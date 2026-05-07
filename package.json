@@ -1,5 +1,5 @@
 {
-  "name": "game-gallery",
+  "name": "degenerates-frontend",
   "version": "1.0.0",
   "private": true,
   "description": "游戏收藏管理平台 - Monorepo",
@@ -32,15 +32,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/catalyzer-dot/game-gallery.git"
+    "url": "git+https://github.com/catalyzer-dot/degenerates-frontend.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/catalyzer-dot/game-gallery/issues"
+    "url": "https://github.com/catalyzer-dot/degenerates-frontend/issues"
   },
-  "homepage": "https://github.com/catalyzer-dot/game-gallery#readme",
+  "homepage": "https://github.com/catalyzer-dot/degenerates-frontend#readme",
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

@@ -34,7 +34,7 @@ async function main() {
   githubService.saveConfig({
     token: GITHUB_TOKEN,
     owner: 'catalyzer-dot',
-    repo: 'game-gallery',
+    repo: 'degenerates-frontend',
   })
 
   // 3. 测试 GitHub 连接

@@ -7,9 +7,9 @@ echo "=== Godot塔防游戏部署脚本 ==="
 echo ""
 
 # 配置
-GODOT_BIN="/Users/zhaoyang/github/game-gallery/godot-editor/Godot.app/Contents/MacOS/Godot"
-PROJECT_DIR="/Users/zhaoyang/github/game-gallery/godot-tower-defense"
-EXPORT_DIR="/Users/zhaoyang/github/game-gallery/web/public/godot-tower-defense"
+GODOT_BIN="/Users/zhaoyang/github/degenerates-frontend/godot-editor/Godot.app/Contents/MacOS/Godot"
+PROJECT_DIR="/Users/zhaoyang/github/degenerates-frontend/godot-tower-defense"
+EXPORT_DIR="/Users/zhaoyang/github/degenerates-frontend/web/public/godot-tower-defense"
 TEMPLATE_DIR="/Users/zhaoyang/Library/Application Support/Godot/export_templates/4.3.stable"
 
 # 1. 检查导出模板
@@ -50,7 +50,7 @@ fi
 
 # 5. 提交到Git
 echo "5. 提交更改到Git..."
-cd /Users/zhaoyang/github/game-gallery
+cd /Users/zhaoyang/github/degenerates-frontend
 git add web/public/godot-tower-defense/
 git add godot-tower-defense/
 git status
@@ -59,9 +59,9 @@ echo ""
 echo "=== 部署准备完成 ==="
 echo ""
 echo "接下来请执行："
-echo "  cd /Users/zhaoyang/github/game-gallery"
+echo "  cd /Users/zhaoyang/github/degenerates-frontend"
 echo "  git commit -m '新增Godot塔防游戏'"
 echo "  git push"
 echo ""
 echo "推送后，游戏将在以下地址可用："
-echo "  https://catalyzer-dot.github.io/game-gallery/godot-tower-defense/"
+echo "  https://catalyzer-dot.github.io/degenerates-frontend/godot-tower-defense/"

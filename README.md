@@ -17,7 +17,7 @@
 ## 项目结构
 
 ```
-game-gallery/
+degenerates-frontend/
 ├── apps/
 │   └── web/                    # 前端应用 (React + Vite)
 │       ├── src/
@@ -46,8 +46,8 @@ game-gallery/
 
 ```bash
 # 克隆仓库
-git clone https://github.com/catalyzer-dot/game-gallery.git
-cd game-gallery
+git clone https://github.com/catalyzer-dot/degenerates-frontend.git
+cd degenerates-frontend
 
 # 安装依赖
 npm install
@@ -186,7 +186,7 @@ npm run format           # Prettier 格式化代码
 ## 📞 联系方式
 
 - GitHub: [@Catalyzer-dot](https://github.com/Catalyzer-dot)
-- 问题反馈: [Issues](https://github.com/Catalyzer-dot/game-gallery/issues)
+- 问题反馈: [Issues](https://github.com/Catalyzer-dot/degenerates-frontend/issues)
 
 ## 📜 License
 

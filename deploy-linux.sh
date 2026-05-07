@@ -6,13 +6,13 @@ set -e
 # 后端服务由 degenerates-backend 仓库独立管理
 
 echo "======================================"
-echo "Game Gallery Frontend Deployment"
+echo "Degenerates Frontend Deployment"
 echo "======================================"
 echo ""
 
 # 配置变量
-DEPLOY_DIR="${DEPLOY_DIR:-/opt/game-gallery}"
-TEMP_DIR="/tmp/game-gallery-deploy-$$"
+DEPLOY_DIR="${DEPLOY_DIR:-/opt/degenerates-frontend}"
+TEMP_DIR="/tmp/degenerates-frontend-deploy-$$"
 
 # 颜色输出
 RED='\033[0;31m'
@@ -60,7 +60,7 @@ SUCCESS=false
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     log_info "Attempt $((RETRY_COUNT + 1))/$MAX_RETRIES to download frontend..."
 
-    if git clone --branch dist --depth 1 --single-branch https://github.com/catalyzer-dot/game-gallery.git .; then
+    if git clone --branch dist --depth 1 --single-branch https://github.com/catalyzer-dot/degenerates-frontend.git .; then
         SUCCESS=true
         log_info "Frontend build downloaded successfully"
         break
@@ -79,7 +79,7 @@ if [ "$SUCCESS" = false ]; then
 
     # 备用方案：使用 GitHub API 下载
     cd "$TEMP_DIR"
-    if curl -fsSL -o dist.tar.gz "https://github.com/catalyzer-dot/game-gallery/archive/refs/heads/dist.tar.gz"; then
+    if curl -fsSL -o dist.tar.gz "https://github.com/catalyzer-dot/degenerates-frontend/archive/refs/heads/dist.tar.gz"; then
         tar -xzf dist.tar.gz --strip-components=1
         rm dist.tar.gz
         log_info "Frontend downloaded via GitHub API"

@@ -7,7 +7,7 @@ services:
     build:
       context: ./apps/web
       dockerfile: Dockerfile.dev
-    container_name: game-gallery-frontend-dev
+    container_name: degenerates-frontend-dev
     ports:
       - '5173:5173'
     environment:

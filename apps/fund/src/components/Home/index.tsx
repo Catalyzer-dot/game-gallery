@@ -13,7 +13,7 @@ import {
 import type { FundPortfolio, WatchFund } from '@/types'
 import shared from '@/styles/shared.module.scss'
 
-const REPO_URL = 'https://github.com/Catalyzer-dot/game-gallery/tree/main/apps/fund'
+const REPO_URL = 'https://github.com/Catalyzer-dot/degenerates-frontend/tree/main/apps/fund'
 const ADVANCED_POSITION_KEY = 'fund_tracker_show_advanced_position'
 
 export default function Home() {

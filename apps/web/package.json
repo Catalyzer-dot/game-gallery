@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://zhaoyang.github.io/game-gallery",
+  "homepage": "https://zhaoyang.github.io/degenerates-frontend",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && rm -rf dist/godot-tower-defense",

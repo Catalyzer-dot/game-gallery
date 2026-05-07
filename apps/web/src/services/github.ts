@@ -54,9 +54,9 @@ class GitHubService {
       }
 
       // 强制修正为正确的owner和repo
-      if (this.config.owner !== 'catalyzer-dot' || this.config.repo !== 'game-gallery') {
+      if (this.config.owner !== 'catalyzer-dot' || this.config.repo !== 'degenerates-frontend') {
         this.config.owner = 'catalyzer-dot'
-        this.config.repo = 'game-gallery'
+        this.config.repo = 'degenerates-frontend'
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config))
       }
 

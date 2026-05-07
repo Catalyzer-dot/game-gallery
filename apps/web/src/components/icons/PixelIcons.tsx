@@ -1,5 +1,5 @@
 /**
- * Pixel-art icon set matching the game-gallery favicon style.
+ * Pixel-art icon set matching the degenerates-frontend favicon style.
  * All icons use currentColor for stroke, with optional accent fills.
  * Drop-in replacements for Lucide icons (same size/className props).
  */

@@ -217,7 +217,7 @@ jobs:
 
             if [ "$WEB_CHANGED" = "true" ] || [ "$FORCE_ALL" = "true" ]; then
               # web 现在不含 godot（已 4MB）
-              download_branch_to "$REPO" dist /opt/game-gallery/web/dist
+              download_branch_to "$REPO" dist /opt/degenerates-frontend/web/dist
             else
               echo "skip web (no changes)"
             fi
