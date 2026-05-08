@@ -69,9 +69,11 @@ body {
   font-weight: 300;
 }
 
-.auth-section {
-  width: 100%;
-  max-width: 420px;
+.settings-corner {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 100;
 }
 
 .grid {

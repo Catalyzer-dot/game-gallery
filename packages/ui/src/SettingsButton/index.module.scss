@@ -1,0 +1,106 @@
+.trigger {
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border, #2a2a4a);
+  border-radius: 10px;
+  padding: 0.6rem;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    color: var(--accent-light, #a78bfa);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.2);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: rgba(22, 22, 51, 0.95);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow:
+    0 0 15px rgba(124, 58, 237, 0.4),
+    0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    width: 92%;
+    max-height: 90vh;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1.25rem;
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary, #94a3b8);
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--accent-light, #a78bfa);
+  }
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary, #e2e8f0);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sectionTitle {
+  color: var(--text-primary, #e2e8f0);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}

@@ -1,53 +1,22 @@
-.root {
-  position: relative;
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.trigger {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted-strong);
-  cursor: pointer;
-  display: inline-flex;
-  gap: 6px;
-  min-height: 32px;
-  padding: 5px 11px;
-
-  &:hover {
-    border-color: rgba(110, 198, 255, 0.45);
-    color: var(--text);
-  }
-}
-
-.panel {
-  background: rgba(16, 23, 32, 0.96);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38);
-  min-width: 320px;
-  padding: 14px;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  z-index: 30;
-}
-
-.panelHead {
+.sectionHead {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 12px;
 
   strong {
-    color: var(--text);
+    color: var(--text-primary, var(--text, #e2e8f0));
     font-size: 13px;
     font-weight: 700;
   }
 
   span {
-    color: var(--muted);
-    font-family: var(--mono);
+    color: var(--text-secondary, var(--muted, #94a3b8));
     font-size: 11px;
   }
 }
@@ -65,14 +34,13 @@
   gap: 4px;
 
   strong {
-    color: var(--text);
+    color: var(--text-primary, var(--text, #e2e8f0));
     font-size: 13px;
     font-weight: 700;
   }
 
   span {
-    color: var(--muted);
-    font-family: var(--mono);
+    color: var(--text-secondary, var(--muted, #94a3b8));
     font-size: 12px;
   }
 }
@@ -80,9 +48,9 @@
 .switchBtn {
   align-items: center;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 999px;
-  color: var(--muted-strong);
+  color: var(--text-secondary, #94a3b8);
   cursor: pointer;
   display: inline-flex;
   flex-shrink: 0;
@@ -91,13 +59,13 @@
   padding: 5px 12px 5px 8px;
 
   &[data-on='true'] {
-    background: rgba(110, 198, 255, 0.08);
-    border-color: rgba(110, 198, 255, 0.32);
-    color: var(--text);
+    background: rgba(124, 58, 237, 0.12);
+    border-color: rgba(124, 58, 237, 0.4);
+    color: var(--text-primary, #e2e8f0);
   }
 
   &:hover {
-    border-color: rgba(110, 198, 255, 0.45);
+    border-color: rgba(124, 58, 237, 0.45);
   }
 }
 
@@ -127,16 +95,11 @@
 }
 
 .switchLabel {
-  font-family: var(--mono);
   font-size: 12px;
   font-weight: 700;
 }
 
 @media (max-width: 700px) {
-  .panel {
-    min-width: min(320px, calc(100vw - 32px));
-  }
-
   .settingRow {
     align-items: flex-start;
     flex-direction: column;

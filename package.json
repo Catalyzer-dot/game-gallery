@@ -9,13 +9,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w apps/game-gallery",
+    "dev": "npm run dev -w apps/home & npm run dev -w apps/game-gallery & npm run dev -w apps/fund & wait",
     "dev:home": "npm run dev -w apps/home",
+    "dev:game": "npm run dev -w apps/game-gallery",
     "dev:fund": "npm run dev -w apps/fund",
-    "build": "npm run build -w apps/game-gallery",
+    "build": "npm run build -w apps/home && npm run build -w apps/game-gallery && npm run build -w apps/fund",
     "build:home": "npm run build -w apps/home",
+    "build:game": "npm run build -w apps/game-gallery",
     "build:fund": "npm run build -w apps/fund",
-    "build:all": "npm run build -w apps/game-gallery && npm run build -w apps/fund && npm run build -w apps/home",
     "prepare": "husky || true"
   },
   "lint-staged": {

@@ -1,10 +1,14 @@
 {
-  "name": "@degenerates/auth",
+  "name": "@degenerates/ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@degenerates/auth": "*",
+    "lucide-react": "^0.562.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

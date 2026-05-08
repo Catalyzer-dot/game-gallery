@@ -15,7 +15,6 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
-    open: true,
     proxy: {
       // 仅在未显式设置 VITE_API_URL 且请求相对路径时使用。
       // 当前前端开发默认会直连 https://degenerates.site。

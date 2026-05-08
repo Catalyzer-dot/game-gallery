@@ -1,4 +1,16 @@
-import { LoginButton } from '@degenerates/auth'
+import { LoginButton, SettingsButton } from '@degenerates/ui'
+
+const DEV_PORTS: Record<string, number> = {
+  '/game-gallery/': 5173,
+  '/fund/': 5174,
+}
+
+function resolveHref(path: string): string {
+  if (import.meta.env.DEV && DEV_PORTS[path]) {
+    return `http://localhost:${DEV_PORTS[path]}`
+  }
+  return path
+}
 
 const apps = [
   {
@@ -29,20 +41,22 @@ const apps = [
 export default function App() {
   return (
     <div className="page">
+      <div className="settings-corner">
+        <SettingsButton>
+          <LoginButton mode="full" />
+        </SettingsButton>
+      </div>
+
       <header className="hero">
         <h1 className="title">Degenerates</h1>
         <p className="subtitle">A collection of tools built for fun.</p>
       </header>
 
-      <section className="auth-section">
-        <LoginButton mode="full" />
-      </section>
-
       <nav className="grid">
         {apps.map((app) => (
           <a
             key={app.href}
-            href={app.href}
+            href={resolveHref(app.href)}
             className="card"
             style={{ '--accent': app.color } as React.CSSProperties}
           >

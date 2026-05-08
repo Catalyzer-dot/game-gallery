@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Loader2, LogIn, LogOut, Plus } from 'lucide-react'
-import { useAuth } from './useAuth'
-import { generateInviteCode as generateInviteCodeService } from './auth'
-import type { InviteCodeData } from './types'
-import styles from './LoginButton.module.scss'
+import { useAuth, generateInviteCode as generateInviteCodeService } from '@degenerates/auth'
+import type { InviteCodeData } from '@degenerates/auth'
+import styles from './index.module.scss'
 
 interface LoginButtonProps {
   mode?: 'compact' | 'full'

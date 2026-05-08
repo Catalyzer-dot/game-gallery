@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@degenerates/auth": "*",
+    "@degenerates/ui": "*",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.27.0",

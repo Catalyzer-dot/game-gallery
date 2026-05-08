@@ -1,4 +1,3 @@
-export { default as LoginButton } from './LoginButton'
 export { useAuth } from './useAuth'
 export {
   login,

@@ -12,6 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@degenerates/auth": "*",
+    "@degenerates/ui": "*",
     "classnames": "^2.5.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",

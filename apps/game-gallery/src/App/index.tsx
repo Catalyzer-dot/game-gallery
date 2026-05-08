@@ -6,7 +6,6 @@ import { SearchBar, type SearchResult } from '../components/SearchBar'
 import type { Game } from '../types'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  SettingsIcon,
   Loader2,
   Play,
   Bookmark,
@@ -77,7 +76,6 @@ function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showSteamSearch, setShowSteamSearch] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [mainTab, setMainTab] = useState<'steamgames' | 'playground'>('steamgames')
   const [activeTab, setActiveTab] = useState<'playing' | 'queueing' | 'completion'>('playing')
   const [statusCounts, setStatusCounts] = useState<Record<GameStatus, number>>({
@@ -488,7 +486,6 @@ function HomePage() {
   }
 
   const handleSettingsClose = async () => {
-    setShowSettings(false)
     await reloadLibraryFirstPages()
   }
 
@@ -594,9 +591,9 @@ function HomePage() {
             results={searchResults}
             onResultClick={handleSearchResultClick}
           />
-          <button onClick={() => setShowSettings(true)} className={styles.btnSettings} title="设置">
-            <SettingsIcon size={18} />
-          </button>
+          <Suspense fallback={<div />}>
+            <Settings onClose={handleSettingsClose} />
+          </Suspense>
         </div>
       </header>
 
@@ -770,12 +767,6 @@ function HomePage() {
             onAddGame={handleAddGameFromSteam}
             onClose={() => setShowSteamSearch(false)}
           />
-        </Suspense>
-      )}
-
-      {showSettings && (
-        <Suspense fallback={<div />}>
-          <Settings onClose={handleSettingsClose} />
         </Suspense>
       )}
 

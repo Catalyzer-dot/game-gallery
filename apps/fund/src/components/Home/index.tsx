@@ -76,20 +76,23 @@ export default function Home() {
       <main className={shared.main}>
         {authRequired ? (
           <div className={shared.statusBox}>
-            fund 跟踪清单已按登录用户隔离。请先登录后再查看或维护自己的基金列表。
-            <a href="/" style={{ marginLeft: 10 }}>
-              去登录
-            </a>
+            请点击右上角设置按钮登录，即可查看和管理你的基金跟踪清单。
           </div>
         ) : (
           <>
             <FundRankings />
-            <Watchlist
-              funds={watchlist}
-              portfolio={portfolio}
-              onChange={reload}
-              showAdvancedPosition={showAdvancedPosition}
-            />
+            {watchlist.length === 0 ? (
+              <div className={shared.statusBox}>
+                暂无跟踪数据，使用上方搜索框添加你想关注的基金。
+              </div>
+            ) : (
+              <Watchlist
+                funds={watchlist}
+                portfolio={portfolio}
+                onChange={reload}
+                showAdvancedPosition={showAdvancedPosition}
+              />
+            )}
           </>
         )}
       </main>
