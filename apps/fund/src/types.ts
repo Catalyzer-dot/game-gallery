@@ -130,6 +130,7 @@ export interface QuoteRow {
   price: number | null
   prev: number | null
   chg: number | null
+  prev_chg: number | null
 }
 
 export interface GlobalMeta {

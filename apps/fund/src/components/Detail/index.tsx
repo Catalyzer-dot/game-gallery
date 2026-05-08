@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import classNames from 'classnames'
-import { fetchQuotes, loadDaily, loadHoldings, loadMeta, loadWatchlist } from '@services/api'
-import type { DailyData, FundMeta, HoldingsData, QuoteRow } from '@/types'
+import { fetchGz, fetchQuotes, loadDaily, loadHoldings, loadMeta, loadWatchlist } from '@services/api'
+import type { DailyData, FundMeta, GzData, HoldingsData, QuoteRow } from '@/types'
 import { isAfterClose, isTradeMinute, num, pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
 import styles from './index.module.scss'
@@ -206,6 +206,7 @@ function DailyNavChart({ points }: { points: DailyChartPoint[] }) {
 
 export default function Detail({ code }: Props) {
   const [meta, setMeta] = useState<FundMeta | null>(null)
+  const [gz, setGz] = useState<GzData | null>(null)
   const [holdings, setHoldings] = useState<HoldingsData | null>(null)
   const [holdingQuotes, setHoldingQuotes] = useState<QuoteRow[]>([])
   const [daily, setDaily] = useState<DailyData | null>(null)
@@ -230,6 +231,7 @@ export default function Detail({ code }: Props) {
     const id = window.setInterval(() => {
       void refreshHoldingQuotes()
       void refreshLatestDaily()
+      void refreshGz()
     }, 30000)
 
     return () => window.clearInterval(id)
@@ -244,20 +246,23 @@ export default function Detail({ code }: Props) {
     setLoadError('')
     setFundName(code)
     setMeta(null)
+    setGz(null)
     setHoldings(null)
     setHoldingQuotes([])
     setDaily(null)
 
     try {
-      const [metaData, holdingsData, dailyData, watchlist] = await Promise.all([
+      const [metaData, holdingsData, dailyData, watchlist, gzData] = await Promise.all([
         loadMeta(code),
         loadHoldings(code),
         loadDaily(code, 30),
         loadWatchlist().catch(() => []),
+        fetchGz(code),
       ])
       if (loadRequestRef.current !== requestId) return
 
       setMeta(metaData)
+      setGz(gzData)
       setHoldings(holdingsData)
       setDaily(dailyData)
 
@@ -288,6 +293,11 @@ export default function Detail({ code }: Props) {
     setDaily((prev) => mergeDailyRows(prev, latestDaily))
   }
 
+  async function refreshGz() {
+    const gzData = await fetchGz(code)
+    if (gzData) setGz(gzData)
+  }
+
   async function refreshHoldingQuotes() {
     const currentHoldings = holdingsRef.current
     if (!currentHoldings?.rows.length) return
@@ -301,8 +311,7 @@ export default function Detail({ code }: Props) {
   async function manualRefreshQuotes() {
     setQuoteRefreshing(true)
     try {
-      await refreshHoldingQuotes()
-      await refreshLatestDaily()
+      await Promise.all([refreshHoldingQuotes(), refreshLatestDaily(), refreshGz()])
     } finally {
       setQuoteRefreshing(false)
     }
@@ -373,8 +382,36 @@ export default function Detail({ code }: Props) {
         <section className={shared.card}>
           <div className={styles.metaGrid}>
             <div>
-              <label>类型</label>
-              <span>{meta?.type || '-'}</span>
+              <label>{isTradeMinute() ? '当前估值' : '净值'}</label>
+              <span>
+                {isTradeMinute() ? (
+                  gz?.gsz ? (
+                    <>
+                      {gz.gsz}
+                      {gz.gszzl && (
+                        <span className={classNames('small', pctClass(gz.gszzl))}>
+                          {' '}
+                          {pct(gz.gszzl)}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    latestDailyRows[0]?.dwjz || '-'
+                  )
+                ) : latestDailyRows[0]?.dwjz ? (
+                  <>
+                    {latestDailyRows[0].dwjz}
+                    {latestDailyRows[0].jzzzl && (
+                      <span className={classNames('small', pctClass(latestDailyRows[0].jzzzl))}>
+                        {' '}
+                        {pct(latestDailyRows[0].jzzzl)}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  '-'
+                )}
+              </span>
             </div>
             <div>
               <label>规模</label>
@@ -422,7 +459,7 @@ export default function Detail({ code }: Props) {
                     <th>名称</th>
                     <th className="num">占比</th>
                     <th className="num">现价</th>
-                    <th className="num">昨收</th>
+                    <th className="num">昨收涨跌</th>
                     <th className="num">涨跌</th>
                   </tr>
                 </thead>
@@ -435,25 +472,27 @@ export default function Detail({ code }: Props) {
                         <td>{row.name}</td>
                         <td className="num">{row.ratio.toFixed(2)}%</td>
                         <td className="num">{num(quote?.price)}</td>
-                        <td className={classNames('num', 'muted')}>{num(quote?.prev)}</td>
+                        <td className={classNames('num', pctClass(quote?.prev_chg))}>
+                          {pct(quote?.prev_chg)}
+                        </td>
                         <td className="num">
-                          <span className={styles.chgGroup}>
-                            <span className={pctClass(quote?.chg)}>{pct(quote?.chg)}</span>
-                            {quote != null && (
-                              <span
-                                className={classNames(
-                                  styles.chgTag,
-                                  isTradeMinute()
-                                    ? styles.liveTag
-                                    : isAfterClose()
-                                      ? styles.closeTag
-                                      : styles.prevTag
-                                )}
-                              >
-                                {isTradeMinute() ? '实时' : isAfterClose() ? '收盘' : '昨收'}
-                              </span>
-                            )}
-                          </span>
+                          {isTradeMinute() || isAfterClose() ? (
+                            <span className={styles.chgGroup}>
+                              <span className={pctClass(quote?.chg)}>{pct(quote?.chg)}</span>
+                              {quote != null && (
+                                <span
+                                  className={classNames(
+                                    styles.chgTag,
+                                    isTradeMinute() ? styles.liveTag : styles.closeTag
+                                  )}
+                                >
+                                  {isTradeMinute() ? '实时' : '收盘'}
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="muted">-</span>
+                          )}
                         </td>
                       </tr>
                     )
