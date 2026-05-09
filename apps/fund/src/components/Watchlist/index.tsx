@@ -5,6 +5,7 @@ import { Check, Minus, Pencil, Plus, Trash2, X } from 'lucide-react'
 import {
   fetchGz,
   loadDaily,
+  loadWatchlist,
   removeWatchlist,
   transactWatchlistPosition,
   updateWatchlistPosition,
@@ -278,7 +279,13 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
     setLoading(true)
     setError('')
     try {
-      const results = await mapWithConcurrency(funds, 4, async (fund) => {
+      // 重拉 fund 元数据（含 holding_units/holding_shares），确保持有收益使用最新快照
+      const freshFunds = await loadWatchlist().catch(() => null)
+      const fundsToUse =
+        freshFunds && freshFunds.length > 0
+          ? freshFunds.filter((f) => funds.some((existing) => existing.code === f.code))
+          : funds
+      const results = await mapWithConcurrency(fundsToUse, 4, async (fund) => {
         try {
           return await fetchWatchlistSnapshot(fund)
         } catch {
