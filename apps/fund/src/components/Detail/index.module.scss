@@ -28,6 +28,11 @@
 
     &:global(.up) { color: var(--red); }
     &:global(.down) { color: var(--green); }
+    &:global(.metaDate) {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
   }
 }
 
