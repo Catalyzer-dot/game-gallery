@@ -446,7 +446,9 @@ export default function Detail({ code }: Props) {
                         '—'
                       )}
                     </span>
-                    {gz?.gztime && <span className="metaDate">{gz.gztime.slice(0, 10)}</span>}
+                    {(gz?.jzrq || latestNav?.date) && (
+                      <span className="metaDate">{gz?.jzrq || latestNav?.date}</span>
+                    )}
                   </div>
                 )
               }
