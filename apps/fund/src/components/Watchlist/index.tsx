@@ -616,7 +616,9 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                     onClick={() => toggleSort('prevChange')}
                   >
                     上交易日净值涨跌
-                    {sort.column === 'prevChange' ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                    <span className={styles.sortArrow}>
+                      {sort.column === 'prevChange' ? (sort.direction === 'desc' ? '↓' : '↑') : ''}
+                    </span>
                   </th>
                   <th
                     className={classNames(
@@ -627,11 +629,13 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                     onClick={() => toggleSort('currentChange')}
                   >
                     当前净值/估值涨跌
-                    {sort.column === 'currentChange'
-                      ? sort.direction === 'desc'
-                        ? ' ↓'
-                        : ' ↑'
-                      : ''}
+                    <span className={styles.sortArrow}>
+                      {sort.column === 'currentChange'
+                        ? sort.direction === 'desc'
+                          ? '↓'
+                          : '↑'
+                        : ''}
+                    </span>
                   </th>
                   <th
                     className={classNames(
@@ -642,7 +646,9 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                     onClick={() => toggleSort('holding')}
                   >
                     当前持有
-                    {sort.column === 'holding' ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                    <span className={styles.sortArrow}>
+                      {sort.column === 'holding' ? (sort.direction === 'desc' ? '↓' : '↑') : ''}
+                    </span>
                   </th>
                   <th className="num">更新</th>
                   <th className="num"></th>

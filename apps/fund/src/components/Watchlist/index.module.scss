@@ -1,6 +1,7 @@
 .sortable {
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 
   &:hover {
     color: var(--fg);
@@ -9,6 +10,12 @@
 
 .sorted {
   color: var(--fg);
+}
+
+.sortArrow {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
 }
 
 .empty {
