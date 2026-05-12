@@ -1,3 +1,16 @@
+.sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--fg);
+  }
+}
+
+.sorted {
+  color: var(--fg);
+}
+
 .empty {
   color: var(--muted);
   font-size: 13px;

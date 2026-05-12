@@ -1,5 +1,5 @@
 /* 跟踪清单表格 */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import classNames from 'classnames'
 import { Check, Minus, Pencil, Plus, Trash2, X } from 'lucide-react'
 import {
@@ -31,6 +31,12 @@ interface Row {
 }
 
 type PositionEditMode = 'set' | 'buy' | 'sell'
+type SortColumn = 'prevChange' | 'currentChange' | 'holding'
+type SortDirection = 'desc' | 'asc'
+interface SortState {
+  column: SortColumn | null
+  direction: SortDirection
+}
 
 function toNumber(value: string | null | undefined): number | null {
   if (!value) return null
@@ -247,6 +253,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
   const [sharesDraft, setSharesDraft] = useState('')
   const [costDraft, setCostDraft] = useState('')
   const [savingCode, setSavingCode] = useState('')
+  const [sort, setSort] = useState<SortState>({ column: 'holding', direction: 'desc' })
   const refreshRequestRef = useRef(0)
   const popoverCloseTimerRef = useRef<number | null>(null)
 
@@ -476,22 +483,37 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
     }
   }
 
+  const toggleSort = useCallback((column: SortColumn) => {
+    setSort((prev) => {
+      if (prev.column !== column) return { column, direction: 'desc' }
+      if (prev.direction === 'desc') return { column, direction: 'asc' }
+      return { column: null, direction: 'desc' }
+    })
+  }, [])
+
   const sortedRows = useMemo(() => {
-    const indexed = rows.map((row, i) => {
+    if (!sort.column) return rows
+
+    const getSortValue = (row: Row): number | null => {
+      if (sort.column === 'prevChange') return toNumber(row.previousDaily?.jzzzl)
+      if (sort.column === 'currentChange')
+        return toNumber(getCurrentChange(row.gz, row.daily).value)
       const { shares } = getPositionBasis(row.fund)
       const navPrice = getNavPrice(row.gz, row.daily, row.previousDaily)
-      const amount = shares != null && navPrice.value != null ? shares * navPrice.value : null
-      return { row, amount, index: i }
-    })
+      return shares != null && navPrice.value != null ? shares * navPrice.value : null
+    }
+
+    const multiplier = sort.direction === 'desc' ? 1 : -1
+    const indexed = rows.map((row, i) => ({ row, value: getSortValue(row), index: i }))
     indexed.sort((a, b) => {
-      if (a.amount == null && b.amount == null) return a.index - b.index
-      if (a.amount == null) return 1
-      if (b.amount == null) return -1
-      if (b.amount !== a.amount) return b.amount - a.amount
+      if (a.value == null && b.value == null) return a.index - b.index
+      if (a.value == null) return 1
+      if (b.value == null) return -1
+      if (a.value !== b.value) return (b.value - a.value) * multiplier
       return a.index - b.index
     })
     return indexed.map((entry) => entry.row)
-  }, [rows])
+  }, [rows, sort])
 
   const totalPreviousProfit = rows.reduce<number | null>((total, { fund, previousDaily }) => {
     const { historyShares } = getPositionBasis(fund)
@@ -585,9 +607,43 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                 <tr>
                   <th>代码</th>
                   <th>简称</th>
-                  <th className="num">上交易日净值涨跌</th>
-                  <th className="num">当前净值/估值涨跌</th>
-                  <th className="num">当前持有</th>
+                  <th
+                    className={classNames(
+                      'num',
+                      styles.sortable,
+                      sort.column === 'prevChange' && styles.sorted
+                    )}
+                    onClick={() => toggleSort('prevChange')}
+                  >
+                    上交易日净值涨跌
+                    {sort.column === 'prevChange' ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </th>
+                  <th
+                    className={classNames(
+                      'num',
+                      styles.sortable,
+                      sort.column === 'currentChange' && styles.sorted
+                    )}
+                    onClick={() => toggleSort('currentChange')}
+                  >
+                    当前净值/估值涨跌
+                    {sort.column === 'currentChange'
+                      ? sort.direction === 'desc'
+                        ? ' ↓'
+                        : ' ↑'
+                      : ''}
+                  </th>
+                  <th
+                    className={classNames(
+                      'num',
+                      styles.sortable,
+                      sort.column === 'holding' && styles.sorted
+                    )}
+                    onClick={() => toggleSort('holding')}
+                  >
+                    当前持有
+                    {sort.column === 'holding' ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </th>
                   <th className="num">更新</th>
                   <th className="num"></th>
                 </tr>
