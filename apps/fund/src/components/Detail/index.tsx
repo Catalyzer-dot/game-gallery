@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import classNames from 'classnames'
-import { addWatchlist, fetchGz, fetchQuotes, getSessionToken, loadDaily, loadHoldings, loadMeta, loadWatchlist } from '@services/api'
+import {
+  addWatchlist,
+  fetchGz,
+  fetchQuotes,
+  getSessionToken,
+  loadDaily,
+  loadHoldings,
+  loadMeta,
+  loadWatchlist,
+} from '@services/api'
 import type { DailyData, FundMeta, GzData, HoldingsData, QuoteRow } from '@/types'
 import { isAfterClose, isTradeMinute, num, pct, pctClass } from '@/utils/format'
 import shared from '@/styles/shared.module.scss'
@@ -352,7 +361,14 @@ export default function Detail({ code }: Props) {
     <div className={shared.page}>
       <header className={shared.header}>
         <h1>
-          <a className={shared.back} href="#">
+          <a
+            className={shared.back}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              window.history.back()
+            }}
+          >
             返回
           </a>
           <span>{fundName}</span>
@@ -421,10 +437,7 @@ export default function Detail({ code }: Props) {
                       <span>
                         {todayNav.dwjz}
                         {todayNav.jzzzl && (
-                          <span className={pctClass(todayNav.jzzzl)}>
-                            {' '}
-                            {pct(todayNav.jzzzl)}
-                          </span>
+                          <span className={pctClass(todayNav.jzzzl)}> {pct(todayNav.jzzzl)}</span>
                         )}
                       </span>
                       <span className="metaDate">{todayNav.date}</span>
@@ -438,9 +451,7 @@ export default function Detail({ code }: Props) {
                       {gz?.gsz ? (
                         <>
                           {gz.gsz}
-                          {gz.gszzl && (
-                            <span className={pctClass(gz.gszzl)}> {pct(gz.gszzl)}</span>
-                          )}
+                          {gz.gszzl && <span className={pctClass(gz.gszzl)}> {pct(gz.gszzl)}</span>}
                         </>
                       ) : (
                         '—'
@@ -460,10 +471,7 @@ export default function Detail({ code }: Props) {
                       <>
                         {latestNav.dwjz}
                         {latestNav.jzzzl && (
-                          <span className={pctClass(latestNav.jzzzl)}>
-                            {' '}
-                            {pct(latestNav.jzzzl)}
-                          </span>
+                          <span className={pctClass(latestNav.jzzzl)}> {pct(latestNav.jzzzl)}</span>
                         )}
                       </>
                     ) : (
