@@ -118,14 +118,13 @@
 
 .watchTable {
   min-width: 0;
-  table-layout: fixed;
 
   th {
     background: var(--bg);
-    overflow: hidden;
     position: sticky;
     top: calc(var(--header-h-visible, var(--header-h)) + var(--sticky-head-h, 46px));
     transition: top 0.3s ease;
+    white-space: nowrap;
     z-index: 9;
   }
 }
@@ -175,6 +174,10 @@
   padding-right: 20px;
 }
 
+.centerCol {
+  text-align: center;
+}
+
 .nameCell {
   min-width: 0;
   overflow: hidden;
@@ -219,7 +222,7 @@
   display: inline-grid;
   gap: 6px;
   grid-template-columns: 68px 42px 76px;
-  justify-content: flex-end;
+  justify-content: center;
   min-height: 36px;
   max-width: 100%;
   white-space: nowrap;

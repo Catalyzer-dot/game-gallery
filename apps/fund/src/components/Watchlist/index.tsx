@@ -645,7 +645,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                   <th>简称</th>
                   <th
                     className={classNames(
-                      'num',
+                      styles.centerCol,
                       styles.sortable,
                       sort.column === 'prevChange' && styles.sorted
                     )}
@@ -658,7 +658,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                   </th>
                   <th
                     className={classNames(
-                      'num',
+                      styles.centerCol,
                       styles.sortable,
                       sort.column === 'currentChange' && styles.sorted
                     )}
@@ -730,7 +730,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                     <tr key={fund.code} onClick={() => go(fund.code)}>
                       <td>{fund.code}</td>
                       <td className={styles.nameCell}>{fund.name}</td>
-                      <td className="num">
+                      <td className={styles.centerCol}>
                         <span
                           title={previousDaily?.date ? `净值日期 ${previousDaily.date}` : undefined}
                           className={classNames(
@@ -741,7 +741,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                           {pct(previousDaily?.jzzzl)}
                         </span>
                       </td>
-                      <td className="num">
+                      <td className={styles.centerCol}>
                         <span className={styles.currentChangeGroup}>
                           <span
                             title={
