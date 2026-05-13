@@ -675,7 +675,7 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
                   </th>
                   <th
                     className={classNames(
-                      'num',
+                      styles.positionColTh,
                       styles.sortable,
                       sort.column === 'holding' && styles.sorted
                     )}
