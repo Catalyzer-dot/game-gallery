@@ -83,7 +83,10 @@ function RankList({
   )
 }
 
+type RankTab = 'gainers' | 'losers'
+
 export default function FundRankings({ watchlist, onWatchlistChange }: Props) {
+  const [tab, setTab] = useState<RankTab>('gainers')
   const [top30d, setTop30d] = useState<FundRankRow[]>([])
   const [topPreviousDay, setTopPreviousDay] = useState<FundDailyRankRow[]>([])
   const [previousDayLosers, setPreviousDayLosers] = useState<FundDailyRankRow[]>([])
@@ -154,8 +157,24 @@ export default function FundRankings({ watchlist, onWatchlistChange }: Props) {
   return (
     <section className={shared.card}>
       <div className={shared.cardHead}>
-        <h2>基金涨跌排行</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <h2>基金排行</h2>
+        <div className={styles.headerRight}>
+          <div className={styles.tabs}>
+            <button
+              type="button"
+              className={classNames(styles.tab, tab === 'gainers' && styles.tabActive)}
+              onClick={() => setTab('gainers')}
+            >
+              涨幅榜
+            </button>
+            <button
+              type="button"
+              className={classNames(styles.tab, tab === 'losers' && styles.tabActive)}
+              onClick={() => setTab('losers')}
+            >
+              跌幅榜
+            </button>
+          </div>
           {refreshMsg && <span className="muted small">{refreshMsg}</span>}
           {getSessionToken() && (
             <button
@@ -167,14 +186,13 @@ export default function FundRankings({ watchlist, onWatchlistChange }: Props) {
               {refreshing ? '刷新中...' : '刷新缓存'}
             </button>
           )}
-          <span className="muted small">基于已缓存真实净值</span>
         </div>
       </div>
       {loading ? (
         <div className={styles.status}>加载排行中...</div>
       ) : error ? (
         <div className={styles.error}>排行暂不可用：{error}</div>
-      ) : (
+      ) : tab === 'gainers' ? (
         <div className={styles.rankPanels}>
           <div className={styles.rankPanel}>
             <div className={styles.panelHead}>
@@ -210,6 +228,9 @@ export default function FundRankings({ watchlist, onWatchlistChange }: Props) {
               <div className={styles.status}>暂无足够 30 天净值数据</div>
             )}
           </div>
+        </div>
+      ) : (
+        <div className={styles.rankPanels}>
           <div className={styles.rankPanel}>
             <div className={styles.panelHead}>
               <h3>上交易日跌幅 Top 10</h3>

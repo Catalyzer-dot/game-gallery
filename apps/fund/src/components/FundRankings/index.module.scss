@@ -1,10 +1,52 @@
+.headerRight {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.tabs {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.tab {
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  height: 30px;
+  padding: 0 12px;
+  white-space: nowrap;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  &:hover {
+    background: rgba(110, 198, 255, 0.08);
+    color: var(--accent-strong);
+  }
+}
+
+.tabActive {
+  background: rgba(110, 198, 255, 0.14);
+  color: var(--accent-strong);
+}
+
 .rankPanels {
-  display: grid;
+  display: flex;
   gap: 14px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .rankPanel {
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -59,7 +101,9 @@
   height: 26px;
   line-height: 1;
   padding: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   width: 26px;
 
   &:hover:not(:disabled) {
@@ -186,12 +230,6 @@
   background: rgba(255, 107, 99, 0.08);
   border-color: rgba(255, 107, 99, 0.26);
   color: var(--red);
-}
-
-@media (max-width: 920px) {
-  .rankPanels {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 760px) {
