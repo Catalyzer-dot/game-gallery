@@ -1,3 +1,25 @@
+.stickyHead {
+  align-items: center;
+  background: var(--bg);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 0;
+  position: sticky;
+  top: var(--header-h-visible, var(--header-h));
+  transition: top 0.3s ease;
+  z-index: 11;
+
+  h2 {
+    color: var(--muted-strong);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+}
+
 .sortable {
   cursor: pointer;
   user-select: none;
@@ -99,12 +121,17 @@
   table-layout: fixed;
 
   th {
+    background: var(--bg);
     overflow: hidden;
+    position: sticky;
+    top: calc(var(--header-h-visible, var(--header-h)) + var(--sticky-head-h, 46px));
+    transition: top 0.3s ease;
+    z-index: 9;
   }
 }
 
 .watchTableWrap {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .codeCol {

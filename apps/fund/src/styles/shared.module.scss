@@ -19,6 +19,7 @@
   border-bottom: 1px solid var(--line-soft);
   background: rgba(16, 23, 32, 0.92);
   backdrop-filter: blur(18px);
+  transition: transform 0.3s ease;
 
   h1 {
     font-size: 20px;
@@ -50,11 +51,16 @@
   }
 }
 
+.headerHidden {
+  transform: translateY(-100%);
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
 .main {
-  padding: 96px 48px 40px 28px;
-  max-width: 1180px;
-  width: 100%;
-  margin: 0 auto;
+  padding: 80px 48px 40px 28px;
   flex: 1;
 }
 

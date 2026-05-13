@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import Settings from '@components/Settings'
 import Watchlist from '@components/Watchlist'
@@ -23,6 +23,40 @@ export default function Home() {
   const [showAdvancedPosition, setShowAdvancedPosition] = useState(() => {
     return window.localStorage.getItem(ADVANCED_POSITION_KEY) === '1'
   })
+  const headerRef = useRef<HTMLElement>(null)
+  const [headerHidden, setHeaderHidden] = useState(false)
+  const lastScrollY = useRef(0)
+
+  useLayoutEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    const update = () => {
+      const h = el.offsetHeight
+      document.documentElement.style.setProperty('--header-h', `${h}px`)
+      document.documentElement.style.setProperty(
+        '--header-h-visible',
+        headerHidden ? '0px' : `${h}px`
+      )
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [headerHidden])
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y > lastScrollY.current && y > 80) {
+        setHeaderHidden(true)
+      } else if (y < lastScrollY.current) {
+        setHeaderHidden(false)
+      }
+      lastScrollY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const reload = useCallback(async () => {
     if (!getSessionToken()) {
@@ -59,7 +93,10 @@ export default function Home() {
 
   return (
     <div className={shared.page}>
-      <header className={shared.header}>
+      <header
+        ref={headerRef}
+        className={`${shared.header} ${headerHidden ? shared.headerHidden : ''}`}
+      >
         <h1>Fund Tracker</h1>
         <Search watchlist={watchlist} onWatchlistChange={reload} inline />
         <div className={shared.meta}>

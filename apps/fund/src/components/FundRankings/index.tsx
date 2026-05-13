@@ -155,8 +155,8 @@ export default function FundRankings({ watchlist, onWatchlistChange }: Props) {
   }
 
   return (
-    <section className={shared.card}>
-      <div className={shared.cardHead}>
+    <section className={shared.section}>
+      <div className={styles.stickyHead}>
         <h2>基金排行</h2>
         <div className={styles.headerRight}>
           <div className={styles.tabs}>

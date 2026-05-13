@@ -263,6 +263,18 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
   const [sort, setSort] = useState<SortState>({ column: 'holding', direction: 'desc' })
   const refreshRequestRef = useRef(0)
   const popoverCloseTimerRef = useRef<number | null>(null)
+  const stickyHeadRef = useRef<HTMLDivElement>(null)
+  const [stickyHeadH, setStickyHeadH] = useState(0)
+
+  useLayoutEffect(() => {
+    const el = stickyHeadRef.current
+    if (!el) return
+    const update = () => setStickyHeadH(el.offsetHeight)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   useEffect(() => {
     setRows((prev) => {
@@ -568,8 +580,8 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
   const totalCurrentProfitState = moneyClass(totalCurrentProfit)
 
   return (
-    <section className={shared.card}>
-      <div className={shared.cardHead}>
+    <section className={shared.section}>
+      <div ref={stickyHeadRef} className={styles.stickyHead}>
         <h2>跟踪清单</h2>
         <div className={styles.summaryGroup}>
           <div
@@ -613,7 +625,10 @@ export default function Watchlist({ funds, showAdvancedPosition, onChange }: Pro
       ) : (
         <>
           {error && <div className={styles.inlineError}>{error}</div>}
-          <div className={classNames(shared.tableScroll, styles.watchTableWrap)}>
+          <div
+            className={styles.watchTableWrap}
+            style={{ '--sticky-head-h': `${stickyHeadH}px` } as React.CSSProperties}
+          >
             <table className={classNames(shared.dataTable, styles.watchTable)}>
               <colgroup>
                 <col className={styles.codeCol} />

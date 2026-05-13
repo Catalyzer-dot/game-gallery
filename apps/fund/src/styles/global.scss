@@ -17,6 +17,7 @@
   --amber: #f4c95d;
   --shadow-card: 0 14px 34px rgba(0, 0, 0, 0.24);
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --header-h: 64px; /* JS will override with actual measured height */
 }
 
 *,
