@@ -266,7 +266,7 @@ export default function Detail({ code }: Props) {
       const [metaData, holdingsData, dailyData, watchlist, gzData] = await Promise.all([
         loadMeta(code),
         loadHoldings(code),
-        loadDaily(code, 30),
+        loadDaily(code, 60),
         loadWatchlist().catch(() => []),
         fetchGz(code),
       ])
